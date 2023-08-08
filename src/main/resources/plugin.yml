@@ -1,0 +1,13 @@
+name: AxInventoryRestore
+version: '${project.version}'
+main: com.artillexstudios.axinventoryrestore.AxInventoryRestore
+api-version: '1.13'
+
+commands:
+  axinventoryrestore:
+    usage: /<command>
+    aliases: [axir]
+
+permissions:
+  axinventoryrestore.reload:
+    default: op

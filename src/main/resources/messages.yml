@@ -1,0 +1,9 @@
+usage: "&#FF3333/axir <player/reload>"
+
+reloaded: "&#33FF33Successfully reloaded plugin!"
+
+errors:
+  no-permission: "&#FF3333You don't have permission to run this command!"
+
+# do not change this
+version: 2
