@@ -29,7 +29,7 @@ public class PreviewGui {
         this.backupData = backupData;
 
         previewGui = Gui.gui()
-                .title(ColorUtils.deserialize(AxInventoryRestore.MESSAGES.getString("guis.previewgui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
+                .title(ColorUtils.formatToComponent(AxInventoryRestore.MESSAGES.getString("guis.previewgui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
                 .rows(6)
                 .create();
     }

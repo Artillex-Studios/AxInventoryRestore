@@ -2,6 +2,7 @@ package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.enums.SaveReason;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -11,12 +12,14 @@ public class DeathListener implements Listener {
 
     @EventHandler
     public void onDeath(@NotNull PlayerDeathEvent event) {
-        String cause = event.getPlayer().getLastDamageCause() == null ? "---" : event.getPlayer().getLastDamageCause().getCause().toString();
+        final Player player = event.getEntity();
 
-        if (event.getPlayer().getKiller() != null) {
-            cause = cause + " (" + event.getPlayer().getKiller().getName() + ")";
+        String cause = player.getLastDamageCause() == null ? "---" : player.getLastDamageCause().getCause().toString();
+
+        if (player.getKiller() != null) {
+            cause = cause + " (" + player.getKiller().getName() + ")";
         }
 
-        AxInventoryRestore.getDatabase().saveInventory(event.getPlayer(), SaveReason.DEATH, cause);
+        AxInventoryRestore.getDB().saveInventory(player, SaveReason.DEATH, cause);
     }
 }

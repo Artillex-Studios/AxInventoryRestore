@@ -31,7 +31,7 @@ public final class AxInventoryRestore extends JavaPlugin {
         return instance;
     }
 
-    public static Database getDatabase() {
+    public static Database getDB() {
         return database;
     }
 

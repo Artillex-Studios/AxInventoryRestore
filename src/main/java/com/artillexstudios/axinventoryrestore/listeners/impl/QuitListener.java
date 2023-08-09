@@ -13,6 +13,6 @@ public class QuitListener implements Listener {
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent event) {
         final String cause = "---";
-        AxInventoryRestore.getDatabase().saveInventory(event.getPlayer(), SaveReason.QUIT, cause);
+        AxInventoryRestore.getDB().saveInventory(event.getPlayer(), SaveReason.QUIT, cause);
     }
 }

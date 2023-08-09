@@ -47,7 +47,7 @@ public class Commands implements CommandExecutor {
 
             if (args[1].equals("*")) {
                for (Player player : Bukkit.getOnlinePlayers()) {
-                   AxInventoryRestore.getDatabase().saveInventory(player, SaveReason.MANUAL, cause);
+                   AxInventoryRestore.getDB().saveInventory(player, SaveReason.MANUAL, cause);
                }
 
                MessageUtils.sendMsgP(sender, "manual-backup-all");
@@ -59,7 +59,7 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            AxInventoryRestore.getDatabase().saveInventory(Bukkit.getPlayer(args[1]), SaveReason.MANUAL, cause);
+            AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), SaveReason.MANUAL, cause);
             MessageUtils.sendMsgP(sender, "manual-backup", Map.of("%player%", Bukkit.getPlayer(args[1]).getName()));
             return true;
         }

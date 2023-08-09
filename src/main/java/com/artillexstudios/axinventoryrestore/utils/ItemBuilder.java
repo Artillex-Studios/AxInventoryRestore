@@ -1,29 +1,18 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
-import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import dev.dejvokep.boostedyaml.YamlDocument;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ItemBuilder {
@@ -31,7 +20,7 @@ public class ItemBuilder {
     private final String section;
     private @NotNull ItemStack item = new ItemStack(Material.RED_BANNER);
     private final Map<String, String> replacements;
-    private @Nullable Player player;
+//    private @Nullable Player player;
 
     public ItemBuilder(YamlDocument file, String section, Map<String, String> replacements) {
         this.file = file;
@@ -41,25 +30,15 @@ public class ItemBuilder {
         createItem();
     }
 
-    @Nullable
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-        setSkullBase64();
-    }
-
-    public void storeData(String key, String value) {
-
-        ItemMeta meta = item.getItemMeta();
-
-        NamespacedKey nKey = new NamespacedKey(AxInventoryRestore.getInstance(), key);
-        meta.getPersistentDataContainer().set(nKey, PersistentDataType.STRING, value);
-
-        item.setItemMeta(meta);
-    }
+//    @Nullable
+//    public Player getPlayer() {
+//        return player;
+//    }
+//
+//    public void setPlayer(Player player) {
+//        this.player = player;
+//        setSkullBase64();
+//    }
 
     @NotNull
     public ItemStack getItem() {
@@ -73,7 +52,7 @@ public class ItemBuilder {
         setAmount();
         setColor();
         setGlow();
-        setCustomModelData();
+//        setCustomModelData();
         setEnchantments();
     }
 
@@ -84,7 +63,7 @@ public class ItemBuilder {
         replacements.forEach((key, value) -> message.set(message.get().replace(key, value)));
 
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(ColorUtils.deserialize(String.valueOf(message)).applyFallbackStyle(TextDecoration.ITALIC.withState(false)));
+        meta.setDisplayName(ColorUtils.format(String.valueOf(message)));
 
         item.setItemMeta(meta);
     }
@@ -93,16 +72,16 @@ public class ItemBuilder {
         if (file.getStringList(section + ".lore") == null) return;
         if (!item.hasItemMeta()) return;
 
-        ArrayList<Component> lore = new ArrayList<>();
+        ArrayList<String> lore = new ArrayList<>();
 
         for (String txt : file.getStringList(section + ".lore")) {
             AtomicReference<String> message = new AtomicReference<>(txt);
             replacements.forEach((key, value) -> message.set(message.get().replace(key, value)));
-            lore.add(ColorUtils.deserialize(String.valueOf(message)).applyFallbackStyle(TextDecoration.ITALIC.withState(false)));
+            lore.add(ColorUtils.format(String.valueOf(message)));
         }
 
         ItemMeta meta = item.getItemMeta();
-        meta.lore(lore);
+        meta.setLore(lore);
 
         item.setItemMeta(meta);
     }
@@ -148,15 +127,15 @@ public class ItemBuilder {
         item.setItemMeta(meta);
     }
 
-    private void setCustomModelData() {
-        if (!file.isInt(section + ".custommodeldata")) return;
-
-        int data = file.getInt(section + ".custommodeldata");
-        ItemMeta meta = item.getItemMeta();
-        meta.setCustomModelData(data);
-
-        item.setItemMeta(meta);
-    }
+//    private void setCustomModelData() {
+//        if (!file.isInt(section + ".custommodeldata")) return;
+//
+//        int data = file.getInt(section + ".custommodeldata");
+//        ItemMeta meta = item.getItemMeta();
+//        meta.setCustomModelData(data);
+//
+//        item.setItemMeta(meta);
+//    }
 
     private void setEnchantments() {
         if (!file.isSection(section + ".enchantments")) return;
@@ -181,24 +160,24 @@ public class ItemBuilder {
         item.setItemMeta(meta);
     }
 
-    private void setSkullBase64() {
-        if (!item.getType().equals(Material.PLAYER_HEAD)) return;
-
-        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
-        
-        if (!file.isString(section + ".base64")) {
-            if (player == null) return;
-
-            PlayerProfile profile = Bukkit.createProfile(player.getUniqueId());
-            skullMeta.setPlayerProfile(profile);
-            item.setItemMeta(skullMeta);
-            return;
-        }
-
-        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
-        profile.setProperty(new ProfileProperty("textures", file.getString(section + ".base64")));
-        skullMeta.setPlayerProfile(profile);
-
-        item.setItemMeta(skullMeta);
-    }
+//    private void setSkullBase64() {
+//        if (!item.getType().equals(Material.PLAYER_HEAD)) return;
+//
+//        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
+//
+//        if (!file.isString(section + ".base64")) {
+//            if (player == null) return;
+//
+//            PlayerProfile profile = Bukkit.createProfile(player.getUniqueId());
+//            skullMeta.setPlayerProfile(profile);
+//            item.setItemMeta(skullMeta);
+//            return;
+//        }
+//
+//        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
+//        profile.setProperty(new ProfileProperty("textures", file.getString(section + ".base64")));
+//        skullMeta.setPlayerProfile(profile);
+//
+//        item.setItemMeta(skullMeta);
+//    }
 }

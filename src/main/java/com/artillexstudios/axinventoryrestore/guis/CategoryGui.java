@@ -32,7 +32,7 @@ public class CategoryGui {
         this.saveReason = saveReason;
 
         categoryGui = Gui.paginated()
-                .title(ColorUtils.deserialize(AxInventoryRestore.MESSAGES.getString("guis.categorygui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
+                .title(ColorUtils.formatToComponent(AxInventoryRestore.MESSAGES.getString("guis.categorygui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
                 .rows(4)
                 .pageSize(27)
                 .create();
@@ -42,7 +42,7 @@ public class CategoryGui {
         categoryGui.clearPageItems();
 
         int n = 1;
-        for (BackupData backupData : AxInventoryRestore.getDatabase().getDeathsByType(restoreUser, saveReason)) {
+        for (BackupData backupData : AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason)) {
             if (backupData.getItems() == null) continue;
 
             final Map<String, String> replacements = new HashMap<>();

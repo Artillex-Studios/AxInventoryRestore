@@ -13,7 +13,7 @@ public class AutoBackupScheduler {
 
         Bukkit.getScheduler().runTaskTimer(AxInventoryRestore.getInstance(), () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                AxInventoryRestore.getDatabase().saveInventory(player, SaveReason.AUTOMATIC, "---");
+                AxInventoryRestore.getDB().saveInventory(player, SaveReason.AUTOMATIC, "---");
             }
         }, 0L, AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes") * 1200L);
     }

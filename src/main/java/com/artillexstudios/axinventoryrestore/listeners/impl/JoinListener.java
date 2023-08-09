@@ -13,6 +13,6 @@ public class JoinListener implements Listener {
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent event) {
         final String cause = "---";
-        AxInventoryRestore.getDatabase().saveInventory(event.getPlayer(), SaveReason.JOIN, cause);
+        AxInventoryRestore.getDB().saveInventory(event.getPlayer(), SaveReason.JOIN, cause);
     }
 }
