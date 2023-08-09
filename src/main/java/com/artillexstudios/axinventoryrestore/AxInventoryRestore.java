@@ -9,6 +9,8 @@ import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
 import dev.dejvokep.boostedyaml.YamlDocument;
+import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class AxInventoryRestore extends JavaPlugin {
@@ -39,6 +41,9 @@ public final class AxInventoryRestore extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        int pluginId = 19446;
+        new Metrics(this, pluginId);
+
         abstractConfig = new Config();
         abstractConfig.setup();
         CONFIG = abstractConfig.getConfig();
@@ -56,6 +61,10 @@ public final class AxInventoryRestore extends JavaPlugin {
         this.getCommand("axinventoryrestore").setExecutor(new Commands());
 
         new AutoBackupScheduler().start();
+
+        final String packageName = Bukkit.getServer().getClass().getPackage().getName();
+        String version = packageName.substring(packageName.lastIndexOf('.') + 1);
+        System.out.println(version);
 
     }
 

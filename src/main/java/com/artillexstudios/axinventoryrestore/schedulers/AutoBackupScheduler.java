@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.schedulers;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -13,7 +12,7 @@ public class AutoBackupScheduler {
 
         Bukkit.getScheduler().runTaskTimer(AxInventoryRestore.getInstance(), () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                AxInventoryRestore.getDB().saveInventory(player, SaveReason.AUTOMATIC, "---");
+                AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", "---");
             }
         }, 0L, AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes") * 1200L);
     }

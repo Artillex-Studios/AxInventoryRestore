@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
@@ -23,9 +22,9 @@ public class CategoryGui {
     private final MainGui mainGui;
     private final Player viewer;
     private final OfflinePlayer restoreUser;
-    private final SaveReason saveReason;
+    private final String saveReason;
 
-    public CategoryGui(@NotNull MainGui mainGui, SaveReason saveReason) {
+    public CategoryGui(@NotNull MainGui mainGui, String saveReason) {
         this.mainGui = mainGui;
         this.viewer = mainGui.getViewer();
         this.restoreUser = mainGui.getRestoreUser();

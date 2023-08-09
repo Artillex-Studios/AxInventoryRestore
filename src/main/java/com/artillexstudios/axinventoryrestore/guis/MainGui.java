@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
@@ -32,7 +31,7 @@ public class MainGui {
     }
 
     public void openMainGui() {
-        final ArrayList<SaveReason> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
+        final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
         if (reasons.isEmpty()) {
             MessageUtils.sendMsgP(viewer, "errors.unknown-player");
             return;
@@ -45,7 +44,7 @@ public class MainGui {
         // Next item
         mainGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.next()));
 
-        for (SaveReason saveReason : reasons) {
+        for (String saveReason : reasons) {
             ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.formatToComponent("<!i>&#FFFF00&l" + saveReason));
 
             if (AxInventoryRestore.MESSAGES.isSection("categories." + saveReason)) {

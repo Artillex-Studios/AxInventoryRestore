@@ -1,6 +1,5 @@
 package com.artillexstudios.axinventoryrestore.database;
 
-import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -12,8 +11,8 @@ public interface Database {
 
     String getType();
     void setup();
-    void saveInventory(@NotNull Player player, @NotNull SaveReason reason, @NotNull String cause);
-    ArrayList<BackupData> getDeathsByType(@NotNull OfflinePlayer player, @NotNull SaveReason reason);
-    ArrayList<SaveReason> getDeathReasons(@NotNull OfflinePlayer player);
+    void saveInventory(@NotNull Player player, @NotNull String reason, @NotNull String cause);
+    ArrayList<BackupData> getDeathsByType(@NotNull OfflinePlayer player, @NotNull String reason);
+    ArrayList<String> getDeathReasons(@NotNull OfflinePlayer player);
     void cleanup();
 }

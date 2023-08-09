@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.ShulkerBox;
@@ -21,14 +20,14 @@ import java.util.Map;
 
 public class BackupData {
     final OfflinePlayer player;
-    final SaveReason reason;
+    final String reason;
     final Location location;
     final ItemStack[] items;
     final long date;
     final String cause;
     final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
 
-    public BackupData(@NotNull OfflinePlayer player, @NotNull SaveReason reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
+    public BackupData(@NotNull OfflinePlayer player, @NotNull String reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
         this.player = player;
         this.reason = reason;
         this.location = location;
@@ -53,7 +52,7 @@ public class BackupData {
         return player;
     }
 
-    public SaveReason getReason() {
+    public String getReason() {
         return reason;
     }
 

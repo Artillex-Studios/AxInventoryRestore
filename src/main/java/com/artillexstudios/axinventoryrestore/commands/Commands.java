@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.commands;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import org.bukkit.Bukkit;
@@ -47,7 +46,7 @@ public class Commands implements CommandExecutor {
 
             if (args[1].equals("*")) {
                for (Player player : Bukkit.getOnlinePlayers()) {
-                   AxInventoryRestore.getDB().saveInventory(player, SaveReason.MANUAL, cause);
+                   AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause);
                }
 
                MessageUtils.sendMsgP(sender, "manual-backup-all");
@@ -59,7 +58,7 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), SaveReason.MANUAL, cause);
+            AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
             MessageUtils.sendMsgP(sender, "manual-backup", Map.of("%player%", Bukkit.getPlayer(args[1]).getName()));
             return true;
         }

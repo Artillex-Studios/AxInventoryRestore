@@ -1,12 +1,14 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.api.events.InventoryRestoreEvent;
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -62,6 +64,10 @@ public class PreviewGui {
                 MessageUtils.sendMsgP(viewer, "errors.player-offline");
                 return;
             }
+
+            final InventoryRestoreEvent inventoryRestoreEvent = new InventoryRestoreEvent(restoreUser.getPlayer(), backupData);
+            Bukkit.getPluginManager().callEvent(inventoryRestoreEvent);
+            if (inventoryRestoreEvent.isCancelled()) return;
 
             int n2 = 0;
             for (ItemStack it : backupData.getItems()) {
