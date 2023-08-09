@@ -19,12 +19,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class SQLite implements Database {
-    private final String url = "jdbc:sqlite:" + AxInventoryRestore.getInstance().getDataFolder() + "/data.db";
+public class H2 implements Database {
+    private final String url = "jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data";
 
     @Override
     public String getType() {
-        return "SQLite";
+        return "H2";
     }
 
     @Override

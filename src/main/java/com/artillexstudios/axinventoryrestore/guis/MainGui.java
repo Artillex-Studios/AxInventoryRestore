@@ -1,18 +1,19 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.enums.SaveReason;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
+import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.PaginatedGui;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class MainGui {
     private final PaginatedGui mainGui;
@@ -24,29 +25,41 @@ public class MainGui {
         this.restoreUser = restoreUser;
 
         mainGui = Gui.paginated()
-                .title(ColorUtils.deserialize("<black><b>Restore ></b></black> <dark_gray>" + restoreUser.getName()))
+                .title(ColorUtils.deserialize(AxInventoryRestore.MESSAGES.getString("guis.maingui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
                 .rows(4)
                 .pageSize(27)
                 .create();
     }
 
     public void openMainGui() {
+        final ArrayList<SaveReason> reasons = AxInventoryRestore.getDatabase().getDeathReasons(restoreUser);
+        if (reasons.size() == 0) {
+            MessageUtils.sendMsgP(viewer, "errors.unknown-player");
+            return;
+        }
+
         mainGui.clearPageItems();
 
         // Previous item
-        mainGui.setItem(4, 3, ItemBuilder.from(Material.ARROW).name(ColorUtils.deserialize("<!i>&#FF3333&lPrevious page")).asGuiItem(event2 -> mainGui.previous()));
+        mainGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.previous()));
         // Next item
-        mainGui.setItem(4, 7, ItemBuilder.from(Material.ARROW).name(ColorUtils.deserialize("<!i>&#33FF33&lNext page")).asGuiItem(event2 -> mainGui.next()));
+        mainGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.next()));
 
-        for (SaveReason saveReason : SaveReason.values()) {
-            mainGui.addItem(ItemBuilder.from(Material.PAPER).name(ColorUtils.deserialize("<!i>&#FFFF00&l" + saveReason.toString())).asGuiItem(event -> {
-                new RestoreGui(this, saveReason).openRestoreGui();
+        for (SaveReason saveReason : reasons) {
+            ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.deserialize("<!i>&#FFFF00&l" + saveReason));
+
+            if (AxInventoryRestore.MESSAGES.isSection("categories." + saveReason)) {
+                item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDatabase().getDeathsByType(restoreUser, saveReason).size())).getItem());
+            }
+
+            mainGui.addItem(item.asGuiItem(event -> {
+                new CategoryGui(this, saveReason).openCategoryGui();
             }));
         }
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(4, 5, ItemBuilder.from(Material.BARRIER).name(ColorUtils.deserialize("<!i>&#FF0000&lClose")).asGuiItem(event2 -> {
+        mainGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.close", Map.of()).getItem()).asGuiItem(event2 -> {
             mainGui.close(viewer);
         }));
 

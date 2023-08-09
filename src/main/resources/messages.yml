@@ -1,9 +1,131 @@
-usage: "&#FF3333/axir <player/reload>"
-
 reloaded: "&#33FF33Successfully reloaded plugin!"
+
+cleaned-up: "&#33FF33Successfully cleaned up database!"
+
+manual-backup: "&#33FF33Successfully made a manual backup for &f%player%&#33FF33!"
+manual-backup-all: "&#33FF33Successfully made a manual backup for all players!"
+manual-created-by: "by: %player%"
+
+help:
+  - " "
+  - "&#00aaff&lAxInventoryRestore &7» "
+  - " &7- &f/axir <player> &7| &#00aaffOpen restore GUI"
+  - " &7- &f/axir save <*/player> <gray>|</gray> &7| &#00aaffCreate manual backup"
+  - " &7- &f/axir reload <gray>|</gray> &7| &#00aaffReload plugin"
+  - " &7- &f/axir cleanup <gray>|</gray> &7| &#00aaffDelete old backups (look at config.yml)"
+  - " "
 
 errors:
   no-permission: "&#FF3333You don't have permission to run this command!"
+  player-offline: "&#FF3333The player must be online to restore their inventory!"
+  unknown-player: "&#FF3333This player has 0 backups saved!"
+
+restored-shulker:
+  # this must be some kind of shulker box!
+  material: SHULKER_BOX
+  name: "&#00CCFFInventory backup"
+  lore:
+    - "&#DDDDDD%player-uuid%"
+    - " "
+    - " &7- &#00FFFFDate: &f%date%"
+    - " &7- &#00FFFFLocation: &f%location%"
+    - " &7- &#00FFFFGiven to: &f%staff%"
+    - " "
+
+guis:
+  maingui:
+    title: "&0&lRestore > &8%player%"
+  categorygui:
+    title: "&0&lRestore > &8%player%"
+    item:
+      material: BARREL
+      name: "&#00CCFFDate: &#00EEFF%date%"
+      lore:
+        - " "
+        - "&#00FFFFInfo: &f%cause%"
+        - "&#00FFFFLocation: &f%location%"
+        - " "
+        - "&#00CCFF&l(!) &#00CCFFClick here to check items!"
+  previewgui:
+    title: "&0&lRestore > &8%player%"
+    quick-restore:
+      material: PISTON
+      name: "&#00CCFFReplace player's inventory"
+      lore:
+        - " "
+        - " &7- &#00FFFFNote: &fthis will erase the player's current items!"
+        - " &7- &#00FFFFThe player must be online for this to work!"
+        - " "
+        - "&#00CCFF&l(!) &#00CCFFClick here to replace!"
+    teleport:
+      material: ENDER_PEARL
+      name: "&#00CCFFTeleport to event location"
+      lore:
+        - " "
+        - " &7- &#00FFFFLocation: &f%location%"
+        - " "
+        - "&#00CCFF&l(!) &#00CCFFClick here to teleport!"
+    export-as-shulker:
+      material: SHULKER_BOX
+      name: "&#00CCFFExport items in shulker boxes"
+      lore:
+        - " "
+        - " &7- &#00FFFFEmpty slots needed: &f%shulker-amount%"
+        - " "
+        - "&#00CCFF&l(!) &#00CCFFClick here to export items!"
+
+
+gui-items:
+  close:
+    material: BARRIER
+    name: "&#FF3333&lClose"
+  back:
+    material: BARRIER
+    name: "&#FF3333&lBack"
+  previous-page:
+    material: ARROW
+    name: "&#FF6600&lPrevious Page"
+  next-page:
+    material: ARROW
+    name: "&#FFCC00&lNext Page"
+
+categories:
+  DEATH:
+    material: TOTEM_OF_UNDYING
+    name: "&#FF3333&lDEATHS &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#FF3333&l(!) &#FF3333Click here to view backups!"
+  JOIN:
+    material: LIME_WOOL
+    name: "&#33FF33&lJOINS &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#33FF33&l(!) &#33FF33Click here to view backups!"
+  QUIT:
+    material: RED_WOOL
+    name: "&#EE3333&lQUITS &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#EE3333&l(!) &#EE3333Click here to view backups!"
+  WORLD_CHANGE:
+    material: END_PORTAL_FRAME
+    name: "&#33DD33&lWORLD CHANGES &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#33DD33&l(!) &#33DD33Click here to view backups!"
+  MANUAL:
+    material: LEVER
+    name: "&#FFEE00&lMANUAL BACKUPS &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#FFEE00&l(!) &#FFEE00Click here to view backups!"
+  AUTOMATIC:
+    material: CLOCK
+    name: "&#AA00FF&lAUTOMATIC BACKUPS &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#AA00FF&l(!) &#AA00FFClick here to view backups!"
 
 # do not change this
-version: 2
+version: 1

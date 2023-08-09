@@ -10,6 +10,7 @@ import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Config implements AbstractConfig {
     private YamlDocument file = null;
@@ -26,5 +27,14 @@ public class Config implements AbstractConfig {
     @Override
     public YamlDocument getConfig() {
         return file;
+    }
+
+    @Override
+    public void reloadConfig() {
+        try {
+            file.reload();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }

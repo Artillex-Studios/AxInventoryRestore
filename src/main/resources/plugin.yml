@@ -9,5 +9,5 @@ commands:
     aliases: [axir]
 
 permissions:
-  axinventoryrestore.reload:
+  axinventoryrestore.admin:
     default: op

@@ -1,4 +1,15 @@
 prefix: "&#00aaff&lAxInventoryRestore &7» "
 
+# how long should the plugin keep backups? (in days)
+# this will run at server start/stop and when usign /axir cleanup
+cleanup-after-days: 14
+
+# this setting is not reloadable, you have to restart the server
+# should the plugin make backups periodically?
+# do not set "minutes" to anything below 1
+automatic-backup:
+  enabled: true
+  minutes: 5
+
 # do not change this
 version: 1

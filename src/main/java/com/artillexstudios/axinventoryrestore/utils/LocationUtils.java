@@ -30,4 +30,15 @@ public class LocationUtils {
 
         return String.format("%s;%.3f;%.3f;%.3f", world, x, y, z);
     }
+
+    @NotNull
+    public static String serializeLocationReadable(@NotNull Location loc) {
+
+        final String world = loc.getWorld().getName();
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+
+        return String.format("%s: %.1f, %.1f, %.1f", world, x, y, z);
+    }
 }

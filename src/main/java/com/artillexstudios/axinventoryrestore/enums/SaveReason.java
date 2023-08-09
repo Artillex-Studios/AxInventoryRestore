@@ -5,6 +5,7 @@ public enum SaveReason {
     JOIN,
     QUIT,
     WORLD_CHANGE,
-    MANUAL
+    MANUAL,
+    AUTOMATIC
 
 }

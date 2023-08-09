@@ -12,6 +12,8 @@ public interface Database {
 
     String getType();
     void setup();
-    void saveInventory(@NotNull Player player, @NotNull SaveReason reason);
+    void saveInventory(@NotNull Player player, @NotNull SaveReason reason, @NotNull String cause);
     ArrayList<BackupData> getDeathsByType(@NotNull OfflinePlayer player, @NotNull SaveReason reason);
+    ArrayList<SaveReason> getDeathReasons(@NotNull OfflinePlayer player);
+    void cleanup();
 }
