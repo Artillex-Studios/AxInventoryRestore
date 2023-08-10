@@ -5,12 +5,15 @@ import com.artillexstudios.axinventoryrestore.config.AbstractConfig;
 import com.artillexstudios.axinventoryrestore.config.impl.Config;
 import com.artillexstudios.axinventoryrestore.config.impl.Messages;
 import com.artillexstudios.axinventoryrestore.database.Database;
+import com.artillexstudios.axinventoryrestore.database.DatabaseQueue;
+import com.artillexstudios.axinventoryrestore.database.impl.H2;
+import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
+import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class AxInventoryRestore extends JavaPlugin {
@@ -19,6 +22,7 @@ public final class AxInventoryRestore extends JavaPlugin {
     public static YamlDocument MESSAGES;
     public static YamlDocument CONFIG;
     private static AxInventoryRestore instance;
+    private static DatabaseQueue databaseQueue;
     private static Database database;
 
     public static AbstractConfig getAbstractConfig() {
@@ -37,6 +41,10 @@ public final class AxInventoryRestore extends JavaPlugin {
         return database;
     }
 
+    public static DatabaseQueue getDatabaseQueue() {
+        return databaseQueue;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
@@ -52,20 +60,31 @@ public final class AxInventoryRestore extends JavaPlugin {
         abstractMessages.setup();
         MESSAGES = abstractMessages.getConfig();
 
+        databaseQueue = new DatabaseQueue("AxMinions-Datastore-thread");
+
+        switch (CONFIG.getString("database.type").toLowerCase()) {
+            case "h2":
+                database = new H2();
+                break;
+            case "mysql":
+                database = new MySQL();
+                break;
+//            case "postgresql" -> new PostgreSQL();
+            default:
+                database = new SQLite();
+                break;
+        };
+
         database = new SQLite();
         database.setup();
         database.cleanup();
 
+        new ColorUtils();
         new RegisterListeners().register();
 
         this.getCommand("axinventoryrestore").setExecutor(new Commands());
 
         new AutoBackupScheduler().start();
-
-        final String packageName = Bukkit.getServer().getClass().getPackage().getName();
-        String version = packageName.substring(packageName.lastIndexOf('.') + 1);
-        System.out.println(version);
-
     }
 
     @Override

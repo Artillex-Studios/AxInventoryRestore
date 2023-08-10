@@ -19,20 +19,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class SQLite implements Database {
+public class H2 implements Database {
     private Connection conn;
 
     @Override
     public String getType() {
-        return "SQLite";
+        return "H2";
     }
 
     @Override
     public void setup() {
 
         try {
-            Class.forName("org.sqlite.JDBC");
-            this.conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s/data.db", AxInventoryRestore.getInstance().getDataFolder()));
+            Class.forName("org.h2.Driver");
+            this.conn = DriverManager.getConnection(String.format("jdbc:h2:./%s/data", AxInventoryRestore.getInstance().getDataFolder()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

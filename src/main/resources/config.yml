@@ -11,5 +11,22 @@ automatic-backup:
   enabled: true
   minutes: 5
 
+database:
+  # sqlite, h2, mysql, postgresql
+  type: "sqlite"
+
+  # you only need to touch these when using mysql/postgresql
+  address: 127.0.0.1
+  port: 3306
+  database: admin
+  username: admin
+  password: 'admin'
+  pool:
+    maximum-pool-size: 10
+    minimum-idle: 10
+    maximum-lifetime: 1800000
+    keepalive-time: 0
+    connection-timeout: 5000
+
 # do not change this
 version: 1

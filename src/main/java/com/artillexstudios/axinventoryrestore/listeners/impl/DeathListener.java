@@ -19,6 +19,9 @@ public class DeathListener implements Listener {
             cause = cause + " (" + player.getKiller().getName() + ")";
         }
 
-        AxInventoryRestore.getDB().saveInventory(player, "DEATH", cause);
+        String finalCause = cause;
+        AxInventoryRestore.getDatabaseQueue().submit(() -> {
+            AxInventoryRestore.getDB().saveInventory(player, "DEATH", finalCause);
+        });
     }
 }

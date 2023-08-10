@@ -11,3 +11,9 @@ commands:
 permissions:
   axinventoryrestore.admin:
     default: op
+
+libraries:
+  - com.mysql:mysql-connector-j:8.0.33
+  - org.xerial:sqlite-jdbc:3.42.0.0
+  - com.h2database:h2:2.1.214
+  - org.postgresql:postgresql:42.5.4

@@ -4,16 +4,21 @@ import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 public class AutoBackupScheduler {
 
     public void start() {
         if (!AxInventoryRestore.CONFIG.getBoolean("automatic-backup.enabled")) return;
         if (AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes") < 1) return;
 
-        Bukkit.getScheduler().runTaskTimer(AxInventoryRestore.getInstance(), () -> {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", "---");
+                AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                    AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", "---");
+                });
             }
-        }, 0L, AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes") * 1200L);
+        }, 0, AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes"), TimeUnit.MINUTES);
     }
 }
