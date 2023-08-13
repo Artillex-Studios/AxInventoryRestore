@@ -32,6 +32,7 @@ public class MainGui {
 
     public void openMainGui() {
         final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
+
         if (reasons.isEmpty()) {
             MessageUtils.sendMsgP(viewer, "errors.unknown-player");
             return;

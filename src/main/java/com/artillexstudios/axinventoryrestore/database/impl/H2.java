@@ -37,7 +37,7 @@ public class H2 implements Database {
             throw new RuntimeException(e);
         }
 
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_data` ( `player` VARCHAR(36) NOT NULL, `reason` VARCHAR(64) NOT NULL, `location` VARCHAR(256) NOT NULL, `inventory` VARCHAR NOT NULL, `time` INT NOT NULL, `cause` VARCHAR(64) NOT NULL );";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_data` ( `player` VARCHAR(36) NOT NULL, `reason` VARCHAR(64) NOT NULL, `location` VARCHAR(256) NOT NULL, `inventory` VARCHAR NOT NULL, `time` BIGINT NOT NULL, `cause` VARCHAR(64) NOT NULL );";
 
         try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();

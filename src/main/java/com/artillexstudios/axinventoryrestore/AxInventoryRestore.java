@@ -8,12 +8,14 @@ import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.database.DatabaseQueue;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
+import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class AxInventoryRestore extends JavaPlugin {
@@ -60,7 +62,7 @@ public final class AxInventoryRestore extends JavaPlugin {
         abstractMessages.setup();
         MESSAGES = abstractMessages.getConfig();
 
-        databaseQueue = new DatabaseQueue("AxMinions-Datastore-thread");
+        databaseQueue = new DatabaseQueue("AxInventoryRestore-Datastore-thread");
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
             case "h2":
@@ -69,13 +71,14 @@ public final class AxInventoryRestore extends JavaPlugin {
             case "mysql":
                 database = new MySQL();
                 break;
-//            case "postgresql" -> new PostgreSQL();
+            case "postgresql":
+                database = new PostgreSQL();
+                break;
             default:
                 database = new SQLite();
                 break;
-        };
+        }
 
-        database = new SQLite();
         database.setup();
         database.cleanup();
 

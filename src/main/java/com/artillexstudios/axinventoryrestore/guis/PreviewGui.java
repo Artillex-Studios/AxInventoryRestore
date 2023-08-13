@@ -6,6 +6,7 @@ import com.artillexstudios.axinventoryrestore.utils.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
+import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import org.bukkit.Bukkit;
@@ -42,7 +43,10 @@ public class PreviewGui {
         for (ItemStack it : backupData.getItems()) {
             if (it == null) it = new ItemStack(Material.AIR);
 
-            previewGui.setItem(n, ItemBuilder.from(it).asGuiItem());
+            previewGui.setItem(n, ItemBuilder.from(it).asGuiItem(event -> {
+                if (PermissionUtils.hasPermission(viewer, "modify")) return;
+                event.setCancelled(true);
+            }));
             n++;
         }
 
@@ -54,11 +58,21 @@ public class PreviewGui {
         previewGui.setItem(6, 4, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.teleport", Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
+            if (!PermissionUtils.hasPermission(viewer, "teleport")) {
+                MessageUtils.sendMsgP(viewer, "errors.no-permission");
+                return;
+            }
+
             viewer.teleport(backupData.getLocation());
         }));
 
         previewGui.setItem(6, 6, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.quick-restore", Map.of()).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
+
+            if (!PermissionUtils.hasPermission(viewer, "restore")) {
+                MessageUtils.sendMsgP(viewer, "errors.no-permission");
+                return;
+            }
 
             if (restoreUser.getPlayer() == null) {
                 MessageUtils.sendMsgP(viewer, "errors.player-offline");
@@ -80,6 +94,11 @@ public class PreviewGui {
 
         previewGui.setItem(6, 8, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.export-as-shulker", Map.of("%shulker-amount%", Integer.toString(backupData.getInShulkers(viewer).size()))).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
+
+            if (!PermissionUtils.hasPermission(viewer, "export")) {
+                MessageUtils.sendMsgP(viewer, "errors.no-permission");
+                return;
+            }
 
             for (ItemStack it : backupData.getInShulkers(viewer)) {
                 viewer.getInventory().addItem(it);

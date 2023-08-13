@@ -3,6 +3,7 @@ package com.artillexstudios.axinventoryrestore.commands;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
+import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,12 +17,13 @@ public class Commands implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String s, @NotNull String[] args) {
-        if (!sender.hasPermission("axinventoryrestore.admin")) {
-            MessageUtils.sendMsgP(sender, "errors.no-permission");
-            return true;
-        }
+        final Player player = (Player) sender;
 
         if (args.length == 1 && args[0].equals("reload")) {
+            if (!PermissionUtils.hasPermission(player, "reload")) {
+                MessageUtils.sendMsgP(sender, "errors.no-permission");
+                return true;
+            }
 
             AxInventoryRestore.getAbstractConfig().reloadConfig();
             AxInventoryRestore.getAbstractMessages().reloadConfig();
@@ -31,22 +33,38 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 1 && args[0].equals("cleanup")) {
+            if (!PermissionUtils.hasPermission(player, "cleanup")) {
+                MessageUtils.sendMsgP(sender, "errors.no-permission");
+                return true;
+            }
 
             MessageUtils.sendMsgP(sender, "cleaned-up");
             return true;
         }
 
         if (args.length == 1) {
-            new MainGui(Bukkit.getOfflinePlayer(args[0]), (Player) sender).openMainGui();
+            if (!PermissionUtils.hasPermission(player, "view")) {
+                MessageUtils.sendMsgP(sender, "errors.no-permission");
+                return true;
+            }
+
+            new MainGui(Bukkit.getOfflinePlayer(args[0]), player).openMainGui();
             return true;
         }
 
         if (args.length == 2 && args[0].equals("save")) {
+            if (!PermissionUtils.hasPermission(player, "manualbackup")) {
+                MessageUtils.sendMsgP(sender, "errors.no-permission");
+                return true;
+            }
+
             final String cause = AxInventoryRestore.MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
             if (args[1].equals("*")) {
-               for (Player player : Bukkit.getOnlinePlayers()) {
-                   AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause);
+               for (Player pl : Bukkit.getOnlinePlayers()) {
+                   AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                       AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
+                   });
                }
 
                MessageUtils.sendMsgP(sender, "manual-backup-all");
@@ -58,7 +76,10 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
+            AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
+            });
+
             MessageUtils.sendMsgP(sender, "manual-backup", Map.of("%player%", Bukkit.getPlayer(args[1]).getName()));
             return true;
         }

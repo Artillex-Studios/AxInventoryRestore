@@ -9,7 +9,41 @@ commands:
     aliases: [axir]
 
 permissions:
+  axinventoryrestore.view:
+    default: op
+  axinventoryrestore.modify:
+    default: op
+  axinventoryrestore.teleport:
+    default: op
+  axinventoryrestore.restore:
+    default: op
+  axinventoryrestore.export:
+    default: op
+  axinventoryrestore.reload:
+    default: op
+  axinventoryrestore.manualbackup:
+    default: op
+  axinventoryrestore.cleanup:
+    default: op
   axinventoryrestore.admin:
+    default: op
+  axir.view:
+    default: op
+  axir.modify:
+    default: op
+  axir.teleport:
+    default: op
+  axir.restore:
+    default: op
+  axir.export:
+    default: op
+  axir.reload:
+    default: op
+  axir.manualbackup:
+    default: op
+  axir.cleanup:
+    default: op
+  axir.admin:
     default: op
 
 libraries:

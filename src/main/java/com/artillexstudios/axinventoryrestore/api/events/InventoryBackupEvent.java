@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.api.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -14,6 +15,8 @@ public class InventoryBackupEvent extends Event implements Cancellable {
     private boolean isCancelled = false;
 
     public InventoryBackupEvent(@NotNull Player player, @NotNull String category, @NotNull String extraInfo) {
+        super(!Bukkit.isPrimaryThread());
+
         this.player = player;
         this.category = category;
         this.extraInfo = extraInfo;
