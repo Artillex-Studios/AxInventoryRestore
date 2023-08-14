@@ -18,7 +18,7 @@ public class Config implements AbstractConfig {
     @Override
     public void setup() {
         try {
-            file = YamlDocument.create(new File(AxInventoryRestore.getInstance().getDataFolder(), "config.yml"), AxInventoryRestore.getInstance().getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
+            file = YamlDocument.create(new File(AxInventoryRestore.getInstance().getDataFolder(), "config.yml"), AxInventoryRestore.getInstance().getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.DEFAULT, DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

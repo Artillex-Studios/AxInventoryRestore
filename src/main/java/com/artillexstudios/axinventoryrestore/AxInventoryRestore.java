@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore;
 
 import com.artillexstudios.axinventoryrestore.commands.Commands;
+import com.artillexstudios.axinventoryrestore.commands.TabComplete;
 import com.artillexstudios.axinventoryrestore.config.AbstractConfig;
 import com.artillexstudios.axinventoryrestore.config.impl.Config;
 import com.artillexstudios.axinventoryrestore.config.impl.Messages;
@@ -86,6 +87,7 @@ public final class AxInventoryRestore extends JavaPlugin {
         new RegisterListeners().register();
 
         this.getCommand("axinventoryrestore").setExecutor(new Commands());
+        this.getCommand("axinventoryrestore").setTabCompleter(new TabComplete());
 
         new AutoBackupScheduler().start();
     }
