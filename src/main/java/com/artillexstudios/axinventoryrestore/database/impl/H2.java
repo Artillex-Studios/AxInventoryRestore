@@ -10,14 +10,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.h2.jdbc.JdbcConnection;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class H2 implements Database {
     private Connection conn;
@@ -31,8 +32,8 @@ public class H2 implements Database {
     public void setup() {
 
         try {
-            Class.forName("org.h2.Driver");
-            this.conn = DriverManager.getConnection(String.format("jdbc:h2:./%s/data", AxInventoryRestore.getInstance().getDataFolder()));
+            conn = new JdbcConnection("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data", new Properties(), null, null, false);
+            conn.setAutoCommit(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -89,12 +90,7 @@ public class H2 implements Database {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    backups.add(new BackupData(Bukkit.getOfflinePlayer(rs.getString(1)),
-                            rs.getString(2),
-                            LocationUtils.deserializeLocation(rs.getString(3)),
-                            SerializationUtils.invFromBase64(rs.getString(4)),
-                            rs.getLong(5),
-                            rs.getString(6)));
+                    backups.add(new BackupData(Bukkit.getOfflinePlayer(rs.getString(1)), rs.getString(2), LocationUtils.deserializeLocation(rs.getString(3)), SerializationUtils.invFromBase64(rs.getString(4)), rs.getLong(5), rs.getString(6)));
                 }
             }
 
