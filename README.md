@@ -1,1 +1,1 @@
-![InvRestore](https://github.com/Artillex-Studios/AxInventoryRestore/assets/52270269/7ebd1919-4d1a-4066-bd5f-593a74119d41)
+![InvRestore_reworked](https://github.com/Artillex-Studios/AxInventoryRestore/assets/52270269/cb680863-5ddf-4f91-b3f8-ab91e6d66435)
