@@ -13,6 +13,8 @@ public interface Database {
     void setup();
     void saveInventory(@NotNull Player player, @NotNull String reason, @NotNull String cause);
     ArrayList<BackupData> getDeathsByType(@NotNull OfflinePlayer player, @NotNull String reason);
+    int getDeathsSizeType(@NotNull OfflinePlayer player, @NotNull String reason);
     ArrayList<String> getDeathReasons(@NotNull OfflinePlayer player);
     void cleanup();
+    void disable();
 }

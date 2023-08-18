@@ -1,10 +1,12 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.utils.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
+import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -13,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MainGui {
     private final PaginatedGui mainGui;
@@ -31,31 +34,49 @@ public class MainGui {
     }
 
     public void openMainGui() {
-        final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
-
-        if (reasons.isEmpty()) {
-            MessageUtils.sendMsgP(viewer, "errors.unknown-player");
-            return;
-        }
-
         mainGui.clearPageItems();
+
+        AxInventoryRestore.getDatabaseQueue().submit(() -> {
+            final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
+
+            if (reasons.isEmpty()) {
+                MessageUtils.sendMsgP(viewer, "errors.unknown-player");
+                return;
+            }
+
+            for (String saveReason : reasons) {
+                ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.formatToComponent("<!i>&#FFFF00&l" + saveReason));
+
+                if (AxInventoryRestore.MESSAGES.isSection("categories." + saveReason)) {
+                    item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "???")).getItem());
+                }
+
+                final AtomicReference<ArrayList<BackupData>> backupDataList = new AtomicReference<>();
+                AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                    backupDataList.set(AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason));
+                });
+
+                final GuiItem gitem = item.asGuiItem(event -> {
+                    if (backupDataList.get() == null) return;
+                    new CategoryGui(this, saveReason, backupDataList.get()).openCategoryGui();
+                });
+
+                mainGui.addItem(gitem);
+
+                mainGui.update();
+
+                AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                    gitem.setItemStack(ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDB().getDeathsSizeType(restoreUser, saveReason))).getItem()).build());
+                    mainGui.update();
+                });
+            }
+        });
 
         // Previous item
         mainGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.previous()));
         // Next item
         mainGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.next()));
 
-        for (String saveReason : reasons) {
-            ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.formatToComponent("<!i>&#FFFF00&l" + saveReason));
-
-            if (AxInventoryRestore.MESSAGES.isSection("categories." + saveReason)) {
-                item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason).size())).getItem());
-            }
-
-            mainGui.addItem(item.asGuiItem(event -> {
-                new CategoryGui(this, saveReason).openCategoryGui();
-            }));
-        }
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 

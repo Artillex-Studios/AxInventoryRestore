@@ -127,12 +127,40 @@ public class SQLite implements Database {
     }
 
     @Override
+    public int getDeathsSizeType(@NotNull OfflinePlayer player, @NotNull String reason) {
+
+        String ex = "SELECT COUNT(*) FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(ex)) {
+            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(2, reason);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    @Override
     public void cleanup() {
         String ex = "DELETE FROM `axinventoryrestore_data` WHERE `time` < ?;";
         try (PreparedStatement stmt = conn.prepareStatement(ex)) {
             stmt.setLong(1, System.currentTimeMillis() - (86_400_000L * AxInventoryRestore.CONFIG.getLong("cleanup-after-days")));
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void disable() {
+        try {
+            conn.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

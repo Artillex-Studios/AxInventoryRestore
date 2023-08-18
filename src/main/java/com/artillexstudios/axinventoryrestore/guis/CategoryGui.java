@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,12 +24,14 @@ public class CategoryGui {
     private final Player viewer;
     private final OfflinePlayer restoreUser;
     private final String saveReason;
+    private final ArrayList<BackupData> backupDataList;
 
-    public CategoryGui(@NotNull MainGui mainGui, String saveReason) {
+    public CategoryGui(@NotNull MainGui mainGui, String saveReason, ArrayList<BackupData> backupDataList) {
         this.mainGui = mainGui;
         this.viewer = mainGui.getViewer();
         this.restoreUser = mainGui.getRestoreUser();
         this.saveReason = saveReason;
+        this.backupDataList = backupDataList;
 
         categoryGui = Gui.paginated()
                 .title(ColorUtils.formatToComponent(AxInventoryRestore.MESSAGES.getString("guis.categorygui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
@@ -41,7 +44,7 @@ public class CategoryGui {
         categoryGui.clearPageItems();
 
         int n = 1;
-        for (BackupData backupData : AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason)) {
+        for (BackupData backupData : backupDataList) {
             if (backupData.getItems() == null) continue;
 
             final Map<String, String> replacements = new HashMap<>();
@@ -61,6 +64,8 @@ public class CategoryGui {
             n++;
 
             if (n > 64) n = 1;
+
+            categoryGui.update();
         }
 
         // Previous item
