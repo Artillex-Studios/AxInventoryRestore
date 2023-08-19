@@ -6,7 +6,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.2</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -78,6 +78,10 @@
         <repository>
             <id>alessiodp</id>
             <url>https://repo.alessiodp.com/releases/</url>
+        </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
     </repositories>
 
@@ -163,6 +167,12 @@
             <groupId>net.byteflux</groupId>
             <artifactId>libby-bukkit</artifactId>
             <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.papermc</groupId>
+            <artifactId>paperlib</artifactId>
+            <version>1.0.7</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

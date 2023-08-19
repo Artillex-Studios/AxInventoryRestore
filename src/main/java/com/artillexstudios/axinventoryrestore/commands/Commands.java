@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+
 public class Commands implements CommandExecutor {
 
     @Override
@@ -58,7 +60,7 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            final String cause = AxInventoryRestore.MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
+            final String cause = MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
             if (args[1].equals("*")) {
                for (Player pl : Bukkit.getOnlinePlayers()) {

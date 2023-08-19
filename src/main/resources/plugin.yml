@@ -2,6 +2,7 @@ name: AxInventoryRestore
 version: '${project.version}'
 main: com.artillexstudios.axinventoryrestore.AxInventoryRestore
 api-version: '1.13'
+folia-supported: true
 
 commands:
   axinventoryrestore:
@@ -45,9 +46,3 @@ permissions:
     default: op
   axir.admin:
     default: op
-
-libraries:
-  - com.mysql:mysql-connector-j:8.0.33
-  - org.xerial:sqlite-jdbc:3.42.0.0
-#  - com.h2database:h2:2.1.214
-#  - org.postgresql:postgresql:42.5.4

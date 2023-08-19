@@ -24,6 +24,8 @@ public enum Libraries {
             Relocation.builder().pattern("net{}kyori").relocatedPattern("com{}artillexstudios{}axinventoryrestore{}libs{}adventure").build()
     ),
 
+    PAPER_LIB("io{}papermc:paperlib:1.0.7"),
+
     BOOSTED_YAML("dev{}dejvokep:boosted-yaml:1.3"),
 
     HIKARICP("com{}zaxxer:HikariCP:5.0.1",

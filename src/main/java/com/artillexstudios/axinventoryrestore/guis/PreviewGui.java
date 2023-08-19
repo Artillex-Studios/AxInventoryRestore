@@ -9,6 +9,7 @@ import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
+import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -63,7 +64,7 @@ public class PreviewGui {
                 return;
             }
 
-            viewer.teleport(backupData.getLocation());
+            PaperLib.teleportAsync(viewer, backupData.getLocation());
         }));
 
         previewGui.setItem(6, 6, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.quick-restore", Map.of()).getItem()).asGuiItem(event -> {

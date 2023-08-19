@@ -17,7 +17,7 @@ public class ColorUtils {
         final String packageName = Bukkit.getServer().getClass().getPackage().getName();
         final String v = packageName.substring(packageName.lastIndexOf('.') + 1);
 
-        if (v.contains("1.13") || v.contains("1.14") || v.contains("1.15")) {
+        if (v.contains("1_7") || v.contains("1_8") || v.contains("1_9") || v.contains("1_10") || v.contains("1_11") || v.contains("1_12") || v.contains("1_13") || v.contains("1_14") || v.contains("1_15")) {
             LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder().character('§').useUnusualXRepeatedCharacterHexFormat().build();
             LEGACY_FORMATTER = LegacyComponentSerializer.legacyAmpersand().toBuilder().useUnusualXRepeatedCharacterHexFormat().build();
             return;

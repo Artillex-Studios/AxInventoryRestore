@@ -10,9 +10,9 @@ help:
   - " "
   - "&#00aaff&lAxInventoryRestore &7» "
   - " &7- &f/axir <player> &7| &#00aaffOpen restore GUI"
-  - " &7- &f/axir save <*/player> <gray>|</gray> &7| &#00aaffCreate manual backup"
-  - " &7- &f/axir reload <gray>|</gray> &7| &#00aaffReload plugin"
-  - " &7- &f/axir cleanup <gray>|</gray> &7| &#00aaffDelete old backups (look at config.yml)"
+  - " &7- &f/axir save <*/player> &7| &#00aaffCreate manual backup"
+  - " &7- &f/axir reload &7| &#00aaffReload plugin"
+  - " &7- &f/axir cleanup &7| &#00aaffDelete old backups (look at config.yml)"
   - " "
 
 errors:
