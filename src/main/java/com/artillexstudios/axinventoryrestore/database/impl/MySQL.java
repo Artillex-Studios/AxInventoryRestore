@@ -12,6 +12,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,7 +59,7 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void saveInventory(@NotNull Player player, @NotNull String reason, @NotNull String cause) {
+    public void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause) {
 
         final InventoryBackupEvent inventoryBackupEvent = new InventoryBackupEvent(player, reason, cause);
         Bukkit.getPluginManager().callEvent(inventoryBackupEvent);

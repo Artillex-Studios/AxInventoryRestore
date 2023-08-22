@@ -74,7 +74,7 @@ public class BackupData {
             Date resultdate = new Date(date);
             replacements.put("%date%", sdf.format(resultdate));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(location));
-            replacements.put("%cause%", cause);
+            replacements.put("%cause%", cause == null ? "---" : cause);
             replacements.put("%staff%", restorer.getName());
             replacements.put("%player-uuid%", player.getUniqueId().toString());
 

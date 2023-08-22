@@ -53,7 +53,7 @@ public class CategoryGui {
             Date resultdate = new Date(backupData.getDate());
             replacements.put("%date%", sdf.format(resultdate));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
-            replacements.put("%cause%", backupData.getCause());
+            replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
             final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.categorygui.item", replacements).getItem();
 

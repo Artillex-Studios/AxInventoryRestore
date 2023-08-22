@@ -22,7 +22,7 @@ public class Commands implements CommandExecutor {
         final Player player = (Player) sender;
 
         if (args.length == 1 && args[0].equals("reload")) {
-            if (!PermissionUtils.hasPermission(player, "reload")) {
+            if (!PermissionUtils.hasPermission(sender, "reload")) {
                 MessageUtils.sendMsgP(sender, "errors.no-permission");
                 return true;
             }
@@ -35,7 +35,7 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 1 && args[0].equals("cleanup")) {
-            if (!PermissionUtils.hasPermission(player, "cleanup")) {
+            if (!PermissionUtils.hasPermission(sender, "cleanup")) {
                 MessageUtils.sendMsgP(sender, "errors.no-permission");
                 return true;
             }
@@ -45,7 +45,7 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 1) {
-            if (!PermissionUtils.hasPermission(player, "view")) {
+            if (!PermissionUtils.hasPermission(sender, "view")) {
                 MessageUtils.sendMsgP(sender, "errors.no-permission");
                 return true;
             }
@@ -55,7 +55,7 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 2 && args[0].equals("save")) {
-            if (!PermissionUtils.hasPermission(player, "manualbackup")) {
+            if (!PermissionUtils.hasPermission(sender, "manualbackup")) {
                 MessageUtils.sendMsgP(sender, "errors.no-permission");
                 return true;
             }

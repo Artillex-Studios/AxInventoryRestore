@@ -2,6 +2,7 @@ package com.artillexstudios.axinventoryrestore.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 public class LocationUtils {
@@ -9,9 +10,13 @@ public class LocationUtils {
     @NotNull
     public static Location deserializeLocation(@NotNull String loc) {
         String[] l = loc.replace(" ", "").split(";");
+
+        World world = Bukkit.getWorld(l[0]);
+        if (world == null) world = Bukkit.getWorlds().get(0);
+
         if (l.length == 6)
-            return new Location(Bukkit.getWorld(l[0]), Double.parseDouble(l[1]), Double.parseDouble(l[2]), Double.parseDouble(l[3]), Float.parseFloat(l[4]), Float.parseFloat(l[5]));
-        return new Location(Bukkit.getWorld(l[0]), Double.parseDouble(l[1]), Double.parseDouble(l[2]), Double.parseDouble(l[3]));
+            return new Location(world, Double.parseDouble(l[1]), Double.parseDouble(l[2]), Double.parseDouble(l[3]), Float.parseFloat(l[4]), Float.parseFloat(l[5]));
+        return new Location(world, Double.parseDouble(l[1]), Double.parseDouble(l[2]), Double.parseDouble(l[3]));
     }
 
     @NotNull

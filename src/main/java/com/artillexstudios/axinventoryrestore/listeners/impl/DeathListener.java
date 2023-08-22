@@ -13,7 +13,7 @@ public class DeathListener implements Listener {
     public void onDeath(@NotNull PlayerDeathEvent event) {
         final Player player = event.getEntity();
 
-        String cause = player.getLastDamageCause() == null ? "---" : player.getLastDamageCause().getCause().toString();
+        String cause = player.getLastDamageCause() == null ? null : player.getLastDamageCause().getCause().toString();
 
         if (player.getKiller() != null) {
             cause = cause + " (" + player.getKiller().getName() + ")";

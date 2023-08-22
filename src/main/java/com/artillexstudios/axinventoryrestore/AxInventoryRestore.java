@@ -67,6 +67,8 @@ public final class AxInventoryRestore extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        new ColorUtils();
+
         int pluginId = 19446;
         new Metrics(this, pluginId);
 
@@ -97,8 +99,6 @@ public final class AxInventoryRestore extends JavaPlugin {
 
         database.setup();
         database.cleanup();
-
-        new ColorUtils();
         new RegisterListeners().register();
 
         this.getCommand("axinventoryrestore").setExecutor(new Commands());

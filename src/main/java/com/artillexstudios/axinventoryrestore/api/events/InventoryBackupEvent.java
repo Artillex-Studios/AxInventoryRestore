@@ -6,6 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class InventoryBackupEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
@@ -14,7 +15,7 @@ public class InventoryBackupEvent extends Event implements Cancellable {
     private final String extraInfo;
     private boolean isCancelled = false;
 
-    public InventoryBackupEvent(@NotNull Player player, @NotNull String category, @NotNull String extraInfo) {
+    public InventoryBackupEvent(@NotNull Player player, @NotNull String category, @Nullable String extraInfo) {
         super(!Bukkit.isPrimaryThread());
 
         this.player = player;
@@ -42,7 +43,7 @@ public class InventoryBackupEvent extends Event implements Cancellable {
         return category;
     }
 
-    @NotNull
+    @Nullable
     public String getExtraInfo() {
         return extraInfo;
     }
