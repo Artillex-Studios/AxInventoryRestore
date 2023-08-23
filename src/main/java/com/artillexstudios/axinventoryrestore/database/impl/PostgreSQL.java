@@ -34,7 +34,7 @@ public class PostgreSQL implements Database {
     @Override
     public void setup() {
 
-        hConfig.setPoolName("rivalsauction-pool");
+        hConfig.setPoolName("axinventoryrestore-pool");
 
         hConfig.setMaximumPoolSize(CONFIG.getInt("database.pool.maximum-pool-size"));
         hConfig.setMinimumIdle(CONFIG.getInt("database.pool.minimum-idle"));

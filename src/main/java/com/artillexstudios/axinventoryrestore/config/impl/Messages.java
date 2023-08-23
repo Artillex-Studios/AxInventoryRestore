@@ -19,6 +19,7 @@ public class Messages implements AbstractConfig {
     public void setup() {
         try {
             file = YamlDocument.create(new File(AxInventoryRestore.getInstance().getDataFolder(), "messages.yml"), AxInventoryRestore.getInstance().getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.DEFAULT, DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
+            file.update();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

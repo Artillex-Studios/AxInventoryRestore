@@ -28,9 +28,9 @@ public enum Libraries {
 
     BOOSTED_YAML("dev{}dejvokep:boosted-yaml:1.3"),
 
-    HIKARICP("com{}zaxxer:HikariCP:5.0.1",
-        Relocation.builder().pattern("com{}zaxxer").relocatedPattern("com{}artillexstudios{}libs{}hikaricp").build()
-    ),
+//    HIKARICP("com{}zaxxer:HikariCP:5.0.1",
+//        Relocation.builder().pattern("com{}zaxxer").relocatedPattern("com{}artillexstudios{}libs{}hikaricp").build()
+//    ),
 
     MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:8.0.33"),
 
