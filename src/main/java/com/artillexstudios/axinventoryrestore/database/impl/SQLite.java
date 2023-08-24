@@ -44,24 +44,26 @@ public class SQLite implements Database {
 
         boolean migrating = false;
         try (ResultSet rs = conn.getMetaData().getTables(null, null, "AXINVENTORYRESTORE_BACKUPS", null)) {
-            if (!rs.next()) {
-                migrating = true;
+            try (ResultSet rs2 = conn.getMetaData().getTables(null, null, "AXINVENTORYRESTORE_DATA", null)) {
+                if (!rs.next() && rs2.next()) {
+                    migrating = true;
 
-                Bukkit.getConsoleSender().sendMessage(ColorUtils.format("&#FF6600[AxInventoryRestore] Your database is outdated, we will start migrating it.."));
+                    Bukkit.getConsoleSender().sendMessage(ColorUtils.format("&#FF6600[AxInventoryRestore] Your database is outdated, we will start migrating it.."));
 
-                final String ex = "ALTER TABLE `axinventoryrestore_data` RENAME TO `axinventoryrestore_temp`;";
+                    final String ex = "ALTER TABLE `axinventoryrestore_data` RENAME TO `axinventoryrestore_temp`;";
 
-                try (PreparedStatement stmt = conn.prepareStatement(ex)) {
-                    stmt.executeUpdate();
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
+                    try (PreparedStatement stmt = conn.prepareStatement(ex)) {
+                        stmt.executeUpdate();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
+                    }
                 }
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
 
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_data` ( `player` VARCHAR(36) NOT NULL, `reason` VARCHAR(64) NOT NULL, `location` VARCHAR(256) NOT NULL, `id` INTEGER PRIMARY KEY, `time` BIGINT NOT NULL, `cause` VARCHAR(64) );";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_data` ( `player` VARCHAR(36) NOT NULL, `reason` VARCHAR(64) NOT NULL, `location` VARCHAR(256) NOT NULL, `id` INTEGER PRIMARY KEY, `time` BIGINT NOT NULL, `cause` VARCHAR(512) );";
 
         try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();

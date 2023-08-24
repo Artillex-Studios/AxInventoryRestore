@@ -49,7 +49,7 @@ public class PostgreSQL implements Database {
 
         dataSource = new HikariDataSource(hConfig);
 
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axinventoryrestore_data ( player VARCHAR(36) NOT NULL, reason VARCHAR(64) NOT NULL, location VARCHAR(256) NOT NULL, inventory VARCHAR NOT NULL, time INT NOT NULL, cause VARCHAR(64) NOT NULL );";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axinventoryrestore_data ( player VARCHAR(36) NOT NULL, reason VARCHAR(64) NOT NULL, location VARCHAR(256) NOT NULL, inventory VARCHAR NOT NULL, time INT NOT NULL, cause VARCHAR(512) NOT NULL );";
 
         try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
