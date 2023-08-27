@@ -36,13 +36,14 @@ public class MainGui {
     public void openMainGui() {
         mainGui.clearPageItems();
 
-        AxInventoryRestore.getDatabaseQueue().submit(() -> {
-            final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
+        final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
 
-            if (reasons.isEmpty()) {
-                MessageUtils.sendMsgP(viewer, "errors.unknown-player");
-                return;
-            }
+        if (reasons.isEmpty()) {
+            MessageUtils.sendMsgP(viewer, "errors.unknown-player");
+            return;
+        }
+
+        AxInventoryRestore.getDatabaseQueue().submit(() -> {
 
             for (String saveReason : reasons) {
                 ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.formatToComponent("<!i>&#FFFF00&l" + saveReason));
@@ -51,24 +52,15 @@ public class MainGui {
                     item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "???")).getItem());
                 }
 
-                final AtomicReference<ArrayList<BackupData>> backupDataList = new AtomicReference<>();
-                AxInventoryRestore.getDatabaseQueue().submit(() -> {
-                    backupDataList.set(AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason));
-                });
+                final ArrayList<BackupData> backupDataList = AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason);
 
                 final GuiItem gitem = item.asGuiItem(event -> {
-                    if (backupDataList.get() == null) return;
-                    new CategoryGui(this, saveReason, backupDataList.get()).openCategoryGui();
+                    new CategoryGui(this, saveReason, backupDataList).openCategoryGui();
                 });
 
+                gitem.setItemStack(ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDB().getDeathsSizeType(restoreUser, saveReason))).getItem()).build());
                 mainGui.addItem(gitem);
-
                 mainGui.update();
-
-                AxInventoryRestore.getDatabaseQueue().submit(() -> {
-                    gitem.setItemStack(ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDB().getDeathsSizeType(restoreUser, saveReason))).getItem()).build());
-                    mainGui.update();
-                });
             }
         });
 
