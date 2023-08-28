@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 
@@ -101,7 +102,7 @@ public class PostgreSQL implements Database {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    backups.add(new BackupData(Bukkit.getOfflinePlayer(rs.getString(1)),
+                    backups.add(new BackupData(UUID.fromString(rs.getString(1)),
                             rs.getString(2),
                             LocationUtils.deserializeLocation(rs.getString(3)),
                             SerializationUtils.invFromBase64(rs.getString(4)),

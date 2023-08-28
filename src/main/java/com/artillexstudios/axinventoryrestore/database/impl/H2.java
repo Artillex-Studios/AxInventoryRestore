@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.UUID;
 
 public class H2 implements Database {
     private Connection conn;
@@ -210,7 +211,7 @@ public class H2 implements Database {
                         try (ResultSet rs2 = stmt2.executeQuery()) {
                             // System.out.println((System.currentTimeMillis() - time) + " - SELECT `inventory` FROM `axinventoryrestore_backups` WHERE `id` = ?");
                             rs2.next();
-                            backups.add(new BackupData(Bukkit.getOfflinePlayer(rs.getString(1)),
+                            backups.add(new BackupData(UUID.fromString(rs.getString(1)),
                                     rs.getString(2),
                                     LocationUtils.deserializeLocation(rs.getString(3)),
                                     SerializationUtils.invFromBase64(rs2.getString(1)),

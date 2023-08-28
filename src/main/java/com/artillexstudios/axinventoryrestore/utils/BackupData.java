@@ -17,9 +17,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class BackupData {
-    final OfflinePlayer player;
+    final UUID player;
     final String reason;
     final Location location;
     final ItemStack[] items;
@@ -27,7 +28,7 @@ public class BackupData {
     final String cause;
     final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
 
-    public BackupData(@NotNull OfflinePlayer player, @NotNull String reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
+    public BackupData(@NotNull UUID player, @NotNull String reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
         this.player = player;
         this.reason = reason;
         this.location = location;
@@ -48,7 +49,7 @@ public class BackupData {
         return date;
     }
 
-    public OfflinePlayer getPlayer() {
+    public UUID getPlayerUUID() {
         return player;
     }
 
@@ -76,7 +77,7 @@ public class BackupData {
             replacements.put("%location%", LocationUtils.serializeLocationReadable(location));
             replacements.put("%cause%", cause == null ? "---" : cause);
             replacements.put("%staff%", restorer.getName());
-            replacements.put("%player-uuid%", player.getUniqueId().toString());
+            replacements.put("%player-uuid%", player.toString());
 
             final ItemStack shulkerIt = new ItemBuilder(AxInventoryRestore.MESSAGES, "restored-shulker", replacements).getItem();
             final BlockStateMeta im = (BlockStateMeta) shulkerIt.getItemMeta();
