@@ -18,12 +18,15 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
+
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
 public class PreviewGui {
     private final Gui previewGui;
     private final CategoryGui categoryGui;
     private final Player viewer;
-    private final OfflinePlayer restoreUser;
+    private final UUID restoreUser;
     private final BackupData backupData;
 
     public PreviewGui(@NotNull CategoryGui categoryGui, BackupData backupData) {
@@ -33,7 +36,7 @@ public class PreviewGui {
         this.backupData = backupData;
 
         previewGui = Gui.gui()
-                .title(ColorUtils.formatToComponent(AxInventoryRestore.MESSAGES.getString("guis.previewgui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
+                .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.previewgui.title").replace("%player%", categoryGui.getMainGui().getName())))
                 .rows(6)
                 .create();
     }
@@ -51,12 +54,12 @@ public class PreviewGui {
             n++;
         }
 
-        previewGui.setItem(6, 2, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event -> {
+        previewGui.setItem(6, 2, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event -> {
             categoryGui.getCategoryGui().open(viewer);
             event.setCancelled(true);
         }));
 
-        previewGui.setItem(6, 4, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.teleport", Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).getItem()).asGuiItem(event -> {
+        previewGui.setItem(6, 4, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.teleport", Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "teleport")) {
@@ -67,7 +70,7 @@ public class PreviewGui {
             PaperLib.teleportAsync(viewer, backupData.getLocation());
         }));
 
-        previewGui.setItem(6, 6, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.quick-restore", Map.of()).getItem()).asGuiItem(event -> {
+        previewGui.setItem(6, 6, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.quick-restore", Map.of()).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "restore")) {
@@ -75,12 +78,13 @@ public class PreviewGui {
                 return;
             }
 
-            if (restoreUser.getPlayer() == null) {
+            final Player player = Bukkit.getPlayer(restoreUser);
+            if (player == null) {
                 MessageUtils.sendMsgP(viewer, "errors.player-offline");
                 return;
             }
 
-            final InventoryRestoreEvent inventoryRestoreEvent = new InventoryRestoreEvent(restoreUser.getPlayer(), backupData);
+            final InventoryRestoreEvent inventoryRestoreEvent = new InventoryRestoreEvent(player, backupData);
             Bukkit.getPluginManager().callEvent(inventoryRestoreEvent);
             if (inventoryRestoreEvent.isCancelled()) return;
 
@@ -88,12 +92,12 @@ public class PreviewGui {
             for (ItemStack it : backupData.getItems()) {
                 if (it == null) it = new ItemStack(Material.AIR);
 
-                restoreUser.getPlayer().getInventory().setItem(n2, it);
+                player.getInventory().setItem(n2, it);
                 n2++;
             }
         }));
 
-        previewGui.setItem(6, 8, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.previewgui.export-as-shulker", Map.of("%shulker-amount%", Integer.toString(backupData.getInShulkers(viewer).size()))).getItem()).asGuiItem(event -> {
+        previewGui.setItem(6, 8, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.export-as-shulker", Map.of("%shulker-amount%", Integer.toString(backupData.getInShulkers(viewer).size()))).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "export")) {

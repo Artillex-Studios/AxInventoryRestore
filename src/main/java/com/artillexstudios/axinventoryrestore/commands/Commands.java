@@ -5,7 +5,6 @@ import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
@@ -51,13 +51,13 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
-            if (offlinePlayer == null) {
+            final UUID uuid = AxInventoryRestore.getDB().getUUID(args[0]);
+            if (uuid == null) {
                 MessageUtils.sendMsgP(sender, "errors.unknown-player");
                 return true;
             }
 
-            new MainGui(offlinePlayer, player).openMainGui();
+            new MainGui(uuid, player, args[0]).openMainGui();
             return true;
         }
 

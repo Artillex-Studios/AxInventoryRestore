@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.database.impl;
 
+import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.api.events.InventoryBackupEvent;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
@@ -18,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -48,11 +50,27 @@ public class PostgreSQL implements Database {
         hConfig.addDataSourceProperty("user", CONFIG.getString("database.username"));
         hConfig.addDataSourceProperty("password", CONFIG.getString("database.password"));
 
-        dataSource = new HikariDataSource(hConfig);
+        dataSource = new com.zaxxer.hikari.HikariDataSource(hConfig);
 
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axinventoryrestore_data ( player VARCHAR(36) NOT NULL, reason VARCHAR(64) NOT NULL, location VARCHAR(256) NOT NULL, inventory VARCHAR NOT NULL, time INT NOT NULL, cause VARCHAR(512) NOT NULL );";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axinventoryrestore_data ( player VARCHAR(36) NOT NULL, reason VARCHAR(64) NOT NULL, location VARCHAR(256) NOT NULL, id INTEGER PRIMARY KEY, time BIGINT NOT NULL, cause VARCHAR(512) );";
 
-        try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(CREATE_TABLE)) {
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
+            stmt.executeUpdate();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+
+        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axinventoryrestore_backups ( id INTEGER PRIMARY KEY AUTO_INCREMENT, inventory TEXT NOT NULL );";
+
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
+            stmt.executeUpdate();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+
+        final String CREATE_TABLE3 = "CREATE TABLE axinventoryrestore_uuids ( uuid VARCHAR(36), name VARCHAR(64), PRIMARY KEY (uuid) );";
+
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
             exception.printStackTrace();
@@ -76,39 +94,65 @@ public class PostgreSQL implements Database {
 
         if (isEmpty) return;
 
-        final String ex = "INSERT INTO axinventoryrestore_data(player, reason, location, inventory, time, cause) VALUES (?,?,?,?,?,?);";
+        final String ex = "INSERT INTO axinventoryrestore_backups(inventory) VALUES (?);";
+        final String ex2 = "INSERT INTO axinventoryrestore_data(player, reason, location, id, time, cause) VALUES (?,?,?,?,?,?);";
 
-        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
-            stmt.setString(1, player.getUniqueId().toString());
-            stmt.setString(2, reason);
-            stmt.setString(3, LocationUtils.serializeLocation(player.getLocation(), true));
-            stmt.setString(4, SerializationUtils.invToBase64(player.getInventory().getContents()));
-            stmt.setLong(5, System.currentTimeMillis());
-            stmt.setString(6, cause);
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, SerializationUtils.invToBase64(player.getInventory().getContents()));
             stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys(); PreparedStatement stmt2 = conn.prepareStatement(ex2)) {
+                rs.next();
+
+                stmt2.setString(1, player.getUniqueId().toString());
+                stmt2.setString(2, reason);
+                stmt2.setString(3, LocationUtils.serializeLocation(player.getLocation(), true));
+                stmt2.setInt(4, rs.getInt(1));
+                stmt2.setLong(5, System.currentTimeMillis());
+                stmt2.setString(6, cause);
+                stmt2.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public ArrayList<BackupData> getDeathsByType(@NotNull OfflinePlayer player, @NotNull String reason) {
+    public ArrayList<BackupData> getDeathsByType(@NotNull UUID uuid, @NotNull String reason) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
-        String ex = "SELECT * FROM axinventoryrestore_data WHERE player = ? AND reason = ? ORDER BY time DESC;";
+        // long time = System.currentTimeMillis();
+
+        final String ex = "SELECT * FROM axinventoryrestore_data WHERE player = ? AND reason = ? ORDER BY time DESC;";
+        final String ex2 = "SELECT inventory FROM axinventoryrestore_backups WHERE id = ?";
+
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             stmt.setString(2, reason);
 
             try (ResultSet rs = stmt.executeQuery()) {
+                // System.out.println((System.currentTimeMillis() - time) + " - SELECT * FROM axinventoryrestore_data WHERE player = ? AND reason = ? ORDER BY time DESC;");
+
                 while (rs.next()) {
-                    backups.add(new BackupData(UUID.fromString(rs.getString(1)),
-                            rs.getString(2),
-                            LocationUtils.deserializeLocation(rs.getString(3)),
-                            SerializationUtils.invFromBase64(rs.getString(4)),
-                            rs.getLong(5),
-                            rs.getString(6)));
+
+                    try (PreparedStatement stmt2 = conn.prepareStatement(ex2)) {
+                        stmt2.setInt(1, rs.getInt(4));
+
+                        try (ResultSet rs2 = stmt2.executeQuery()) {
+                            // System.out.println((System.currentTimeMillis() - time) + " - SELECT inventory FROM axinventoryrestore_backups WHERE id = ?");
+                            rs2.next();
+
+                            backups.add(new BackupData(UUID.fromString(rs.getString(1)),
+                                    rs.getString(2),
+                                    LocationUtils.deserializeLocation(rs.getString(3)),
+                                    SerializationUtils.invFromBase64(rs2.getString(1)),
+                                    rs.getLong(5),
+                                    rs.getString(6)));
+                        }
+                    }
                 }
+
+//                // System.out.println((System.currentTimeMillis() - time) + " - SELECT * FROM axinventoryrestore_data WHERE player = ? AND reason = ? ORDER BY time DESC;");
             }
 
         } catch (SQLException e) {
@@ -119,14 +163,40 @@ public class PostgreSQL implements Database {
     }
 
     @Override
-    public ArrayList<String> getDeathReasons(@NotNull OfflinePlayer player) {
+    public int getDeathsSizeType(@NotNull UUID uuid, @NotNull String reason) {
+
+        // long time = System.currentTimeMillis();
+
+        String ex = "SELECT COUNT(id) FROM axinventoryrestore_data WHERE player = ? AND reason = ?;";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, reason);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                // System.out.println((System.currentTimeMillis() - time) + " - SELECT COUNT(id) FROM axinventoryrestore_data WHERE player = ? AND reason = ?;");
+                if (rs.next())
+                    return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    @Override
+    public ArrayList<String> getDeathReasons(@NotNull UUID uuid) {
         final ArrayList<String> reasons = new ArrayList<>();
+
+        // long time = System.currentTimeMillis();
 
         String ex = "SELECT DISTINCT reason FROM axinventoryrestore_data WHERE player = ?;";
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
 
             try (ResultSet rs = stmt.executeQuery()) {
+                // System.out.println((System.currentTimeMillis() - time) + " - SELECT DISTINCT reason FROM axinventoryrestore_data WHERE player = ?;");
                 while (rs.next()) {
                     reasons.add(rs.getString("reason"));
                 }
@@ -136,26 +206,46 @@ public class PostgreSQL implements Database {
             e.printStackTrace();
         }
 
+
         return reasons;
     }
 
     @Override
-    public int getDeathsSizeType(@NotNull OfflinePlayer player, @NotNull String reason) {
-
-        String ex = "SELECT COUNT(*) FROM axinventoryrestore_data WHERE player = ? AND reason = ?;";
+    public void join(@NotNull Player player) {
+        String ex = "INSERT INTO axinventoryrestore_uuids (uuid, name) VALUES (?, ?) ON CONFLICT (uuid) DO UPDATE SET name = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
             stmt.setString(1, player.getUniqueId().toString());
-            stmt.setString(2, reason);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.getInt(1);
-            }
-
+            stmt.setString(2, player.getName());
+            stmt.setString(3, player.getName());
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
-        return 0;
+    @Nullable
+    @Override
+    public UUID getUUID(@NotNull String player) {
+        final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
+
+        if (offlinePlayer == null) {
+
+            String ex = "SELECT uuid FROM axinventoryrestore_uuids WHERE player = ? LIMIT 1;";
+            try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
+                stmt.setString(1, player);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next())
+                        return UUID.fromString(rs.getString(1));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        return offlinePlayer.getUniqueId();
     }
 
     @Override

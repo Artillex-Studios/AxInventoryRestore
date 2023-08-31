@@ -4,7 +4,6 @@ import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.api.events.InventoryBackupEvent;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
-import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import com.artillexstudios.axinventoryrestore.utils.SerializationUtils;
 import org.bukkit.Bukkit;
@@ -42,38 +41,9 @@ public class H2 implements Database {
             throw new RuntimeException(e);
         }
 
-        boolean migrating = false;
-        try (ResultSet rs = conn.getMetaData().getTables(null, null, "AXINVENTORYRESTORE_BACKUPS", null)) {
-            try (ResultSet rs2 = conn.getMetaData().getTables(null, null, "AXINVENTORYRESTORE_DATA", null)) {
-                if (!rs.next() && rs2.next()) {
-                    migrating = true;
-
-                    Bukkit.getConsoleSender().sendMessage(ColorUtils.format("&#FF6600[AxInventoryRestore] Your database is outdated, we will start migrating it.."));
-
-                    final String ex = "ALTER TABLE `axinventoryrestore_data` RENAME TO `axinventoryrestore_temp`;";
-
-                    try (PreparedStatement stmt = conn.prepareStatement(ex)) {
-                        stmt.executeUpdate();
-                    } catch (SQLException exception) {
-                        exception.printStackTrace();
-                    }
-                }
-            }
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-
         final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_data` ( `player` VARCHAR(36) NOT NULL, `reason` VARCHAR(64) NOT NULL, `location` VARCHAR(256) NOT NULL, `id` INT NOT NULL, `time` BIGINT NOT NULL, `cause` VARCHAR(512), PRIMARY KEY (`id`) );";
 
         try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
-            stmt.executeUpdate();
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-
-        final String ALTER1 = "ALTER TABLE `axinventoryrestore_data` ALTER COLUMN `cause` VARCHAR(512);";
-
-        try (PreparedStatement stmt = conn.prepareStatement(ALTER1)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
             exception.printStackTrace();
@@ -86,65 +56,6 @@ public class H2 implements Database {
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
-
-        if (!migrating) return;
-
-        final String ex = "SELECT * FROM `axinventoryrestore_temp`;";
-        int mcount = 0;
-
-        try (PreparedStatement stmt = conn.prepareStatement(ex)) {
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-
-                    final String ex2 = "INSERT INTO `axinventoryrestore_backups`(`inventory`) VALUES (?);";
-                    final String ex3 = "INSERT INTO `axinventoryrestore_data`(`player`, `reason`, `location`, `id`, `time`, `cause`) VALUES (?,?,?,?,?,?);";
-
-                    try (PreparedStatement stmt2 = conn.prepareStatement(ex2, Statement.RETURN_GENERATED_KEYS)) {
-                        stmt2.setString(1, rs.getString(4));
-                        stmt2.executeUpdate();
-
-                        try (ResultSet rs2 = stmt2.getGeneratedKeys(); PreparedStatement stmt3 = conn.prepareStatement(ex3)) {
-                            rs2.next();
-
-                            stmt3.setString(1, rs.getString(1));
-                            stmt3.setString(2, rs.getString(2));
-                            stmt3.setString(3, rs.getString(3));
-                            stmt3.setInt(4, rs2.getInt(1));
-                            stmt3.setLong(5, System.currentTimeMillis());
-                            stmt3.setString(6, rs.getString(6).equals("---") ? null : rs.getString(6));
-                            stmt3.executeUpdate();
-                            Bukkit.getConsoleSender().sendMessage(ColorUtils.format("&#FF6600[AxInventoryRestore] Migrating database.. " + mcount));
-                            mcount++;
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-
-        final String ex2 = "DROP TABLE `axinventoryrestore_temp`;";
-
-        try (PreparedStatement stmt = conn.prepareStatement(ex2)) {
-            stmt.executeUpdate();
-            Bukkit.getConsoleSender().sendMessage(ColorUtils.format("&#FF6600[AxInventoryRestore] Migrated database!"));
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-
-        final String ex3 = "SHUTDOWN DEFRAG;";
-
-        try (PreparedStatement stmt = conn.prepareStatement(ex3)) {
-            stmt.executeUpdate();
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-
-        setup();
     }
 
     @Override
@@ -188,7 +99,7 @@ public class H2 implements Database {
     }
 
     @Override
-    public ArrayList<BackupData> getDeathsByType(@NotNull OfflinePlayer player, @NotNull String reason) {
+    public ArrayList<BackupData> getDeathsByType(@NotNull UUID uuid, @NotNull String reason) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
         // long time = System.currentTimeMillis();
@@ -197,7 +108,7 @@ public class H2 implements Database {
         final String ex2 = "SELECT `inventory` FROM `axinventoryrestore_backups` WHERE `id` = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(ex)) {
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             stmt.setString(2, reason);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -232,13 +143,13 @@ public class H2 implements Database {
     }
 
     @Override
-    public int getDeathsSizeType(@NotNull OfflinePlayer player, @NotNull String reason) {
+    public int getDeathsSizeType(@NotNull UUID uuid, @NotNull String reason) {
 
         // long time = System.currentTimeMillis();
 
         String ex = "SELECT COUNT(`id`) FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(ex)) {
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             stmt.setString(2, reason);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -255,14 +166,14 @@ public class H2 implements Database {
     }
 
     @Override
-    public ArrayList<String> getDeathReasons(@NotNull OfflinePlayer player) {
+    public ArrayList<String> getDeathReasons(@NotNull UUID uuid) {
         final ArrayList<String> reasons = new ArrayList<>();
 
         // long time = System.currentTimeMillis();
 
         String ex = "SELECT DISTINCT `reason` FROM `axinventoryrestore_data` WHERE `player` = ?;";
         try (PreparedStatement stmt = conn.prepareStatement(ex)) {
-            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
 
             try (ResultSet rs = stmt.executeQuery()) {
                 // System.out.println((System.currentTimeMillis() - time) + " - SELECT DISTINCT `reason` FROM `axinventoryrestore_data` WHERE `player` = ?;");
@@ -277,6 +188,20 @@ public class H2 implements Database {
 
 
         return reasons;
+    }
+
+    @Override
+    public void join(@NotNull Player player) {
+
+    }
+
+    @Nullable
+    @Override
+    public UUID getUUID(@NotNull String player) {
+        final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
+
+        if (offlinePlayer == null) return null;
+        return offlinePlayer.getUniqueId();
     }
 
     @Override

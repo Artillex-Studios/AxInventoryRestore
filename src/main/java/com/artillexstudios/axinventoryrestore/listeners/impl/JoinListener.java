@@ -12,6 +12,7 @@ public class JoinListener implements Listener {
     public void onJoin(@NotNull PlayerJoinEvent event) {
         AxInventoryRestore.getDatabaseQueue().submit(() -> {
             AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "JOIN", null);
+            AxInventoryRestore.getDB().join(event.getPlayer());
         });
     }
 }

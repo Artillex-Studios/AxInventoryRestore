@@ -7,7 +7,6 @@ import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.PaginatedGui;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -17,12 +16,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
 public class CategoryGui {
     private final PaginatedGui categoryGui;
     private final MainGui mainGui;
     private final Player viewer;
-    private final OfflinePlayer restoreUser;
+    private final UUID restoreUser;
     private final String saveReason;
     private final ArrayList<BackupData> backupDataList;
 
@@ -34,7 +36,7 @@ public class CategoryGui {
         this.backupDataList = backupDataList;
 
         categoryGui = Gui.paginated()
-                .title(ColorUtils.formatToComponent(AxInventoryRestore.MESSAGES.getString("guis.categorygui.title").replace("%player%", restoreUser.getName() == null ? "" + restoreUser.getUniqueId() : restoreUser.getName())))
+                .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
                 .rows(4)
                 .pageSize(27)
                 .create();
@@ -55,7 +57,7 @@ public class CategoryGui {
             replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
             replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
-            final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "guis.categorygui.item", replacements).getItem();
+            final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.categorygui.item", replacements).getItem();
 
             categoryGui.addItem(ItemBuilder.from(it).amount(n).asGuiItem(event -> {
                 new PreviewGui(this, backupData).openPreviewGui();
@@ -69,14 +71,14 @@ public class CategoryGui {
         }
 
         // Previous item
-        categoryGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.previous()));
+        categoryGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.previous()));
         // Next item
-        categoryGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.next()));
+        categoryGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.next()));
 
 
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        categoryGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(AxInventoryRestore.MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event2 -> {
+        categoryGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event2 -> {
             mainGui.getMainGui().open(viewer);
         }));
 
@@ -87,7 +89,7 @@ public class CategoryGui {
         return viewer;
     }
 
-    public OfflinePlayer getRestoreUser() {
+    public UUID getRestoreUser() {
         return restoreUser;
     }
 
