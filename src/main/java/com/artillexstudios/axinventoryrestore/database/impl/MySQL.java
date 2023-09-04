@@ -50,7 +50,7 @@ public class MySQL implements Database {
         hConfig.addDataSourceProperty("user", CONFIG.getString("database.username"));
         hConfig.addDataSourceProperty("password", CONFIG.getString("database.password"));
 
-        dataSource = new com.zaxxer.hikari.HikariDataSource(hConfig);
+        dataSource = new HikariDataSource(hConfig);
 
         final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_data` ( `player` VARCHAR(36) NOT NULL, `reason` VARCHAR(64) NOT NULL, `location` VARCHAR(256) NOT NULL, `id` INTEGER PRIMARY KEY, `time` BIGINT NOT NULL, `cause` VARCHAR(512) );";
 
