@@ -70,26 +70,27 @@ public class Commands implements CommandExecutor {
             final String cause = MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
             if (args[1].equals("*")) {
-               for (Player pl : Bukkit.getOnlinePlayers()) {
-                   AxInventoryRestore.getDatabaseQueue().submit(() -> {
-                       AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
-                   });
-               }
+                for (Player pl : Bukkit.getOnlinePlayers()) {
+                    AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                        AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
+                    });
+                }
 
-               MessageUtils.sendMsgP(sender, "manual-backup-all");
-               return true;
+                MessageUtils.sendMsgP(sender, "manual-backup-all");
+                return true;
             }
 
-            if (Bukkit.getPlayer(args[1]) == null) {
+            Player targetPlayer = Bukkit.getPlayer(args[1]);
+            if (targetPlayer == null) {
                 MessageUtils.sendMsgP(sender, "errors.player-offline");
                 return true;
             }
 
             AxInventoryRestore.getDatabaseQueue().submit(() -> {
-                AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
+                AxInventoryRestore.getDB().saveInventory(targetPlayer, "MANUAL", cause);
             });
 
-            MessageUtils.sendMsgP(sender, "manual-backup", Map.of("%player%", Bukkit.getPlayer(args[1]).getName()));
+            MessageUtils.sendMsgP(sender, "manual-backup", Map.of("%player%", targetPlayer.getName()));
             return true;
         }
 
