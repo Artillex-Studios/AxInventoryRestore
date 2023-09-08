@@ -68,7 +68,7 @@ public class MySQL implements Database {
             exception.printStackTrace();
         }
 
-        final String CREATE_TABLE3 = "CREATE TABLE `axinventoryrestore_uuids` ( `uuid` VARCHAR(36), `name` VARCHAR(64), PRIMARY KEY (`uuid`) );";
+        final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS `axinventoryrestore_uuids` ( `uuid` VARCHAR(36), `name` VARCHAR(64), PRIMARY KEY (`uuid`) );";
 
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
