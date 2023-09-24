@@ -90,6 +90,12 @@ gui-items:
     name: "&#FFCC00&lNext Page"
 
 categories:
+  ALL:
+    material: NETHER_STAR
+    name: "&#FFCC00&lALL &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#FF3333&l(!) &#FF3333Click here to all view backups!"
   DEATH:
     material: TOTEM_OF_UNDYING
     name: "&#FF3333&lDEATHS &7(%amount% backups)"
@@ -128,4 +134,4 @@ categories:
       - "&#AA00FF&l(!) &#AA00FFClick here to view backups!"
 
 # do not change this
-version: 1
+version: 2

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
 public class MainGui {
@@ -39,9 +40,14 @@ public class MainGui {
     public void openMainGui() {
         mainGui.clearPageItems();
 
-        final ArrayList<String> reasons = AxInventoryRestore.getDB().getDeathReasons(restoreUser);
+        final ArrayList<String> reasons = new ArrayList<>();
 
-        if (reasons.isEmpty()) {
+        if (CONFIG.getBoolean("enable-all-category"))
+            reasons.add("ALL");
+
+        reasons.addAll(AxInventoryRestore.getDB().getDeathReasons(restoreUser));
+
+        if (reasons.size() == 1) {
             MessageUtils.sendMsgP(viewer, "errors.unknown-player");
             return;
         }
@@ -58,7 +64,7 @@ public class MainGui {
                 final ArrayList<BackupData> backupDataList = AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason);
 
                 final GuiItem gitem = item.asGuiItem(event -> {
-                    new CategoryGui(this, saveReason, backupDataList).openCategoryGui();
+                    new CategoryGui(this, saveReason, backupDataList, mainGui.getCurrentPageNum()).openCategoryGui();
                 });
 
                 gitem.setItemStack(ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDB().getDeathsSizeType(restoreUser, saveReason))).getItem()).build());

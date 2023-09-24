@@ -1,6 +1,5 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
-import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
@@ -27,13 +26,15 @@ public class CategoryGui {
     private final UUID restoreUser;
     private final String saveReason;
     private final ArrayList<BackupData> backupDataList;
+    private final int prevPage;
 
-    public CategoryGui(@NotNull MainGui mainGui, String saveReason, ArrayList<BackupData> backupDataList) {
+    public CategoryGui(@NotNull MainGui mainGui, String saveReason, ArrayList<BackupData> backupDataList, int prevPage) {
         this.mainGui = mainGui;
         this.viewer = mainGui.getViewer();
         this.restoreUser = mainGui.getRestoreUser();
         this.saveReason = saveReason;
         this.backupDataList = backupDataList;
+        this.prevPage = prevPage;
 
         categoryGui = Gui.paginated()
                 .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
@@ -60,7 +61,7 @@ public class CategoryGui {
             final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.categorygui.item", replacements).getItem();
 
             categoryGui.addItem(ItemBuilder.from(it).amount(n).asGuiItem(event -> {
-                new PreviewGui(this, backupData).openPreviewGui();
+                new PreviewGui(this, backupData, categoryGui.getCurrentPageNum()).openPreviewGui();
             }));
 
             n++;
@@ -80,6 +81,9 @@ public class CategoryGui {
 
         categoryGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event2 -> {
             mainGui.getMainGui().open(viewer);
+            for (int i = 1; i < prevPage; i++) {
+                mainGui.getMainGui().next();
+            }
         }));
 
         categoryGui.open(viewer);

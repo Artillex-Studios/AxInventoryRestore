@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.database;
 
 import com.artillexstudios.axinventoryrestore.utils.BackupData;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

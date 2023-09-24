@@ -4,6 +4,10 @@ prefix: "&#00aaff&lAxInventoryRestore &7» "
 # this will run at server start/stop and when usign /axir cleanup
 cleanup-after-days: 14
 
+# should there also be an all category that cointains all the backups of a player?
+# disabling this will speed up the gui loading, but it should already load in miliseconds
+enable-all-category: true
+
 # this setting is not reloadable, you have to restart the server
 # should the plugin make backups periodically?
 # do not set "minutes" to anything below 1
@@ -30,4 +34,4 @@ database:
     connection-timeout: 5000
 
 # do not change this
-version: 1
+version: 2

@@ -104,12 +104,16 @@ public class H2 implements Database {
 
         // long time = System.currentTimeMillis();
 
-        final String ex = "SELECT * FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ? ORDER BY `time` DESC;";
+        String ex = "SELECT * FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ? ORDER BY `time` DESC;";
         final String ex2 = "SELECT `inventory` FROM `axinventoryrestore_backups` WHERE `id` = ?";
+
+        if (reason.equals("ALL"))
+            ex = "SELECT * FROM `axinventoryrestore_data` WHERE `player` = ? ORDER BY `time` DESC;";
 
         try (PreparedStatement stmt = conn.prepareStatement(ex)) {
             stmt.setString(1, uuid.toString());
-            stmt.setString(2, reason);
+            if (!reason.equals("ALL"))
+               stmt.setString(2, reason);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 // System.out.println((System.currentTimeMillis() - time) + " - SELECT * FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ? ORDER BY `time` DESC;");
@@ -148,9 +152,14 @@ public class H2 implements Database {
         // long time = System.currentTimeMillis();
 
         String ex = "SELECT COUNT(`id`) FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ?;";
+
+        if (reason.equals("ALL"))
+            ex = "SELECT COUNT(`id`) FROM `axinventoryrestore_data` WHERE `player` = ?;";
+
         try (PreparedStatement stmt = conn.prepareStatement(ex)) {
             stmt.setString(1, uuid.toString());
-            stmt.setString(2, reason);
+            if (!reason.equals("ALL"))
+                stmt.setString(2, reason);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 // System.out.println((System.currentTimeMillis() - time) + " - SELECT COUNT(`id`) FROM `axinventoryrestore_data` WHERE `player` = ? AND `reason` = ?;");
