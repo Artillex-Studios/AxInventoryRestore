@@ -78,7 +78,6 @@ public class MainGui {
         // Next item
         mainGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.next()));
 
-
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
         mainGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.close", Map.of()).getItem()).asGuiItem(event2 -> {

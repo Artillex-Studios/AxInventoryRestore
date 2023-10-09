@@ -45,7 +45,7 @@ public class PostgreSQL implements Database {
         hConfig.setConnectionTimeout(CONFIG.getInt("database.pool.connection-timeout"));
 
         hConfig.setDriverClassName("org.postgresql.Driver");
-        hConfig.setJdbcUrl("jdbc:mysql://" + CONFIG.getString("database.address") + ":"+ CONFIG.getString("database.port") +"/" + CONFIG.getString("database.database"));
+        hConfig.setJdbcUrl("jdbc:postgresql://" + CONFIG.getString("database.address") + ":"+ CONFIG.getString("database.port") +"/" + CONFIG.getString("database.database"));
         hConfig.addDataSourceProperty("user", CONFIG.getString("database.username"));
         hConfig.addDataSourceProperty("password", CONFIG.getString("database.password"));
 

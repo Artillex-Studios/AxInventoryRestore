@@ -43,15 +43,19 @@ public class PreviewGui {
 
     public void openPreviewGui() {
 
-        int n = 0;
+        int n = -1;
         for (ItemStack it : backupData.getItems()) {
-            if (it == null) it = new ItemStack(Material.AIR);
-
-            previewGui.setItem(n, ItemBuilder.from(it).asGuiItem(event -> {
-                if (PermissionUtils.hasPermission(viewer, "modify")) return;
-                event.setCancelled(true);
-            }));
             n++;
+            if (it == null) continue;
+
+            previewGui.setItem(n, ItemBuilder.from(it.clone()).asGuiItem(event -> {
+                if (!PermissionUtils.hasPermission(viewer, "modify")) {
+                    event.setCancelled(true);
+                    return;
+                }
+
+                event.setCurrentItem(it);
+            }));
         }
 
         previewGui.setItem(6, 2, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event -> {

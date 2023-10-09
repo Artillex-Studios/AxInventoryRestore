@@ -76,7 +76,6 @@ public class CategoryGui {
         // Next item
         categoryGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.next()));
 
-
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
         categoryGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event2 -> {
