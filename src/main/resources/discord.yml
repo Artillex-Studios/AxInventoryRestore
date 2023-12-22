@@ -69,20 +69,24 @@ prompt:
     text: "%player% - restore request"
   fields:
     1:
-      inline: false
+      inline: true
       name: "Requested by"
       value: "%requester%"
     2:
       inline: true
-      name: "Backup date"
+      name: "Creation date"
       value: "%date%"
     3:
-      inline: true
-      name: "Backup cause"
-      value: "%cause%"
-    4:
-      inline: true
+      inline: false
       name: "Location"
       value: "%location%"
+    4:
+      inline: true
+      name: "Category"
+      value: "%category%"
+    5:
+      inline: true
+      name: "Cause"
+      value: "%cause%"
 
 version: 1

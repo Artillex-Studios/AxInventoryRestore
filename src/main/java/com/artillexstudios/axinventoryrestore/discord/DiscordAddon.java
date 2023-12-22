@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+
 public class DiscordAddon extends ListenerAdapter {
     private JDA jda = null;
     public Config DISCORDCONFIG;
@@ -67,6 +69,7 @@ public class DiscordAddon extends ListenerAdapter {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date resultdate = new Date(backupData.getDate());
         replacements.put("%date%", sdf.format(resultdate));
+        replacements.put("%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", "---"));
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
 

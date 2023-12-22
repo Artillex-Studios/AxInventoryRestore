@@ -52,6 +52,8 @@ permissions:
     default: op
   axir.discord-request:
     default: op
+  axinventoryrestore.discord-request:
+    default: op
 
 libraries:
   - net.dv8tion:JDA:5.0.0-beta.18

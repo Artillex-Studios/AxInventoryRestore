@@ -92,42 +92,49 @@ gui-items:
 
 categories:
   ALL:
+    raw: "ALL"
     material: NETHER_STAR
     name: "&#FFCC00&lALL &7(%amount% backups)"
     lore:
       - " "
       - "&#FF3333&l(!) &#FF3333Click here to all view backups!"
   DEATH:
+    raw: "DEATH"
     material: TOTEM_OF_UNDYING
     name: "&#FF3333&lDEATHS &7(%amount% backups)"
     lore:
       - " "
       - "&#FF3333&l(!) &#FF3333Click here to view backups!"
   JOIN:
+    raw: "JOIN"
     material: LIME_WOOL
     name: "&#33FF33&lJOINS &7(%amount% backups)"
     lore:
       - " "
       - "&#33FF33&l(!) &#33FF33Click here to view backups!"
   QUIT:
+    raw: "QUIT"
     material: RED_WOOL
     name: "&#EE3333&lQUITS &7(%amount% backups)"
     lore:
       - " "
       - "&#EE3333&l(!) &#EE3333Click here to view backups!"
   WORLD_CHANGE:
+    raw: "WORLD CHANGE"
     material: END_PORTAL_FRAME
     name: "&#33DD33&lWORLD CHANGES &7(%amount% backups)"
     lore:
       - " "
       - "&#33DD33&l(!) &#33DD33Click here to view backups!"
   MANUAL:
+    raw: "MANUAL"
     material: LEVER
     name: "&#FFEE00&lMANUAL BACKUPS &7(%amount% backups)"
     lore:
       - " "
       - "&#FFEE00&l(!) &#FFEE00Click here to view backups!"
   AUTOMATIC:
+    raw: "AUTOMATIC"
     material: CLOCK
     name: "&#AA00FF&lAUTOMATIC BACKUPS &7(%amount% backups)"
     lore:
