@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.commands;
 
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
@@ -11,9 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
 public class Commands implements CommandExecutor {
@@ -28,9 +31,27 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            AxInventoryRestore.getAbstractConfig().reloadConfig();
-            AxInventoryRestore.getAbstractMessages().reloadConfig();
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff[AxInventoryRestore] &#66aaffReloading configuration..."));
+            if (!CONFIG.reload()) {
+                MessageUtils.sendMsgP(sender, "reload-fail", Collections.singletonMap("%file%", "config.yml"));
+                return true;
+            }
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fconfig.yml&#00FF00!"));
 
+            if (!MESSAGES.reload()) {
+                MessageUtils.sendMsgP(sender, "reload-fail", Collections.singletonMap("%file%", "messages.yml"));
+                return true;
+            }
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
+            if (AxInventoryRestore.getDiscordAddon() != null) {
+                if (!AxInventoryRestore.getDiscordAddon().DISCORDCONFIG.reload()) {
+                    MessageUtils.sendMsgP(sender, "reload-fail", Collections.singletonMap("%file%", "discord.yml"));
+                    return true;
+                }
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fdiscord.yml&#00FF00!"));
+            }
+
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╚ &#00FF00Successful reload!"));
             MessageUtils.sendMsgP(sender, "reloaded");
             return true;
         }
@@ -71,7 +92,7 @@ public class Commands implements CommandExecutor {
 
             if (args[1].equals("*")) {
                for (Player pl : Bukkit.getOnlinePlayers()) {
-                   AxInventoryRestore.getDatabaseQueue().submit(() -> {
+                   AxInventoryRestore.getThreadedQueue().submit(() -> {
                        AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
                    });
                }
@@ -85,7 +106,7 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            AxInventoryRestore.getDatabaseQueue().submit(() -> {
+            AxInventoryRestore.getThreadedQueue().submit(() -> {
                 AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
             });
 

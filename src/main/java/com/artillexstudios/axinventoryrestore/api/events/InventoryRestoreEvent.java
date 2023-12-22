@@ -1,6 +1,6 @@
 package com.artillexstudios.axinventoryrestore.api.events;
 
-import com.artillexstudios.axinventoryrestore.utils.BackupData;
+import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;

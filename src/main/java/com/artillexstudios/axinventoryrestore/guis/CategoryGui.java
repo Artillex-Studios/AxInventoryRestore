@@ -1,6 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
-import com.artillexstudios.axinventoryrestore.utils.BackupData;
+import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
@@ -11,9 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,17 +24,17 @@ public class CategoryGui {
     private final MainGui mainGui;
     private final Player viewer;
     private final UUID restoreUser;
-    private final String saveReason;
-    private final ArrayList<BackupData> backupDataList;
-    private final int prevPage;
+    private final List<BackupData> backupDataList;
+    private final PaginatedGui lastGui;
+    private final int pageNum;
 
-    public CategoryGui(@NotNull MainGui mainGui, String saveReason, ArrayList<BackupData> backupDataList, int prevPage) {
+    public CategoryGui(@NotNull MainGui mainGui, List<BackupData> backupDataList, PaginatedGui lastGui, int pageNum) {
         this.mainGui = mainGui;
         this.viewer = mainGui.getViewer();
         this.restoreUser = mainGui.getRestoreUser();
-        this.saveReason = saveReason;
         this.backupDataList = backupDataList;
-        this.prevPage = prevPage;
+        this.lastGui = lastGui;
+        this.pageNum = pageNum;
 
         categoryGui = Gui.paginated()
                 .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
@@ -52,8 +52,8 @@ public class CategoryGui {
 
             final Map<String, String> replacements = new HashMap<>();
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date resultdate = new Date(backupData.getDate());
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            final Date resultdate = new Date(backupData.getDate());
             replacements.put("%date%", sdf.format(resultdate));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
             replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
@@ -61,11 +61,10 @@ public class CategoryGui {
             final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.categorygui.item", replacements).getItem();
 
             categoryGui.addItem(ItemBuilder.from(it).amount(n).asGuiItem(event -> {
-                new PreviewGui(this, backupData, categoryGui.getCurrentPageNum()).openPreviewGui();
+                new PreviewGui(this, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
             }));
 
             n++;
-
             if (n > 64) n = 1;
 
             categoryGui.update();
@@ -79,10 +78,7 @@ public class CategoryGui {
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
         categoryGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event2 -> {
-            mainGui.getMainGui().open(viewer);
-            for (int i = 1; i < prevPage; i++) {
-                mainGui.getMainGui().next();
-            }
+            lastGui.open(viewer, pageNum);
         }));
 
         categoryGui.open(viewer);

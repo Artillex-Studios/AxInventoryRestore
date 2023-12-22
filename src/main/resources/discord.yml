@@ -1,0 +1,88 @@
+# NOTE: this feature may require 1.18+
+# set enable-discord-addon in the config.yml to true if you want to enable this module
+
+# you must create a bot at https://discord.com/developers/applications
+# the bot will run on your minecraft server, you don't need to do anything externally
+token: ""
+
+bot-activity: "AxInventoryRestore"
+
+# where should the requests be sent?
+channel-id: ""
+
+# the permission needed to interact with a restore request on discord
+# list of permissions: https://ci.dv8tion.net/job/JDA5/javadoc/net/dv8tion/jda/api/Permission.html
+required-permission: "ADMINISTRATOR"
+
+messages:
+  restore: "Restore"
+  decline: "Decline"
+  restored: "&#FFCC00Your items have been restored to shulkers, check your inventory!"
+  accepted: "Successfully accepted restore request!"
+  declined: "Successfully declined restore request!"
+  # the new color of the embed
+  accepted-color: "#00ff00"
+  declined-color: "#ff0000"
+  no-permission: "You don't have permission to use this!"
+
+request-restore:
+  material: BLUE_DYE
+  name: "&#00CCFFRequest restore with a discord bot"
+  lore:
+    - " "
+    - " &7- &#00FFFFUse this to request a restore from a higher ranking staff!"
+    - " "
+    - "&#00CCFF&l(!) &#00CCFFClick here to request!"
+
+# These are all the options that you can use here: (most of them are optional, you can remove them)
+#    # the message before the embed, you can put a ping here in the <@&1234567890123456789> format
+#    content: "<@&1234567890123456789>"
+#    # color in hex
+#    color: "#FF6600"
+#    description: "Your description"
+#    title:
+#      # required
+#      text: "Title!"
+#      icon: ""
+#    author:
+#      # required
+#      name: "Author name"
+#      icon-url: ""
+#      url: ""
+#    footer:
+#      # required
+#      text: "Footer"
+#      icon: ""
+#    image-url: ""
+#    thumbnail-url: ""
+#    fields:
+#      1:
+#        # required
+#        inline: false
+#        # required
+#        name: "Field1"
+#        # required
+#        value: "Value1"
+prompt:
+  color: "#00aaff"
+  title:
+    text: "%player% - restore request"
+  fields:
+    1:
+      inline: false
+      name: "Requested by"
+      value: "%requester%"
+    2:
+      inline: true
+      name: "Backup date"
+      value: "%date%"
+    3:
+      inline: true
+      name: "Backup cause"
+      value: "%cause%"
+    4:
+      inline: true
+      name: "Location"
+      value: "%location%"
+
+version: 1

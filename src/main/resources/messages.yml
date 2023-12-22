@@ -1,4 +1,5 @@
 reloaded: "&#33FF33Successfully reloaded plugin!"
+reload-fail: "&#FF3333Failed to reload the plugin! Something is wrong in the &f%file%&#FF3333 file, look in the console or use a yaml validator to fix the errors!"
 
 cleaned-up: "&#33FF33Successfully cleaned up database!"
 
@@ -134,4 +135,4 @@ categories:
       - "&#AA00FF&l(!) &#AA00FFClick here to view backups!"
 
 # do not change this
-version: 2
+version: 3

@@ -1,7 +1,8 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.utils.BackupData;
+import com.artillexstudios.axinventoryrestore.backups.Backup;
+import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,38 +42,35 @@ public class MainGui {
     public void openMainGui() {
         mainGui.clearPageItems();
 
-        final ArrayList<String> reasons = new ArrayList<>();
+        AxInventoryRestore.getThreadedQueue().submit(() -> {
+            final Backup backup = AxInventoryRestore.getDB().getDeathsOfPlayer(restoreUser);
+            final ArrayList<String> reasons = new ArrayList<>();
+            if (CONFIG.getBoolean("enable-all-category")) reasons.add("ALL");
+            reasons.addAll(backup.getDeathsPerTypes().keySet());
 
-        if (CONFIG.getBoolean("enable-all-category"))
-            reasons.add("ALL");
-
-        reasons.addAll(AxInventoryRestore.getDB().getDeathReasons(restoreUser));
-
-        if (reasons.size() == 1) {
-            MessageUtils.sendMsgP(viewer, "errors.unknown-player");
-            return;
-        }
-
-        AxInventoryRestore.getDatabaseQueue().submit(() -> {
+            if (CONFIG.getBoolean("enable-all-category") && reasons.size() == 1 || reasons.isEmpty()) {
+                MessageUtils.sendMsgP(viewer, "errors.unknown-player");
+                return;
+            }
 
             for (String saveReason : reasons) {
                 ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.formatToComponent("<!i>&#FFFF00&l" + saveReason));
 
-                if (MESSAGES.isSection("categories." + saveReason)) {
-                    item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "categories." + saveReason, Map.of("%amount%", "???")).getItem());
+                final List<BackupData> backupDataList = backup.getDeathsByReason(saveReason);
+
+                if (MESSAGES.getSection("categories." + saveReason) != null) {
+                    item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + backupDataList.size())).getItem());
                 }
 
-                final ArrayList<BackupData> backupDataList = AxInventoryRestore.getDB().getDeathsByType(restoreUser, saveReason);
-
                 final GuiItem gitem = item.asGuiItem(event -> {
-                    new CategoryGui(this, saveReason, backupDataList, mainGui.getCurrentPageNum()).openCategoryGui();
+                    new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
                 });
 
-                gitem.setItemStack(ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + AxInventoryRestore.getDB().getDeathsSizeType(restoreUser, saveReason))).getItem()).build());
                 mainGui.addItem(gitem);
                 mainGui.update();
             }
         });
+
 
         // Previous item
         mainGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.previous()));

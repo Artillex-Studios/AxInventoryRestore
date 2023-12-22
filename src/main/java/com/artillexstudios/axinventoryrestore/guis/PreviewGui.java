@@ -1,13 +1,16 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.api.events.InventoryRestoreEvent;
-import com.artillexstudios.axinventoryrestore.utils.BackupData;
+import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
+import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
+import dev.triumphteam.gui.guis.PaginatedGui;
 import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -26,14 +29,16 @@ public class PreviewGui {
     private final Player viewer;
     private final UUID restoreUser;
     private final BackupData backupData;
-    private final int prevPage;
+    private final PaginatedGui lastGui;
+    private final int pageNum;
 
-    public PreviewGui(@NotNull CategoryGui categoryGui, BackupData backupData, int prevPage) {
+    public PreviewGui(@NotNull CategoryGui categoryGui, BackupData backupData, PaginatedGui lastGui, int pageNum) {
         this.categoryGui = categoryGui;
         this.viewer = categoryGui.getViewer();
         this.restoreUser = categoryGui.getRestoreUser();
         this.backupData = backupData;
-        this.prevPage = prevPage;
+        this.lastGui = lastGui;
+        this.pageNum = pageNum;
 
         previewGui = Gui.gui()
                 .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.previewgui.title").replace("%player%", categoryGui.getMainGui().getName())))
@@ -58,15 +63,16 @@ public class PreviewGui {
             }));
         }
 
-        previewGui.setItem(6, 2, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event -> {
-            categoryGui.getCategoryGui().open(viewer);
-            for (int i = 1; i < prevPage; i++) {
-                categoryGui.getCategoryGui().next();
-            }
+        int starter = 46;
+        final DiscordAddon discordAddon = AxInventoryRestore.getDiscordAddon();
+        if (discordAddon != null) starter = 45;
+
+        previewGui.setItem(starter, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event -> {
+            lastGui.open(viewer, pageNum);
             event.setCancelled(true);
         }));
 
-        previewGui.setItem(6, 4, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.teleport", Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).getItem()).asGuiItem(event -> {
+        previewGui.setItem(starter + 2, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.teleport", Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "teleport")) {
@@ -77,7 +83,7 @@ public class PreviewGui {
             PaperLib.teleportAsync(viewer, backupData.getLocation());
         }));
 
-        previewGui.setItem(6, 6, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.quick-restore", Map.of()).getItem()).asGuiItem(event -> {
+        previewGui.setItem(starter + 4, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.quick-restore", Map.of()).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "restore")) {
@@ -104,7 +110,7 @@ public class PreviewGui {
             }
         }));
 
-        previewGui.setItem(6, 8, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.export-as-shulker", Map.of("%shulker-amount%", Integer.toString(backupData.getInShulkers(viewer).size()))).getItem()).asGuiItem(event -> {
+        previewGui.setItem(starter + 6, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.previewgui.export-as-shulker", Map.of("%shulker-amount%", Integer.toString(backupData.getInShulkers(viewer.getName()).size()))).getItem()).asGuiItem(event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "export")) {
@@ -112,10 +118,23 @@ public class PreviewGui {
                 return;
             }
 
-            for (ItemStack it : backupData.getInShulkers(viewer)) {
+            for (ItemStack it : backupData.getInShulkers(viewer.getName())) {
                 viewer.getInventory().addItem(it);
             }
         }));
+
+        if (discordAddon != null) {
+            previewGui.setItem(starter + 8, ItemBuilder.from(discordAddon.getRequestItem()).asGuiItem(event -> {
+                event.setCancelled(true);
+
+                if (!PermissionUtils.hasPermission(viewer, "discord-request")) {
+                    MessageUtils.sendMsgP(viewer, "errors.no-permission");
+                    return;
+                }
+
+                discordAddon.sendRequest((Player) event.getWhoClicked(), backupData);
+            }));
+        }
 
         previewGui.open(viewer);
     }

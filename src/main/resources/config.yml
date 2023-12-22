@@ -5,7 +5,6 @@ prefix: "&#00aaff&lAxInventoryRestore &7» "
 cleanup-after-days: 14
 
 # should there also be an all category that cointains all the backups of a player?
-# disabling this will speed up the gui loading, but it should already load in miliseconds
 enable-all-category: true
 
 # this setting is not reloadable, you have to restart the server
@@ -14,6 +13,9 @@ enable-all-category: true
 automatic-backup:
   enabled: true
   minutes: 5
+
+# check out the discord.yml for more info
+enable-discord-addon: false
 
 database:
   # h2, sqlite, mysql, postgresql
@@ -34,4 +36,4 @@ database:
     connection-timeout: 5000
 
 # do not change this
-version: 2
+version: 3

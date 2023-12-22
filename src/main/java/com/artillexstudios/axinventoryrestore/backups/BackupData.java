@@ -1,6 +1,8 @@
-package com.artillexstudios.axinventoryrestore.utils;
+package com.artillexstudios.axinventoryrestore.backups;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.utils.ItemBuilder;
+import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.ShulkerBox;
@@ -20,21 +22,27 @@ import java.util.Map;
 import java.util.UUID;
 
 public class BackupData {
-    final UUID player;
-    final String reason;
-    final Location location;
-    final ItemStack[] items;
-    final long date;
-    final String cause;
-    final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
+    private final int id;
+    private final UUID player;
+    private final String reason;
+    private final Location location;
+    private final ItemStack[] items;
+    private final long date;
+    private final String cause;
+    private final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
 
-    public BackupData(@NotNull UUID player, @NotNull String reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
+    public BackupData(int id, @NotNull UUID player, @NotNull String reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
+        this.id = id;
         this.player = player;
         this.reason = reason;
         this.location = location;
         this.items = items;
         this.date = date;
         this.cause = cause;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Location getLocation() {
@@ -61,7 +69,7 @@ public class BackupData {
         return cause;
     }
 
-    public ArrayList<ItemStack> getInShulkers(@NotNull Player restorer) {
+    public ArrayList<ItemStack> getInShulkers(@NotNull String restorerName) {
         shulkerItems.clear();
 
         final List<ItemStack> itemsCopy = new ArrayList<>();
@@ -76,7 +84,7 @@ public class BackupData {
             replacements.put("%date%", sdf.format(resultdate));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(location));
             replacements.put("%cause%", cause == null ? "---" : cause);
-            replacements.put("%staff%", restorer.getName());
+            replacements.put("%staff%", restorerName);
             replacements.put("%player-uuid%", player.toString());
 
             final ItemStack shulkerIt = new ItemBuilder(AxInventoryRestore.MESSAGES, "restored-shulker", replacements).getItem();

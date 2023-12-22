@@ -1,41 +1,43 @@
 package com.artillexstudios.axinventoryrestore;
 
+import com.alessiodp.libby.BukkitLibraryManager;
+import com.artillexstudios.axapi.AxPlugin;
+import com.artillexstudios.axapi.config.Config;
+import com.artillexstudios.axapi.data.ThreadedQueue;
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.dvs.versioning.BasicVersioning;
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.DumperSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
 import com.artillexstudios.axinventoryrestore.commands.TabComplete;
-import com.artillexstudios.axinventoryrestore.config.AbstractConfig;
-import com.artillexstudios.axinventoryrestore.config.impl.Config;
-import com.artillexstudios.axinventoryrestore.config.impl.Messages;
 import com.artillexstudios.axinventoryrestore.database.Database;
-import com.artillexstudios.axinventoryrestore.database.DatabaseQueue;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
+import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
-import dev.dejvokep.boostedyaml.YamlDocument;
-import net.byteflux.libby.BukkitLibraryManager;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bstats.charts.SimplePie;
+import org.jetbrains.annotations.Nullable;
 
-public final class AxInventoryRestore extends JavaPlugin {
-    private static AbstractConfig abstractConfig;
-    private static AbstractConfig abstractMessages;
-    public static YamlDocument MESSAGES;
-    public static YamlDocument CONFIG;
+import java.io.File;
+
+public final class AxInventoryRestore extends AxPlugin {
+    public static Config CONFIG;
+    public static Config MESSAGES;
     private static AxInventoryRestore instance;
-    private static DatabaseQueue databaseQueue;
+    private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
+    private static DiscordAddon discordAddon = null;
 
-    public static AbstractConfig getAbstractConfig() {
-        return abstractConfig;
-    }
-
-    public static AbstractConfig getAbstractMessages() {
-        return abstractMessages;
+    @Nullable
+    public static DiscordAddon getDiscordAddon() {
+        return discordAddon;
     }
 
     public static AxInventoryRestore getInstance() {
@@ -46,12 +48,11 @@ public final class AxInventoryRestore extends JavaPlugin {
         return database;
     }
 
-    public static DatabaseQueue getDatabaseQueue() {
-        return databaseQueue;
+    public static ThreadedQueue<Runnable> getThreadedQueue() {
+        return threadedQueue;
     }
 
-    @Override
-    public void onLoad() {
+    public void load() {
         BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "libraries");
         libraryManager.addMavenCentral();
         libraryManager.addJitPack();
@@ -63,24 +64,18 @@ public final class AxInventoryRestore extends JavaPlugin {
         }
     }
 
-    @Override
-    public void onEnable() {
+    public void enable() {
         instance = this;
 
         new ColorUtils();
 
         int pluginId = 19446;
-        new Metrics(this, pluginId);
+        final Metrics metrics = new Metrics(this, pluginId);
 
-        abstractConfig = new Config();
-        abstractConfig.setup();
-        CONFIG = abstractConfig.getConfig();
+        CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
-        abstractMessages = new Messages();
-        abstractMessages.setup();
-        MESSAGES = abstractMessages.getConfig();
-
-        databaseQueue = new DatabaseQueue("AxInventoryRestore-Datastore-thread");
+        threadedQueue = new ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
             case "h2":
@@ -97,6 +92,8 @@ public final class AxInventoryRestore extends JavaPlugin {
                 break;
         }
 
+        metrics.addCustomChart(new SimplePie("database_type", () -> database.getType()));
+
         database.setup();
         database.cleanup();
         new RegisterListeners().register();
@@ -105,10 +102,13 @@ public final class AxInventoryRestore extends JavaPlugin {
         this.getCommand("axinventoryrestore").setTabCompleter(new TabComplete());
 
         new AutoBackupScheduler().start();
+
+        if (CONFIG.getBoolean("enable-discord-addon", false)) {
+            discordAddon = new DiscordAddon();
+        }
     }
 
-    @Override
-    public void onDisable() {
+    public void disable() {
         database.cleanup();
     }
 }

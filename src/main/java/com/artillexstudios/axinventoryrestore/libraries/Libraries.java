@@ -1,7 +1,7 @@
 package com.artillexstudios.axinventoryrestore.libraries;
 
-import net.byteflux.libby.Library;
-import net.byteflux.libby.relocation.Relocation;
+import com.alessiodp.libby.Library;
+import com.alessiodp.libby.relocation.Relocation;
 
 public enum Libraries {
 //    ADVENTURE_MINI_MESSAGE("net{}kyori:adventure-text-minimessage:4.14.0",
@@ -40,11 +40,13 @@ public enum Libraries {
 
     H2_JDBC("com{}h2database:h2:2.1.214"),
 
-    POSTGRESQL("org{}postgresql:postgresql:42.5.4");
+    POSTGRESQL("org{}postgresql:postgresql:42.5.4"),
 
-    private final net.byteflux.libby.Library library;
+    JDA("net{}dv8tion:JDA:5.0.0-beta.18");
 
-    public net.byteflux.libby.Library getLibrary() {
+    private final Library library;
+
+    public Library getLibrary() {
         return this.library;
     }
 

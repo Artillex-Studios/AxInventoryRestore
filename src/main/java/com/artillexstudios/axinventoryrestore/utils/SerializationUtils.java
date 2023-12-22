@@ -9,6 +9,8 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.sql.Blob;
 
 public class SerializationUtils {
 
@@ -35,6 +37,38 @@ public class SerializationUtils {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             try (BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream)) {
+                return (ItemStack[]) dataInput.readObject();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static ByteArrayInputStream invToBits(ItemStack[] stack) {
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            BukkitObjectOutputStream boos = new BukkitObjectOutputStream(baos);
+            boos.writeObject(stack);
+
+            boos.flush();
+            boos.close();
+
+            return new ByteArrayInputStream(baos.toByteArray());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static ItemStack[] invFromBits(@NotNull InputStream stream) {
+
+        try {
+            try (BukkitObjectInputStream dataInput = new BukkitObjectInputStream(stream)) {
                 return (ItemStack[]) dataInput.readObject();
             }
         } catch (Exception e) {

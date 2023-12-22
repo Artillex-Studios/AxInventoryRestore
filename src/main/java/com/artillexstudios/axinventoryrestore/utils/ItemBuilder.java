@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
-import dev.dejvokep.boostedyaml.YamlDocument;
+import com.artillexstudios.axapi.config.Config;
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.YamlDocument;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -22,8 +23,8 @@ public class ItemBuilder {
     private final Map<String, String> replacements;
 //    private @Nullable Player player;
 
-    public ItemBuilder(YamlDocument file, String section, Map<String, String> replacements) {
-        this.file = file;
+    public ItemBuilder(Config file, String section, Map<String, String> replacements) {
+        this.file = file.getBackingDocument();
         this.section = section;
         this.replacements = replacements;
 
