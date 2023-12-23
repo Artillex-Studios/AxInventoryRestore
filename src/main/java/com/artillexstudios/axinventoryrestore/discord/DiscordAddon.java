@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -73,11 +74,26 @@ public class DiscordAddon extends ListenerAdapter {
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
 
+        final RegisteredServiceProvider<net.luckperms.api.LuckPerms> provider = Bukkit.getServicesManager().getRegistration(net.luckperms.api.LuckPerms.class);
+        if (provider != null) {
+            final net.luckperms.api.LuckPerms api = provider.getProvider();
+
+            final net.luckperms.api.context.ImmutableContextSet set = api.getContextManager().getStaticContext();
+            if (set.getAnyValue("server").isPresent()) {
+                final String str = set.getAnyValue("server").get();
+                replacements.put("%server%", str);
+            }
+        }
+
         final MessageCreateAction action = channel.sendMessageEmbeds(new EmbedBuilder(DISCORDCONFIG.getSection("prompt"), replacements).get());
         action.addActionRow(
             Button.success("axir-accept:" + id, DISCORDCONFIG.getString("messages.restore")),
             Button.danger("axir-deny:" + id, DISCORDCONFIG.getString("messages.decline")))
-        .queue();
+        .queue((message -> {
+            if (!DISCORDCONFIG.getBoolean("create-thread", true)) return;
+            channel.createThreadChannel(DISCORDCONFIG.getString("thread-name", "-"), message.getId()).queue();
+        }));
+
     }
 
     public ItemStack getRequestItem() {

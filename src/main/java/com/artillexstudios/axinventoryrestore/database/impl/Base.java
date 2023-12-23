@@ -42,20 +42,7 @@ public class Base implements Database {
 
     @Override
     public void setup() {
-
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (\n" +
-                "\tid INT(128) NOT NULL AUTO_INCREMENT,\n" +
-                "\tuserId INT(128) NOT NULL,\n" +
-                "\treasonId INT(128) NOT NULL,\n" +
-                "\tworld VARCHAR(128) NOT NULL,\n" +
-                "\tx INT(128) NOT NULL,\n" +
-                "\ty INT(128) NOT NULL,\n" +
-                "\tz INT(128) NOT NULL,\n" +
-                "\tinventory MEDIUMBLOB(16777215) NOT NULL,\n" +
-                "\ttime BIGINT(128) NOT NULL,\n" +
-                "\tcause VARCHAR(128),\n" +
-                "\tPRIMARY KEY (id)\n" +
-                ");";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(128) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory MEDIUMBLOB(16777215) NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(128), PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
@@ -63,12 +50,7 @@ public class Base implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons (\n" +
-                "\tid INT(128) NOT NULL AUTO_INCREMENT,\n" +
-                "\treason VARCHAR(128) NOT NULL,\n" +
-                "\tPRIMARY KEY (id),\n" +
-                "\tUNIQUE (reason)\n" +
-                ");";
+        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(128) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
@@ -76,13 +58,7 @@ public class Base implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axir_users (\n" +
-                "\tid INT(128) NOT NULL AUTO_INCREMENT,\n" +
-                "\tuuid VARCHAR(36) NOT NULL,\n" +
-                "\tname VARCHAR(64) NOT NULL,\n" +
-                "\tPRIMARY KEY (id),\n" +
-                "\tUNIQUE (uuid)\n" +
-                ");";
+        final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axir_users ( id INT(128) NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL, name VARCHAR(64) NOT NULL, PRIMARY KEY (id), UNIQUE (uuid));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
@@ -90,12 +66,7 @@ public class Base implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE4 = "CREATE TABLE IF NOT EXISTS axir_restorerequests (\n" +
-                "\tid INT(128) NOT NULL AUTO_INCREMENT,\n" +
-                "\tbackupId INT(128) NOT NULL,\n" +
-                "\tgranted BOOLEAN,\n" +
-                "\tPRIMARY KEY (id)\n" +
-                ");";
+        final String CREATE_TABLE4 = "CREATE TABLE IF NOT EXISTS axir_restorerequests ( id INT(128) NOT NULL AUTO_INCREMENT, backupId INT(128) NOT NULL, granted BOOLEAN, PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE4)) {
             stmt.executeUpdate();
