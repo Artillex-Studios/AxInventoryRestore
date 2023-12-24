@@ -20,6 +20,7 @@ errors:
   no-permission: "&#FF3333You don't have permission to run this command!"
   player-offline: "&#FF3333The player must be online to restore their inventory!"
   unknown-player: "&#FF3333This player has 0 backups saved!"
+  not-player: "&#FF3333You must be a player to execute this command!"
 
 restored-shulker:
   # this must be some kind of shulker box!
@@ -142,4 +143,4 @@ categories:
       - "&#AA00FF&l(!) &#AA00FFClick here to view backups!"
 
 # do not change this
-version: 3
+version: 4

@@ -51,7 +51,7 @@ public class SQLite extends Base {
                 "\tx INT(128) NOT NULL,\n" +
                 "\ty INT(128) NOT NULL,\n" +
                 "\tz INT(128) NOT NULL,\n" +
-                "\tinventory MEDIUMBLOB(16777215) NOT NULL,\n" +
+                "\tinventory MEDIUMBLOB NOT NULL,\n" +
                 "\ttime BIGINT(128) NOT NULL,\n" +
                 "\tcause VARCHAR(128)\n" +
                 ");";

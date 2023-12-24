@@ -42,7 +42,7 @@ public class Base implements Database {
 
     @Override
     public void setup() {
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(128) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory MEDIUMBLOB(16777215) NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(128), PRIMARY KEY (id));";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(128) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory MEDIUMBLOB NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(128), PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();

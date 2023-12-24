@@ -23,7 +23,6 @@ public class Commands implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String s, @NotNull String[] args) {
-        final Player player = (Player) sender;
 
         if (args.length == 1 && args[0].equals("reload")) {
             if (!PermissionUtils.hasPermission(sender, "reload")) {
@@ -78,7 +77,12 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            new MainGui(uuid, player, args[0]).openMainGui();
+            if (!(sender instanceof Player)) {
+                MessageUtils.sendMsgP(sender, "errors.not-player");
+                return true;
+            }
+
+            new MainGui(uuid, (Player) sender, args[0]).openMainGui();
             return true;
         }
 
