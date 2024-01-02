@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.Du
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
+import com.artillexstudios.axapi.utils.ClassUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.EmbedBuilder;
@@ -74,14 +75,17 @@ public class DiscordAddon extends ListenerAdapter {
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
 
-        final RegisteredServiceProvider<net.luckperms.api.LuckPerms> provider = Bukkit.getServicesManager().getRegistration(net.luckperms.api.LuckPerms.class);
-        if (provider != null) {
-            final net.luckperms.api.LuckPerms api = provider.getProvider();
 
-            final net.luckperms.api.context.ImmutableContextSet set = api.getContextManager().getStaticContext();
-            if (set.getAnyValue("server").isPresent()) {
-                final String str = set.getAnyValue("server").get();
-                replacements.put("%server%", str);
+        if (ClassUtils.classExists("net.luckperms.api.LuckPerms")) {
+            final RegisteredServiceProvider<net.luckperms.api.LuckPerms> provider = Bukkit.getServicesManager().getRegistration(net.luckperms.api.LuckPerms.class);
+            if (provider != null) {
+                final net.luckperms.api.LuckPerms api = provider.getProvider();
+
+                final net.luckperms.api.context.ImmutableContextSet set = api.getContextManager().getStaticContext();
+                if (set.getAnyValue("server").isPresent()) {
+                    final String str = set.getAnyValue("server").get();
+                    replacements.put("%server%", str);
+                }
             }
         }
 

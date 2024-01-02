@@ -1,12 +1,11 @@
 package com.artillexstudios.axinventoryrestore.backups;
 
+import com.artillexstudios.axapi.utils.ClassUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.ShulkerBox;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +36,15 @@ public class BackupData {
         this.reason = reason;
         this.location = location;
         this.items = items;
+
+        for (ItemStack it : this.items) {
+            if (it == null) continue;
+            // axshulkers compatibility
+            if (ClassUtils.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
+                com.artillexstudios.axshulkers.utils.ShulkerUtils.removeShulkerUUID(it);
+            }
+        }
+
         this.date = date;
         this.cause = cause;
     }

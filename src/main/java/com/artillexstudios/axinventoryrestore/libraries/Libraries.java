@@ -4,33 +4,8 @@ import com.alessiodp.libby.Library;
 import com.alessiodp.libby.relocation.Relocation;
 
 public enum Libraries {
-//    ADVENTURE_MINI_MESSAGE("net{}kyori:adventure-text-minimessage:4.14.0",
-//            Relocation.builder().pattern("net{}kyori").relocatedPattern("com{}artillexstudios{}axinventoryrestore{}libs{}adventure").build()
-//    ),
-//
-//    ADVENTURE_LEGACY("net{}kyori:adventure-text-serializer-legacy:4.14.0",
-//            Relocation.builder().pattern("net{}kyori").relocatedPattern("com{}artillexstudios{}axinventoryrestore{}libs{}adventure").build()
-//    ),
-//
-//    ADVENTURE_GSON("net{}kyori:adventure-text-serializer-gson:4.14.0",
-//            Relocation.builder().pattern("net{}kyori").relocatedPattern("com{}artillexstudios{}axinventoryrestore{}libs{}adventure").build()
-//    ),
-//
-//    ADVENTURE_BUKKIT("net{}kyori:adventure-platform-bukkit:4.3.0",
-//            Relocation.builder().pattern("net{}kyori").relocatedPattern("com{}artillexstudios{}axinventoryrestore{}libs{}adventure").build()
-//    ),
-//
-//    ADVENTURE_CORE("net{}kyori:adventure-api:4.14.0",
-//            Relocation.builder().pattern("net{}kyori").relocatedPattern("com{}artillexstudios{}axinventoryrestore{}libs{}adventure").build()
-//    ),
-
-    PAPER_LIB("io{}papermc:paperlib:1.0.7"),
 
     BOOSTED_YAML("dev{}dejvokep:boosted-yaml:1.3"),
-
-//    HIKARICP("com{}zaxxer:HikariCP:5.0.1",
-//        Relocation.builder().pattern("com{}zaxxer").relocatedPattern("com{}artillexstudios{}libs{}hikaricp").build()
-//    ),
 
     MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:8.0.33"),
 

@@ -13,12 +13,14 @@ public class AutoBackupScheduler {
         if (!AxInventoryRestore.CONFIG.getBoolean("automatic-backup.enabled")) return;
         if (AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes") < 1) return;
 
+        final int backupMinutes = AxInventoryRestore.CONFIG.getInt("automatic-backup.minutes", 5);
+
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 AxInventoryRestore.getThreadedQueue().submit(() -> {
                     AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", null);
                 });
             }
-        }, 0, AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes"), TimeUnit.MINUTES);
+        }, backupMinutes, backupMinutes, TimeUnit.MINUTES);
     }
 }
