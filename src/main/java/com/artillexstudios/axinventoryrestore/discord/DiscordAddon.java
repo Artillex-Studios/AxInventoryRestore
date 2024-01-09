@@ -7,6 +7,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.utils.ClassUtils;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.EmbedBuilder;
@@ -51,6 +52,7 @@ public class DiscordAddon extends ListenerAdapter {
         try {
             jda.awaitReady();
             jda.addEventListener(this);
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00FF00[AxInventoryRestore] Loaded discord module!"));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -74,7 +76,6 @@ public class DiscordAddon extends ListenerAdapter {
         replacements.put("%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", "---"));
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
-
 
         if (ClassUtils.classExists("net.luckperms.api.LuckPerms")) {
             final RegisteredServiceProvider<net.luckperms.api.LuckPerms> provider = Bukkit.getServicesManager().getRegistration(net.luckperms.api.LuckPerms.class);
@@ -106,7 +107,7 @@ public class DiscordAddon extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        String status = null;
+        String status;
         if (event.getComponentId().startsWith("axir-accept")) {
             status = "accepted";
             AxInventoryRestore.getDB().grantRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
@@ -114,9 +115,14 @@ public class DiscordAddon extends ListenerAdapter {
         else if (event.getComponentId().startsWith("axir-deny")) {
             status = "declined";
             AxInventoryRestore.getDB().removeRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
+        } else {
+            return;
         }
 
-        if (event.getMember() == null) return;
+        if (event.getMember() == null) {
+            event.reply("Something went wrong! member = null").setEphemeral(true).queue();
+            return;
+        }
         if (!event.getMember().hasPermission(Permission.valueOf(DISCORDCONFIG.getString("required-permission", "ADMINISTRATOR")))) {
             event.reply(DISCORDCONFIG.getString("messages.no-permission")).setEphemeral(true).queue();
             return;

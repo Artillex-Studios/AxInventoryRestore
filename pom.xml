@@ -6,7 +6,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.18</version>
+            <version>5.0.0-beta.19</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

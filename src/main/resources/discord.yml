@@ -92,4 +92,4 @@ prompt:
       name: "Cause"
       value: "%cause%"
 
-version: 1
+version: 2

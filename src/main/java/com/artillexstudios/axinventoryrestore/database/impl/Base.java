@@ -166,7 +166,9 @@ public class Base implements Database {
         final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, getUserId(player.getUniqueId()));
+            Integer userId = getUserId(player.getUniqueId());
+            if (userId == null) return;
+            stmt.setInt(1, userId);
             stmt.setInt(2, getReasonId(reason));
             stmt.setString(3, player.getLocation().getWorld().getName());
             stmt.setInt(4, player.getLocation().getBlockX());
