@@ -77,6 +77,12 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
+            final Integer userId = AxInventoryRestore.getDB().getUserId(uuid);
+            if (userId == null) {
+                MessageUtils.sendMsgP(sender, "errors.unknown-player");
+                return true;
+            }
+
             if (!(sender instanceof Player)) {
                 MessageUtils.sendMsgP(sender, "errors.not-player");
                 return true;

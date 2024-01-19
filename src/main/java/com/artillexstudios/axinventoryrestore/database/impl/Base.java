@@ -81,6 +81,8 @@ public class Base implements Database {
         }
     }
 
+    @Nullable
+    @Override
     public Integer getUserId(@NotNull UUID uuid) {
         final String sql = "SELECT * FROM axir_users WHERE uuid = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -95,6 +97,8 @@ public class Base implements Database {
         return null;
     }
 
+    @Nullable
+    @Override
     public UUID getUserUUID(int id) {
         final String sql = "SELECT * FROM axir_users WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -109,6 +113,8 @@ public class Base implements Database {
         return null;
     }
 
+    @Nullable
+    @Override
     public String getReasonName(int id) {
         final String sql = "SELECT * FROM axir_reasons WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -123,6 +129,8 @@ public class Base implements Database {
         return null;
     }
 
+    @Nullable
+    @Override
     public Integer getReasonId(@NotNull String reason) {
         final String sql = "INSERT INTO axir_reasons(reason) VALUES (?);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {

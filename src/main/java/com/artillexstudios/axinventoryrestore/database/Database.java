@@ -6,13 +6,16 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 public interface Database {
 
     String getType();
     void setup();
+    @Nullable Integer getUserId(@NotNull UUID uuid);
+    @Nullable UUID getUserUUID(int id);
+    @Nullable String getReasonName(int id);
+    @Nullable Integer getReasonId(@NotNull String reason);
     void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause);
     Backup getDeathsOfPlayer(@NotNull UUID uuid);
     void join(@NotNull Player player);
