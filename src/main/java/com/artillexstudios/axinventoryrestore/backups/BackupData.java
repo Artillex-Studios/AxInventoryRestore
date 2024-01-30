@@ -5,6 +5,7 @@ import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -25,26 +26,16 @@ public class BackupData {
     private final UUID player;
     private final String reason;
     private final Location location;
-    private final ItemStack[] items;
+    private ItemStack[] items = null;
     private final long date;
     private final String cause;
     private final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
 
-    public BackupData(int id, @NotNull UUID player, @NotNull String reason, @NotNull Location location, @NotNull ItemStack[] items, long date, String cause) {
+    public BackupData(int id, @NotNull UUID player, @NotNull String reason, @NotNull Location location, long date, String cause) {
         this.id = id;
         this.player = player;
         this.reason = reason;
         this.location = location;
-        this.items = items;
-
-        for (ItemStack it : this.items) {
-            if (it == null) continue;
-            // axshulkers compatibility
-            if (ClassUtils.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
-                com.artillexstudios.axshulkers.utils.ShulkerUtils.removeShulkerUUID(it);
-            }
-        }
-
         this.date = date;
         this.cause = cause;
     }
@@ -57,7 +48,19 @@ public class BackupData {
         return location;
     }
 
+    // todo: try to always all async
     public ItemStack[] getItems() {
+        if (items == null) {
+            items = AxInventoryRestore.getDB().getItemsFromBackup(id);;
+            for (ItemStack it : this.items) {
+                if (it == null) continue;
+                // axshulkers compatibility
+                if (ClassUtils.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
+                    if (it.getType().equals(Material.AIR)) continue;
+                    com.artillexstudios.axshulkers.utils.ShulkerUtils.removeShulkerUUID(it);
+                }
+            }
+        }
         return items;
     }
 
@@ -81,7 +84,7 @@ public class BackupData {
         shulkerItems.clear();
 
         final List<ItemStack> itemsCopy = new ArrayList<>();
-        itemsCopy.addAll(Arrays.asList(items));
+        itemsCopy.addAll(Arrays.asList(getItems()));
 
         while (!itemsCopy.isEmpty()) {
 

@@ -3,6 +3,7 @@ package com.artillexstudios.axinventoryrestore.database;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +24,7 @@ public interface Database {
     int addRestoreRequest(int backupId);
     void grantRestoreRequest(int restoreId);
     BackupData getBackupDataById(int backupId);
+    ItemStack[] getItemsFromBackup(int backupId);
     void fetchRestoreRequests(@NotNull UUID uuid);
     void removeRestoreRequest(int restoreId);
     void cleanup();

@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
@@ -46,29 +47,32 @@ public class CategoryGui {
     public void openCategoryGui() {
         categoryGui.clearPageItems();
 
-        int n = 1;
-        for (BackupData backupData : backupDataList) {
-            if (backupData.getItems() == null) continue;
+        final CategoryGui cGui = this;
+        AxInventoryRestore.getThreadedQueue().submit(() -> {
+            int n = 1;
+            for (BackupData backupData : backupDataList) {
+                final Map<String, String> replacements = new HashMap<>();
 
-            final Map<String, String> replacements = new HashMap<>();
+                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                final Date resultdate = new Date(backupData.getDate());
+                replacements.put("%date%", sdf.format(resultdate));
+                replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
+                replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            final Date resultdate = new Date(backupData.getDate());
-            replacements.put("%date%", sdf.format(resultdate));
-            replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
-            replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
+                final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.categorygui.item", replacements).getItem();
 
-            final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.categorygui.item", replacements).getItem();
+                categoryGui.addItem(ItemBuilder.from(it).amount(n).asGuiItem(event -> {
+                    new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
+                }));
 
-            categoryGui.addItem(ItemBuilder.from(it).amount(n).asGuiItem(event -> {
-                new PreviewGui(this, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
-            }));
-
-            n++;
-            if (n > 64) n = 1;
-
+                n++;
+                if (n > 64) {
+                    categoryGui.update();
+                    n = 1;
+                }
+            }
             categoryGui.update();
-        }
+        });
 
         // Previous item
         categoryGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.previous()));

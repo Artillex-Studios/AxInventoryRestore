@@ -195,7 +195,7 @@ public class Base implements Database {
     public Backup getDeathsOfPlayer(@NotNull UUID uuid) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
-        final String sql = "SELECT * FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
+        final String sql = "SELECT id, userid, reasonid, world, x, y, z, time, cause FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, getUserId(uuid));
@@ -208,9 +208,8 @@ public class Base implements Database {
                             getUserUUID(rs.getInt(2)),
                             getReasonName(rs.getInt(3)),
                             new Location(world, rs.getInt(5), rs.getInt(6), rs.getInt(7)),
-                            SerializationUtils.invFromBits(rs.getBinaryStream(8)),
-                            rs.getLong(9),
-                            rs.getString(10))
+                            rs.getLong(8),
+                            rs.getString(9))
                     );
                 }
             }
@@ -310,7 +309,7 @@ public class Base implements Database {
 
     @Override
     public BackupData getBackupDataById(int backupId) {
-        final String sql = "SELECT * FROM axir_backups WHERE id = ? LIMIT 1;";
+        final String sql = "SELECT id, userid, reasonid, world, x, y, z, time, cause FROM axir_backups WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, backupId);
 
@@ -322,11 +321,27 @@ public class Base implements Database {
                             getUserUUID(rs.getInt(2)),
                             getReasonName(rs.getInt(3)),
                             new Location(world, rs.getInt(5), rs.getInt(6), rs.getInt(7)),
-                            SerializationUtils.invFromBits(rs.getBinaryStream(8)),
-                            rs.getLong(9),
-                            rs.getString(10)
+                            rs.getLong(8),
+                            rs.getString(9)
                     );
                 }
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public ItemStack[] getItemsFromBackup(int backupId) {
+        final String sql = "SELECT inventory FROM axir_backups WHERE id = ?;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, backupId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return SerializationUtils.invFromBits(rs.getBinaryStream(1));
             }
 
         } catch (SQLException ex) {

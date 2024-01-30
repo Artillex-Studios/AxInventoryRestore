@@ -47,7 +47,6 @@ public class PreviewGui {
     }
 
     public void openPreviewGui() {
-
         int n = -1;
         for (ItemStack it : backupData.getItems()) {
             n++;
