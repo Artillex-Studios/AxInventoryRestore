@@ -103,9 +103,9 @@ public final class AxInventoryRestore extends AxPlugin {
 
         new AutoBackupScheduler().start();
 
-        if (CONFIG.getBoolean("enable-discord-addon", false)) {
-            discordAddon = new DiscordAddon();
-        }
+        boolean loadDiscordAddon = CONFIG.getBoolean("enable-discord-addon", false);
+        if (loadDiscordAddon) discordAddon = new DiscordAddon();
+        metrics.addCustomChart(new SimplePie("uses_discord_addon", () -> "" + loadDiscordAddon));
     }
 
     public void disable() {

@@ -51,7 +51,7 @@ public class BackupData {
     // todo: try to always all async
     public ItemStack[] getItems() {
         if (items == null) {
-            items = AxInventoryRestore.getDB().getItemsFromBackup(id);;
+            items = AxInventoryRestore.getDB().getItemsFromBackup(id);
             for (ItemStack it : this.items) {
                 if (it == null) continue;
                 // axshulkers compatibility

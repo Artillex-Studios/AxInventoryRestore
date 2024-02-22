@@ -115,9 +115,7 @@ public class DiscordAddon extends ListenerAdapter {
         else if (event.getComponentId().startsWith("axir-deny")) {
             status = "declined";
             AxInventoryRestore.getDB().removeRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
-        } else {
-            return;
-        }
+        } else return;
 
         if (event.getMember() == null) {
             event.reply("Something went wrong! member = null").setEphemeral(true).queue();
@@ -128,12 +126,14 @@ public class DiscordAddon extends ListenerAdapter {
             return;
         }
 
+        event.deferReply().queue();
+
         final MessageEmbed embed = event.getMessage().getEmbeds().get(0);
         event.getMessage().editMessageEmbeds(net.dv8tion.jda.api.EmbedBuilder.fromData(embed.toData())
                 .setAuthor(event.getUser().getName(), null, event.getUser().getAvatarUrl())
                 .setColor(Integer.parseInt(DISCORDCONFIG.getString("messages." + status +"-color").replace("#", ""), 16)).build())
                 .queue();
         event.getMessage().editMessageComponents().queue();
-        event.reply(DISCORDCONFIG.getString("messages." + status)).setEphemeral(true).queue();
+        event.getHook().sendMessage((DISCORDCONFIG.getString("messages." + status))).setEphemeral(true).queue();
     }
 }
