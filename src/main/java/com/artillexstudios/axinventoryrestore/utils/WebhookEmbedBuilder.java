@@ -1,21 +1,26 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
+import club.minnced.discord.webhook.send.WebhookEmbed;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class EmbedBuilder {
-    private final net.dv8tion.jda.api.EmbedBuilder embed;
-    private final HashMap<String, String> replacements;
+public class WebhookEmbedBuilder {
+    private final club.minnced.discord.webhook.send.WebhookEmbedBuilder embed;
+    private final Map<String, String> replacements;
 
-    public EmbedBuilder(Section section, HashMap<String, String> replacements) {
-        this.embed = new net.dv8tion.jda.api.EmbedBuilder();
+    public WebhookEmbedBuilder(@NotNull Section section) {
+        this(section, new HashMap<>());
+    }
+
+    public WebhookEmbedBuilder(@NotNull Section section, Map<String, String> replacements) {
         this.replacements = replacements;
+        this.embed = new club.minnced.discord.webhook.send.WebhookEmbedBuilder();
 
         section.getOptionalString("color").ifPresent(this::setColor);
         section.getOptionalString("description").ifPresent(this::setDescription);
@@ -39,61 +44,58 @@ public class EmbedBuilder {
         });
     }
 
-    public MessageEmbed get() {
+    public WebhookEmbed get() {
         return embed.build();
     }
 
-    public EmbedBuilder setColor(String color) {
+    public WebhookEmbedBuilder setColor(String color) {
         embed.setColor(Integer.parseInt(color.replace("#", ""), 16));
         return this;
     }
 
-    public EmbedBuilder setDescription(String description) {
+    public WebhookEmbedBuilder setDescription(String description) {
         embed.setDescription(replacePlaceholders(description));
         return this;
     }
 
-    public EmbedBuilder setImageUrl(String imageUrl) {
-        embed.setImage(imageUrl);
+    public WebhookEmbedBuilder setImageUrl(String imageUrl) {
+        embed.setImageUrl(imageUrl);
         return this;
     }
 
-    public EmbedBuilder setThumbnailUrl(String thumbnailUrl) {
-        embed.setThumbnail(thumbnailUrl);
+    public WebhookEmbedBuilder setThumbnailUrl(String thumbnailUrl) {
+        embed.setThumbnailUrl(thumbnailUrl);
         return this;
     }
 
-    public EmbedBuilder setTitle(@NotNull String text, @Nullable String icon) {
-        embed.setTitle(replacePlaceholders(text), icon);
+    public WebhookEmbedBuilder setTitle(@NotNull String text, @Nullable String icon) {
+        embed.setTitle(new WebhookEmbed.EmbedTitle(replacePlaceholders(text), icon));
         return this;
     }
 
-    public EmbedBuilder setAuthor(@NotNull String name, @Nullable String iconUrl, @Nullable String url) {
-        embed.setAuthor(replacePlaceholders(name), url, iconUrl);
+    public WebhookEmbedBuilder setAuthor(@NotNull String name, @Nullable String iconUrl, @Nullable String url) {
+        embed.setAuthor(new WebhookEmbed.EmbedAuthor(replacePlaceholders(name), iconUrl, url));
         return this;
     }
 
-    public EmbedBuilder setFooter(@NotNull String text, @Nullable String icon) {
-        embed.setFooter(replacePlaceholders(text), icon);
+    public WebhookEmbedBuilder setFooter(@NotNull String text, @Nullable String icon) {
+        embed.setFooter(new WebhookEmbed.EmbedFooter(replacePlaceholders(text), icon));
         return this;
     }
 
-    public EmbedBuilder addField(boolean inline, @NotNull String name, @NotNull String value) {
-        embed.addField(replacePlaceholders(name), replacePlaceholders(value), inline);
+    public WebhookEmbedBuilder addField(boolean inline, @NotNull String name, @NotNull String value) {
+        embed.addField(new WebhookEmbed.EmbedField(inline, replacePlaceholders(name), replacePlaceholders(value)));
         return this;
     }
 
-    public EmbedBuilder setTimestamp(@Nullable TemporalAccessor timestamp) {
+    public WebhookEmbedBuilder setTimeSpan(@Nullable TemporalAccessor timestamp) {
         embed.setTimestamp(timestamp);
         return this;
     }
 
-    private String replacePlaceholders(@NotNull String str) {
-        final AtomicReference<String> toFormat = new AtomicReference<>(str);
-        replacements.forEach((pattern, replacement) -> {
-            toFormat.set(toFormat.get().replace(pattern, replacement));
-        });
-
-        return toFormat.get();
+    private String replacePlaceholders(@NotNull String string) {
+        AtomicReference<String> message = new AtomicReference<>(string);
+        replacements.forEach((key, value) -> message.set(message.get().replace(key, value)));
+        return message.get();
     }
 }

@@ -1,4 +1,125 @@
-# NOTE: this feature may require 1.18+
+# NOTE: this feature requires 1.18+
+
+# WEBHOOK INFORMATION
+# These are all the options that you can use here: (most of them are optional, you can remove them)
+#    # the message before the embed, you can put a ping here in the <@&1234567890123456789> format
+#    content: "<@&1234567890123456789>"
+#    # color in hex
+#    color: "#FF6600"
+#    description: "Your description"
+#    title:
+#      # required
+#      text: "Title!"
+#      icon: ""
+#    author:
+#      # required
+#      name: "Author name"
+#      icon-url: ""
+#      url: ""
+#    footer:
+#      # required
+#      text: "Footer"
+#      icon: ""
+#    image-url: ""
+#    thumbnail-url: ""
+#    fields:
+#      1:
+#        # required
+#        inline: false
+#        # required
+#        name: "Field1"
+#        # required
+#        value: "Value1"
+
+# ------- WEBHOOKS -------
+
+# REQUIRED FOR WEBHOOKS
+url: ""
+
+# this may be a bit spammy on big servers
+backup-create:
+  enabled: false
+  color: "#00AAFF"
+  title:
+    text: "New backup created"
+  fields:
+    "1":
+      inline: false
+      name: "Player"
+      value: "%player%"
+    "2":
+      inline: false
+      name: "Category"
+      value: "%category%"
+    "3":
+      inline: false
+      name: "Extra Info"
+      value: "%extrainfo%"
+
+backup-restore:
+  enabled: true
+  color: "#00AAFF"
+  title:
+    text: "Backup restored"
+  fields:
+    "1":
+      inline: true
+      name: "Restored by"
+      value: "%restorer%"
+    "2":
+      inline: true
+      name: "Player"
+      value: "%player%"
+    "3":
+      inline: true
+      name: "Backup Date"
+      value: "%date%"
+    "4":
+      inline: true
+      name: "Category"
+      value: "%category%"
+    "5":
+      inline: true
+      name: "Extra Info"
+      value: "%extrainfo%"
+    "6":
+      inline: true
+      name: "Backup Location"
+      value: "%location%"
+
+backup-export:
+  enabled: true
+  color: "#00AAFF"
+  title:
+    text: "Backup exported as shulker"
+  fields:
+    "1":
+      inline: true
+      name: "Exported by"
+      value: "%restorer%"
+    "2":
+      inline: true
+      name: "Player"
+      value: "%player%"
+    "3":
+      inline: true
+      name: "Backup Date"
+      value: "%date%"
+    "4":
+      inline: true
+      name: "Category"
+      value: "%category%"
+    "5":
+      inline: true
+      name: "Extra Info"
+      value: "%extrainfo%"
+    "6":
+      inline: true
+      name: "Backup Location"
+      value: "%location%"
+
+# ------- DISCORD ADDON -------
+
 # set enable-discord-addon in the config.yml to true if you want to enable this module
 
 # you must create a bot at https://discord.com/developers/applications
@@ -37,35 +158,6 @@ request-restore:
     - " "
     - "&#00CCFF&l(!) &#00CCFFClick here to request!"
 
-# These are all the options that you can use here: (most of them are optional, you can remove them)
-#    # the message before the embed, you can put a ping here in the <@&1234567890123456789> format
-#    content: "<@&1234567890123456789>"
-#    # color in hex
-#    color: "#FF6600"
-#    description: "Your description"
-#    title:
-#      # required
-#      text: "Title!"
-#      icon: ""
-#    author:
-#      # required
-#      name: "Author name"
-#      icon-url: ""
-#      url: ""
-#    footer:
-#      # required
-#      text: "Footer"
-#      icon: ""
-#    image-url: ""
-#    thumbnail-url: ""
-#    fields:
-#      1:
-#        # required
-#        inline: false
-#        # required
-#        name: "Field1"
-#        # required
-#        value: "Value1"
 prompt:
   color: "#00aaff"
   title:
@@ -92,4 +184,4 @@ prompt:
       name: "Cause"
       value: "%cause%"
 
-version: 2
+version: 3

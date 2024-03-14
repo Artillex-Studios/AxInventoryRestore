@@ -2,9 +2,9 @@ package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.api.events.InventoryRestoreEvent;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
+import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
@@ -96,9 +96,7 @@ public class PreviewGui {
                 return;
             }
 
-            final InventoryRestoreEvent inventoryRestoreEvent = new InventoryRestoreEvent(player, backupData);
-            Bukkit.getPluginManager().callEvent(inventoryRestoreEvent);
-            if (inventoryRestoreEvent.isCancelled()) return;
+            if (AxirEvents.callInventoryRestoreEvent(player, backupData)) return;
 
             int n2 = 0;
             for (ItemStack it : backupData.getItems()) {
@@ -116,6 +114,8 @@ public class PreviewGui {
                 MessageUtils.sendMsgP(viewer, "errors.no-permission");
                 return;
             }
+
+            AxirEvents.callBackupExportEvent(viewer, backupData);
 
             for (ItemStack it : backupData.getInShulkers(viewer.getName())) {
                 viewer.getInventory().addItem(it);

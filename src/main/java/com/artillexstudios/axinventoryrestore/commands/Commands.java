@@ -2,6 +2,7 @@ package com.artillexstudios.axinventoryrestore.commands;
 
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
 public class Commands implements CommandExecutor {
@@ -42,13 +44,12 @@ public class Commands implements CommandExecutor {
                 return true;
             }
             Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
-            if (AxInventoryRestore.getDiscordAddon() != null) {
-                if (!AxInventoryRestore.getDiscordAddon().DISCORDCONFIG.reload()) {
-                    MessageUtils.sendMsgP(sender, "reload-fail", Collections.singletonMap("%file%", "discord.yml"));
-                    return true;
-                }
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fdiscord.yml&#00FF00!"));
+            if (!DISCORD.reload()) {
+                MessageUtils.sendMsgP(sender, "reload-fail", Collections.singletonMap("%file%", "discord.yml"));
+                return true;
             }
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fdiscord.yml&#00FF00!"));
+            WebHooks.reload();
 
             Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╚ &#00FF00Successful reload!"));
             MessageUtils.sendMsgP(sender, "reloaded");

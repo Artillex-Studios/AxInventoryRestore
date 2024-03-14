@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
 
 public class SQLite extends Base {
     private final String url = String.format("jdbc:sqlite:%s/data.db", AxInventoryRestore.getInstance().getDataFolder());
@@ -123,7 +124,7 @@ public class SQLite extends Base {
                     final BackupData backupData = getBackupDataById(rs.getInt(2));
                     Scheduler.get().run(scheduledTask -> ContainerUtils.addOrDrop(player.getInventory(), backupData.getInShulkers("---"), player.getLocation()));
 
-                    player.sendMessage(ColorUtils.format(CONFIG.getString("prefix") + AxInventoryRestore.getDiscordAddon().DISCORDCONFIG.getString("messages.restored")));
+                    player.sendMessage(ColorUtils.format(CONFIG.getString("prefix") + DISCORD.getString("messages.restored")));
                 }
             }
 
@@ -135,6 +136,16 @@ public class SQLite extends Base {
             }
 
         } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void disable() {
+        final String sql = "VACUUM;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

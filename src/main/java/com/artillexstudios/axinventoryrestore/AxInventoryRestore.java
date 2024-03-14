@@ -17,6 +17,7 @@ import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
+import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
@@ -30,6 +31,7 @@ import java.io.File;
 public final class AxInventoryRestore extends AxPlugin {
     public static Config CONFIG;
     public static Config MESSAGES;
+    public static Config DISCORD;
     private static AxInventoryRestore instance;
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
@@ -74,7 +76,9 @@ public final class AxInventoryRestore extends AxPlugin {
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        DISCORD = new Config(new File(getDataFolder(), "discord.yml"), getResource("discord.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
+        WebHooks.reload();
         threadedQueue = new ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
@@ -110,5 +114,6 @@ public final class AxInventoryRestore extends AxPlugin {
 
     public void disable() {
         database.cleanup();
+        database.disable();
     }
 }

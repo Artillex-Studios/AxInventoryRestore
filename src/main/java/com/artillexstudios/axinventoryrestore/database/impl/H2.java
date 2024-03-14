@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class H2 extends Base {
     private HikariDataSource dataSource;
@@ -37,8 +38,9 @@ public class H2 extends Base {
 
     @Override
     public void disable() {
-        try {
-            dataSource.close();
+        final String sql = "SHUTDOWN COMPACT;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

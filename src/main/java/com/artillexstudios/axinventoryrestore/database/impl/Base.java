@@ -2,11 +2,11 @@ package com.artillexstudios.axinventoryrestore.database.impl;
 
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.api.events.InventoryBackupEvent;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.database.Converter2;
 import com.artillexstudios.axinventoryrestore.database.Database;
+import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.ContainerUtils;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
 
 public class Base implements Database {
     public Connection getConnection() {
@@ -157,9 +158,7 @@ public class Base implements Database {
 
     @Override
     public void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause) {
-        final InventoryBackupEvent inventoryBackupEvent = new InventoryBackupEvent(player, reason, cause);
-        Bukkit.getPluginManager().callEvent(inventoryBackupEvent);
-        if (inventoryBackupEvent.isCancelled()) return;
+        if (AxirEvents.callInventoryBackupEvent(player, reason, cause)) return;
 
         boolean isEmpty = true;
 
@@ -366,7 +365,7 @@ public class Base implements Database {
                     final BackupData backupData = getBackupDataById(rs.getInt(2));
                     Scheduler.get().run(scheduledTask -> ContainerUtils.addOrDrop(player.getInventory(), backupData.getInShulkers("---"), player.getLocation()));
 
-                    player.sendMessage(ColorUtils.format(CONFIG.getString("prefix") + AxInventoryRestore.getDiscordAddon().DISCORDCONFIG.getString("messages.restored")));
+                    player.sendMessage(ColorUtils.format(CONFIG.getString("prefix") + DISCORD.getString("messages.restored")));
                     int id = rs.getInt(1);
                     removeRestoreRequest(id);
                 }
