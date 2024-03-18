@@ -30,7 +30,7 @@ public class H2 extends Base {
         final HikariConfig hConfig = new HikariConfig();
         hConfig.setPoolName("axinventoryrestore-pool");
         hConfig.setDriverClassName("org.h2.Driver");
-        hConfig.setJdbcUrl("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL");
+        hConfig.setJdbcUrl("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL;DB_CLOSE_ON_EXIT=FALSE");
 
         this.dataSource = new HikariDataSource(hConfig);
         super.setup();
@@ -41,8 +41,6 @@ public class H2 extends Base {
         final String sql = "SHUTDOWN COMPACT;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 }

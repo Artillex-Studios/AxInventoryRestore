@@ -22,7 +22,7 @@ public class AxirEvents {
         Bukkit.getPluginManager().callEvent(inventoryBackupEvent);
         WebHooks.sendBackupWebHook(
                 Map.of("%player%", player.getName(),
-                "%category%", MESSAGES.getString("categories." + category + ".raw"),
+                "%category%", MESSAGES.getString("categories." + category + ".raw", category),
                 "%extrainfo%", extraInfo == null ? "---" : extraInfo)
         );
         return inventoryBackupEvent.isCancelled();
@@ -36,7 +36,7 @@ public class AxirEvents {
         WebHooks.sendRestoreWebHook(
                 Map.of("%restorer%", restorer.getName(),
                         "%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName(),
-                        "%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw"),
+                        "%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
                         "%extrainfo%", backupData.getCause() == null ? "---" : backupData.getCause(),
                         "%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()),
                         "%date%", sdf.format(resultdate))
@@ -49,7 +49,7 @@ public class AxirEvents {
         final Date resultdate = new Date(backupData.getDate());
         WebHooks.sendExportWebHook(
                 Map.of("%restorer%", restorer.getName(),
-                        "%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw"),
+                        "%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
                         "%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName(),
                         "%extrainfo%", backupData.getCause() == null ? "---" : backupData.getCause(),
                         "%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()),
