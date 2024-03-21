@@ -4,7 +4,6 @@ import com.artillexstudios.axinventoryrestore.database.impl.Base;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
-import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
@@ -168,7 +167,7 @@ public class Converter2 {
 
         } catch (SQLException ignored) {}
 
-        if (base instanceof SQLite || base instanceof PostgreSQL) {
+        if (base instanceof PostgreSQL) {
             sql = "VACUUM;";
         } else if (base instanceof H2) {
             sql = "SHUTDOWN DEFRAG;";

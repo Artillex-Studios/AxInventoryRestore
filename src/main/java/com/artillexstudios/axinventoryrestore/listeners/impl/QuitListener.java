@@ -10,8 +10,6 @@ public class QuitListener implements Listener {
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent event) {
-        AxInventoryRestore.getThreadedQueue().submit(() -> {
-            AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "QUIT", null);
-        });
+        AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "QUIT", null);
     }
 }

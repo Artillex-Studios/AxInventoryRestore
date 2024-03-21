@@ -1,17 +1,13 @@
 package com.artillexstudios.axinventoryrestore.libraries;
 
-import com.alessiodp.libby.Library;
-import com.alessiodp.libby.relocation.Relocation;
+import com.artillexstudios.axapi.libs.libby.Library;
+import com.artillexstudios.axapi.libs.libby.relocation.Relocation;
 
 public enum Libraries {
-
-    BOOSTED_YAML("dev{}dejvokep:boosted-yaml:1.3"),
 
     MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:8.0.33"),
 
     MARIADB_CONNECTOR("org{}mariadb{}jdbc:mariadb-java-client:3.1.3"),
-
-    SQLITE_JDBC("org{}xerial:sqlite-jdbc:3.42.0.0"),
 
     H2_JDBC("com{}h2database:h2:2.1.214"),
 

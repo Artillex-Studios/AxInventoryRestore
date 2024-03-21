@@ -21,7 +21,6 @@ public class ItemBuilder {
     private final String section;
     private @NotNull ItemStack item = new ItemStack(Material.RED_BANNER);
     private final Map<String, String> replacements;
-//    private @Nullable Player player;
 
     public ItemBuilder(Config file, String section, Map<String, String> replacements) {
         this.file = file.getBackingDocument();
@@ -30,16 +29,6 @@ public class ItemBuilder {
 
         createItem();
     }
-
-//    @Nullable
-//    public Player getPlayer() {
-//        return player;
-//    }
-//
-//    public void setPlayer(Player player) {
-//        this.player = player;
-//        setSkullBase64();
-//    }
 
     @NotNull
     public ItemStack getItem() {
@@ -53,7 +42,6 @@ public class ItemBuilder {
         setAmount();
         setColor();
         setGlow();
-//        setCustomModelData();
         setEnchantments();
     }
 
@@ -128,16 +116,6 @@ public class ItemBuilder {
         item.setItemMeta(meta);
     }
 
-//    private void setCustomModelData() {
-//        if (!file.isInt(section + ".custommodeldata")) return;
-//
-//        int data = file.getInt(section + ".custommodeldata");
-//        ItemMeta meta = item.getItemMeta();
-//        meta.setCustomModelData(data);
-//
-//        item.setItemMeta(meta);
-//    }
-
     private void setEnchantments() {
         if (!file.isSection(section + ".enchantments")) return;
 
@@ -160,25 +138,4 @@ public class ItemBuilder {
 
         item.setItemMeta(meta);
     }
-
-//    private void setSkullBase64() {
-//        if (!item.getType().equals(Material.PLAYER_HEAD)) return;
-//
-//        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
-//
-//        if (!file.isString(section + ".base64")) {
-//            if (player == null) return;
-//
-//            PlayerProfile profile = Bukkit.createProfile(player.getUniqueId());
-//            skullMeta.setPlayerProfile(profile);
-//            item.setItemMeta(skullMeta);
-//            return;
-//        }
-//
-//        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
-//        profile.setProperty(new ProfileProperty("textures", file.getString(section + ".base64")));
-//        skullMeta.setPlayerProfile(profile);
-//
-//        item.setItemMeta(skullMeta);
-//    }
 }

@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.database.impl;
 
 import com.artillexstudios.axapi.scheduler.Scheduler;
+import com.artillexstudios.axapi.utils.ContainerUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
@@ -8,7 +9,6 @@ import com.artillexstudios.axinventoryrestore.database.Converter2;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
-import com.artillexstudios.axinventoryrestore.utils.ContainerUtils;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
 import com.artillexstudios.axinventoryrestore.utils.SerializationUtils;
 import org.bukkit.Bukkit;
@@ -43,7 +43,7 @@ public class Base implements Database {
 
     @Override
     public void setup() {
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(128) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory MEDIUMBLOB NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(128), PRIMARY KEY (id));";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(1024) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory MEDIUMBLOB NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
@@ -51,7 +51,7 @@ public class Base implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(128) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
+        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(1024) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
@@ -59,7 +59,7 @@ public class Base implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axir_users ( id INT(128) NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL, name VARCHAR(64) NOT NULL, PRIMARY KEY (id), UNIQUE (uuid));";
+        final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axir_users ( id INT(128) NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL, name VARCHAR(512) NOT NULL, PRIMARY KEY (id), UNIQUE (uuid));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
@@ -164,30 +164,34 @@ public class Base implements Database {
 
         for (ItemStack it : player.getInventory().getContents()) {
             if (it == null) continue;
-
             isEmpty = false;
+            break;
         }
 
         if (isEmpty) return;
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
+        byte[] inventory = SerializationUtils.invToBits(player.getInventory().getContents()).readAllBytes();
 
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            Integer userId = getUserId(player.getUniqueId());
-            if (userId == null) return;
-            stmt.setInt(1, userId);
-            stmt.setInt(2, getReasonId(reason));
-            stmt.setString(3, player.getLocation().getWorld().getName());
-            stmt.setInt(4, player.getLocation().getBlockX());
-            stmt.setInt(5, player.getLocation().getBlockY());
-            stmt.setInt(6, player.getLocation().getBlockZ());
-            stmt.setBytes(7, SerializationUtils.invToBits(player.getInventory().getContents()).readAllBytes());
-            stmt.setLong(8, System.currentTimeMillis());
-            stmt.setString(9, cause);
-            stmt.executeUpdate();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        AxInventoryRestore.getThreadedQueue().submit(() -> {
+            try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+                final Integer userId = getUserId(player.getUniqueId());
+                if (userId == null) return;
+                stmt.setInt(1, userId);
+                stmt.setInt(2, getReasonId(reason));
+                stmt.setString(3, player.getLocation().getWorld().getName());
+                final Location loc = player.getLocation();
+                stmt.setInt(4, loc.getBlockX());
+                stmt.setInt(5, loc.getBlockY());
+                stmt.setInt(6, loc.getBlockZ());
+                stmt.setBytes(7, inventory);
+                stmt.setLong(8, System.currentTimeMillis());
+                stmt.setString(9, cause);
+                stmt.executeUpdate();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     @Override

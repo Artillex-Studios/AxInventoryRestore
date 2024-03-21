@@ -1,6 +1,5 @@
 package com.artillexstudios.axinventoryrestore;
 
-import com.alessiodp.libby.BukkitLibraryManager;
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.data.ThreadedQueue;
@@ -9,13 +8,13 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.Du
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
+import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
 import com.artillexstudios.axinventoryrestore.commands.TabComplete;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
-import com.artillexstudios.axinventoryrestore.database.impl.SQLite;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
 import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
@@ -55,7 +54,7 @@ public final class AxInventoryRestore extends AxPlugin {
     }
 
     public void load() {
-        BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "libraries");
+        BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "lib");
         libraryManager.addMavenCentral();
         libraryManager.addJitPack();
         libraryManager.addRepository("https://repo.codemc.org/repository/maven-public/");
@@ -82,9 +81,6 @@ public final class AxInventoryRestore extends AxPlugin {
         threadedQueue = new ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
-            case "h2":
-                database = new H2();
-                break;
             case "mysql":
                 database = new MySQL();
                 break;
@@ -92,7 +88,7 @@ public final class AxInventoryRestore extends AxPlugin {
                 database = new PostgreSQL();
                 break;
             default:
-                database = new SQLite();
+                database = new H2();
                 break;
         }
 

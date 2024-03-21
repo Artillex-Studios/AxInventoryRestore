@@ -103,9 +103,7 @@ public class Commands implements CommandExecutor {
 
             if (args[1].equals("*")) {
                for (Player pl : Bukkit.getOnlinePlayers()) {
-                   AxInventoryRestore.getThreadedQueue().submit(() -> {
-                       AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
-                   });
+                   AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
                }
 
                MessageUtils.sendMsgP(sender, "manual-backup-all");
@@ -117,9 +115,7 @@ public class Commands implements CommandExecutor {
                 return true;
             }
 
-            AxInventoryRestore.getThreadedQueue().submit(() -> {
-                AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
-            });
+            AxInventoryRestore.getDB().saveInventory(Bukkit.getPlayer(args[1]), "MANUAL", cause);
 
             MessageUtils.sendMsgP(sender, "manual-backup", Map.of("%player%", Bukkit.getPlayer(args[1]).getName()));
             return true;

@@ -17,9 +17,7 @@ public class AutoBackupScheduler {
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                AxInventoryRestore.getThreadedQueue().submit(() -> {
-                    AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", null);
-                });
+                AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", null);
             }
         }, backupMinutes, backupMinutes, TimeUnit.MINUTES);
     }

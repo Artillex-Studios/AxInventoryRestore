@@ -11,8 +11,6 @@ public class WorldChange implements Listener {
     @EventHandler
     public void onQuit(@NotNull PlayerChangedWorldEvent event) {
         final String cause = event.getFrom().getName() + " -> " + event.getPlayer().getWorld().getName();
-        AxInventoryRestore.getThreadedQueue().submit(() -> {
-            AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "WORLD_CHANGE", cause);
-        });
+        AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "WORLD_CHANGE", cause);
     }
 }
