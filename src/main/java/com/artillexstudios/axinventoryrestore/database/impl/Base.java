@@ -172,6 +172,7 @@ public class Base implements Database {
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
         byte[] inventory = SerializationUtils.invToBits(player.getInventory().getContents()).readAllBytes();
+        final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
             try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -179,11 +180,10 @@ public class Base implements Database {
                 if (userId == null) return;
                 stmt.setInt(1, userId);
                 stmt.setInt(2, getReasonId(reason));
-                stmt.setString(3, player.getLocation().getWorld().getName());
-                final Location loc = player.getLocation();
-                stmt.setInt(4, loc.getBlockX());
-                stmt.setInt(5, loc.getBlockY());
-                stmt.setInt(6, loc.getBlockZ());
+                stmt.setString(3, location.getWorld().getName());
+                stmt.setInt(4, location.getBlockX());
+                stmt.setInt(5, location.getBlockY());
+                stmt.setInt(6, location.getBlockZ());
                 stmt.setBytes(7, inventory);
                 stmt.setLong(8, System.currentTimeMillis());
                 stmt.setString(9, cause);
