@@ -6,7 +6,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>2.3.2</version>
+    <version>2.3.3</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.100</version>
+            <version>1.4.101</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
