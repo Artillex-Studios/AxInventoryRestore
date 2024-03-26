@@ -96,7 +96,7 @@ public class PreviewGui {
                 return;
             }
 
-            if (AxirEvents.callInventoryRestoreEvent(player, backupData)) return;
+            if (AxirEvents.callInventoryRestoreEvent(viewer, backupData)) return;
 
             int n2 = 0;
             for (ItemStack it : backupData.getItems()) {
