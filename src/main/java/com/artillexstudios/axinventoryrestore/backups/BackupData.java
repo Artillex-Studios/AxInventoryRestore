@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+
 public class BackupData {
     private final int id;
     private final UUID player;
@@ -98,7 +100,7 @@ public class BackupData {
             replacements.put("%staff%", restorerName);
             replacements.put("%player-uuid%", player.toString());
 
-            final ItemStack shulkerIt = new ItemBuilder(AxInventoryRestore.MESSAGES, "restored-shulker", replacements).getItem();
+            final ItemStack shulkerIt = new ItemBuilder(MESSAGES, "restored-shulker", replacements).getItem();
             final BlockStateMeta im = (BlockStateMeta) shulkerIt.getItemMeta();
             final ShulkerBox shulker = (ShulkerBox) im.getBlockState();
 
@@ -111,7 +113,10 @@ public class BackupData {
                 }
                 if (shulker.getInventory().firstEmpty() == -1) break;
 
-                shulker.getInventory().addItem(it);
+                if (it.getType().toString().endsWith("SHULKER_BOX"))
+                    shulkerItems.add(it);
+                else
+                    shulker.getInventory().addItem(it);
                 iterator.remove();
             }
 
