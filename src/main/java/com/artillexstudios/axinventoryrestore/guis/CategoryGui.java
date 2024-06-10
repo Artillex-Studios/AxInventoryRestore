@@ -1,11 +1,12 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.utils.ItemBuilder;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
-import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
-import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
+import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +39,7 @@ public class CategoryGui {
         this.pageNum = pageNum;
 
         categoryGui = Gui.paginated()
-                .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
+                .title(StringUtils.format(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
                 .rows(4)
                 .pageSize(27)
                 .create();
@@ -59,9 +60,10 @@ public class CategoryGui {
                 replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
                 replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
-                final ItemStack it = new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "guis.categorygui.item", replacements).getItem();
+                final ItemStack it = new ItemBuilder(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
+                it.setAmount(n);
 
-                categoryGui.addItem(ItemBuilder.from(it).amount(n).asGuiItem(event -> {
+                categoryGui.addItem(new GuiItem(it, event -> {
                     new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
                 }));
 
@@ -74,14 +76,15 @@ public class CategoryGui {
             categoryGui.update();
         });
 
+
         // Previous item
-        categoryGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.previous()));
+        categoryGui.setItem(4, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page"), Map.of()).get(), event2 -> categoryGui.previous()));
         // Next item
-        categoryGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> categoryGui.next()));
+        categoryGui.setItem(4, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page"), Map.of()).get(), event2 -> categoryGui.next()));
 
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        categoryGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.back", Map.of()).getItem()).asGuiItem(event2 -> {
+        categoryGui.setItem(4, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back"), Map.of()).get(), event2 -> {
             lastGui.open(viewer, pageNum);
         }));
 

@@ -1,16 +1,16 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.utils.ItemBuilder;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
-import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
-import com.artillexstudios.axinventoryrestore.utils.MessageUtils;
-import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGEUTILS;
 
 public class MainGui {
     private final PaginatedGui mainGui;
@@ -33,7 +34,7 @@ public class MainGui {
         this.name = name;
 
         mainGui = Gui.paginated()
-                .title(ColorUtils.formatToComponent(MESSAGES.getString("guis.maingui.title").replace("%player%", name)))
+                .title(StringUtils.format(MESSAGES.getString("guis.maingui.title").replace("%player%", name)))
                 .rows(4)
                 .pageSize(27)
                 .create();
@@ -49,37 +50,34 @@ public class MainGui {
             reasons.addAll(backup.getDeathsPerTypes().keySet());
 
             if (CONFIG.getBoolean("enable-all-category") && reasons.size() == 1 || reasons.isEmpty()) {
-                MessageUtils.sendMsgP(viewer, "errors.unknown-player");
+                MESSAGEUTILS.sendLang(viewer, "errors.unknown-player");
                 return;
             }
 
             for (String saveReason : reasons) {
-                ItemBuilder item = ItemBuilder.from(Material.PAPER).name(ColorUtils.formatToComponent("<!i>&#FFFF00&l" + saveReason));
+                ItemStack item = new ItemBuilder(Material.PAPER).setName(StringUtils.formatToString("<!i>&#FFFF00&l" + saveReason)).get();
 
                 final List<BackupData> backupDataList = backup.getDeathsByReason(saveReason);
 
                 if (MESSAGES.getSection("categories." + saveReason) != null) {
-                    item = ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "categories." + saveReason, Map.of("%amount%", "" + backupDataList.size())).getItem());
+                    item = new ItemBuilder(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
-                final GuiItem gitem = item.asGuiItem(event -> {
+                mainGui.addItem(new GuiItem(item, event -> {
                     new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
-                });
-
-                mainGui.addItem(gitem);
+                }));
                 mainGui.update();
             }
         });
 
-
         // Previous item
-        mainGui.setItem(4, 3, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.previous-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.previous()));
+        mainGui.setItem(4, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page"), Map.of()).get(), event2 -> mainGui.previous()));
         // Next item
-        mainGui.setItem(4, 7, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.next-page", Map.of()).getItem()).asGuiItem(event2 -> mainGui.next()));
+        mainGui.setItem(4, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page"), Map.of()).get(), event2 -> mainGui.next()));
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(4, 5, ItemBuilder.from(new com.artillexstudios.axinventoryrestore.utils.ItemBuilder(MESSAGES, "gui-items.close", Map.of()).getItem()).asGuiItem(event2 -> {
+        mainGui.setItem(4, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.close"), Map.of()).get(), event2 -> {
             mainGui.close(viewer);
         }));
 

@@ -9,6 +9,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
+import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
 import com.artillexstudios.axinventoryrestore.commands.TabComplete;
 import com.artillexstudios.axinventoryrestore.database.Database;
@@ -20,9 +21,9 @@ import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
-import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
+import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -31,6 +32,7 @@ public final class AxInventoryRestore extends AxPlugin {
     public static Config CONFIG;
     public static Config MESSAGES;
     public static Config DISCORD;
+    public static MessageUtils MESSAGEUTILS;
     private static AxInventoryRestore instance;
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
@@ -68,8 +70,6 @@ public final class AxInventoryRestore extends AxPlugin {
     public void enable() {
         instance = this;
 
-        new ColorUtils();
-
         int pluginId = 19446;
         final Metrics metrics = new Metrics(this, pluginId);
 
@@ -79,6 +79,8 @@ public final class AxInventoryRestore extends AxPlugin {
 
         WebHooks.reload();
         threadedQueue = new ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
+
+        MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
             case "mysql":

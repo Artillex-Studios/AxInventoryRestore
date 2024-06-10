@@ -7,10 +7,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
+
 public class DeathListener implements Listener {
 
     @EventHandler
     public void onDeath(@NotNull PlayerDeathEvent event) {
+        if (!CONFIG.getBoolean("enabled-backups.death", true)) return;
         final Player player = event.getEntity();
 
         String cause = player.getLastDamageCause() == null ? null : player.getLastDamageCause().getCause().toString();

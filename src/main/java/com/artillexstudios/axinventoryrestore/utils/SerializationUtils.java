@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
+@Deprecated(forRemoval = true)
 public class SerializationUtils {
 
     @NotNull

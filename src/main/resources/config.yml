@@ -1,24 +1,7 @@
 prefix: "&#00aaff&lAxInventoryRestore &7» "
 
-# how long should the plugin keep backups? (in days)
-# this will run at server start/stop and when usign /axir cleanup
-cleanup-after-days: 14
-
-# should there also be an all category that cointains all the backups of a player?
-enable-all-category: true
-
-# this setting is not reloadable, you have to restart the server
-# should the plugin make backups periodically?
-# do not set "minutes" to anything below 1
-automatic-backup:
-  enabled: true
-  minutes: 5
-
-# check out the discord.yml for more info
-enable-discord-addon: false
-
 database:
-  # h2, sqlite, mysql, postgresql
+  # h2, mysql, postgresql
   # for single server setups we recommend h2 because it's way faster than sqlite
   type: "h2"
 
@@ -35,5 +18,29 @@ database:
     keepalive-time: 0
     connection-timeout: 5000
 
+# how long should the plugin keep backups? (in days)
+# this will run at server start/stop and when usign /axir cleanup
+cleanup-after-days: 14
+
+# should there also be an all category that cointains all the backups of a player?
+enable-all-category: true
+
+# this setting is not reloadable, you have to restart the server
+# should the plugin make backups periodically?
+# do not set "minutes" to anything below 1
+automatic-backup:
+  enabled: true
+  minutes: 5
+
+# you can disable categories by setting them to false
+enabled-backups:
+  death: true
+  join: true
+  quit: true
+  world-change: true
+
+# check out the discord.yml for more info
+enable-discord-addon: false
+
 # do not change this
-version: 3
+version: 4

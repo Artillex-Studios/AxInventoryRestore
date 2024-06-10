@@ -1,10 +1,10 @@
 package com.artillexstudios.axinventoryrestore.discord;
 
 import com.artillexstudios.axapi.utils.ClassUtils;
+import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
-import com.artillexstudios.axinventoryrestore.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.utils.JDAEmbedBuilder;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import net.dv8tion.jda.api.JDA;
@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
@@ -68,7 +67,7 @@ public class DiscordAddon extends ListenerAdapter {
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
 
-        if (ClassUtils.classExists("net.luckperms.api.LuckPerms")) {
+        if (ClassUtils.INSTANCE.classExists("net.luckperms.api.LuckPerms")) {
             final RegisteredServiceProvider<net.luckperms.api.LuckPerms> provider = Bukkit.getServicesManager().getRegistration(net.luckperms.api.LuckPerms.class);
             if (provider != null) {
                 final net.luckperms.api.LuckPerms api = provider.getProvider();
@@ -93,7 +92,7 @@ public class DiscordAddon extends ListenerAdapter {
     }
 
     public ItemStack getRequestItem() {
-        return new ItemBuilder(DISCORD, "request-restore", Map.of()).getItem();
+        return new ItemBuilder(DISCORD.getSection("request-restore")).get();
     }
 
     @Override

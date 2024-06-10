@@ -1,16 +1,16 @@
 package com.artillexstudios.axinventoryrestore.database.impl;
 
 import com.artillexstudios.axapi.scheduler.Scheduler;
+import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.ContainerUtils;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.database.Converter2;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
-import com.artillexstudios.axinventoryrestore.utils.ColorUtils;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
-import com.artillexstudios.axinventoryrestore.utils.SerializationUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -21,8 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class Base implements Database {
 
     @Override
     public void setup() {
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(1024) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory MEDIUMBLOB NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(1024) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory VARCHAR NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
@@ -80,6 +82,24 @@ public class Base implements Database {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+//        try (Connection conn = getConnection()) {
+//            final DatabaseMetaData dmb = conn.getMetaData();
+//            final ResultSet tables = dmb.getTables(null, null, "AXIR_BACKUPS", null);
+//            if (tables.next()) {
+//                for (int i = 1; i < tables.getMetaData().getColumnCount(); i++) {
+//                    tables.getMetaData().getColumnName(i);
+//                }
+//            }
+//            final ResultSet tables2 = dmb.getTables(null, null, "axir_backups", null);
+//            if (tables2.next()) {
+//                for (int i = 1; i < tables2.getMetaData().getColumnCount(); i++) {
+//                    tables2.getMetaData().getColumnName(i);
+//                }
+//            }
+////            System.out.println(rs.getMetaData().getColumnType(9));
+//        } catch (SQLException ex) {
+//            ex.printStackTrace();
+//        }
     }
 
     @Nullable
@@ -171,7 +191,7 @@ public class Base implements Database {
         if (isEmpty) return;
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
-        byte[] inventory = SerializationUtils.invToBits(player.getInventory().getContents()).readAllBytes();
+        byte[] inventory = Serializers.ITEM_ARRAY.serialize(player.getInventory().getContents()).getBytes();
         final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
@@ -344,7 +364,7 @@ public class Base implements Database {
             stmt.setInt(1, backupId);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return SerializationUtils.invFromBits(rs.getBinaryStream(1));
+                if (rs.next()) return Serializers.ITEM_ARRAY.deserialize(rs.getBinaryStream(1).toString());
             }
 
         } catch (SQLException ex) {
@@ -367,9 +387,9 @@ public class Base implements Database {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     final BackupData backupData = getBackupDataById(rs.getInt(2));
-                    Scheduler.get().run(scheduledTask -> ContainerUtils.addOrDrop(player.getInventory(), backupData.getInShulkers("---"), player.getLocation()));
+                    Scheduler.get().run(scheduledTask -> ContainerUtils.INSTANCE.addOrDrop(player.getInventory(), backupData.getInShulkers("---"), player.getLocation()));
 
-                    player.sendMessage(ColorUtils.format(CONFIG.getString("prefix") + DISCORD.getString("messages.restored")));
+                    player.sendMessage(StringUtils.formatToString(CONFIG.getString("prefix") + DISCORD.getString("messages.restored")));
                     int id = rs.getInt(1);
                     removeRestoreRequest(id);
                 }

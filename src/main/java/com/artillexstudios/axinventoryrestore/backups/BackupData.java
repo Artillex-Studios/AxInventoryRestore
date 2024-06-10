@@ -1,8 +1,8 @@
 package com.artillexstudios.axinventoryrestore.backups;
 
 import com.artillexstudios.axapi.utils.ClassUtils;
+import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -50,14 +50,14 @@ public class BackupData {
         return location;
     }
 
-    // todo: try to always all async
+    // todo: make the db request async
     public ItemStack[] getItems() {
         if (items == null) {
             items = AxInventoryRestore.getDB().getItemsFromBackup(id);
             for (ItemStack it : this.items) {
                 if (it == null) continue;
                 // axshulkers compatibility
-                if (ClassUtils.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
+                if (ClassUtils.INSTANCE.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
                     if (it.getType().equals(Material.AIR)) continue;
                     com.artillexstudios.axshulkers.utils.ShulkerUtils.removeShulkerUUID(it);
                 }
@@ -100,7 +100,7 @@ public class BackupData {
             replacements.put("%staff%", restorerName);
             replacements.put("%player-uuid%", player.toString());
 
-            final ItemStack shulkerIt = new ItemBuilder(MESSAGES, "restored-shulker", replacements).getItem();
+            final ItemStack shulkerIt = new ItemBuilder(MESSAGES.getSection("restored-shulker"), replacements).get();
             final BlockStateMeta im = (BlockStateMeta) shulkerIt.getItemMeta();
             final ShulkerBox shulker = (ShulkerBox) im.getBlockState();
 
