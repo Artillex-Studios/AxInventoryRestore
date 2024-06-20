@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 
-public class WorldChange implements Listener {
+public class WorldChangeListener implements Listener {
 
     @EventHandler
     public void onQuit(@NotNull PlayerChangedWorldEvent event) {

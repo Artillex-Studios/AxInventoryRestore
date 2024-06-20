@@ -175,6 +175,11 @@ public class Base implements Database {
 
     @Override
     public void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause) {
+        saveInventory(player.getInventory().getContents(), player, reason, cause);
+    }
+
+    @Override
+    public void saveInventory(ItemStack[] items, @NotNull Player player, @NotNull String reason, @Nullable String cause) {
         if (AxirEvents.callInventoryBackupEvent(player, reason, cause)) return;
 
         boolean isEmpty = true;
@@ -188,7 +193,7 @@ public class Base implements Database {
         if (isEmpty) return;
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
-        String inventory = Serializers.ITEM_ARRAY.serialize(player.getInventory().getContents());
+        String inventory = Serializers.ITEM_ARRAY.serialize(items);
         final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
@@ -266,8 +271,7 @@ public class Base implements Database {
     public UUID getUUID(@NotNull String name) {
         final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
 
-        if (offlinePlayer == null) {
-
+        if (offlinePlayer.getName() == null) {
             String ex = "SELECT uuid FROM axir_users WHERE name = ? LIMIT 1;";
             try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
                 stmt.setString(1, name);

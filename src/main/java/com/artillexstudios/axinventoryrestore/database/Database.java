@@ -29,6 +29,8 @@ public interface Database {
 
     void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause);
 
+    void saveInventory(ItemStack[] items, @NotNull Player player, @NotNull String reason, @Nullable String cause);
+
     Backup getBackupsOfPlayer(@NotNull UUID uuid);
 
     void join(@NotNull Player player);

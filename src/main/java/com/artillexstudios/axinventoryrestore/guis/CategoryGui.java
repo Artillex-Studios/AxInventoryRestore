@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 
 public class CategoryGui {
@@ -29,6 +30,7 @@ public class CategoryGui {
     private final List<BackupData> backupDataList;
     private final PaginatedGui lastGui;
     private final int pageNum;
+    private final int rows = CONFIG.getInt("menu-rows.backup-selector", 4);
 
     public CategoryGui(@NotNull MainGui mainGui, List<BackupData> backupDataList, PaginatedGui lastGui, int pageNum) {
         this.mainGui = mainGui;
@@ -40,8 +42,8 @@ public class CategoryGui {
 
         categoryGui = Gui.paginated()
                 .title(StringUtils.format(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
-                .rows(4)
-                .pageSize(27)
+                .rows(rows)
+                .pageSize(rows * 9 - 9)
                 .create();
     }
 
@@ -78,13 +80,13 @@ public class CategoryGui {
 
 
         // Previous item
-        categoryGui.setItem(4, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page"), Map.of()).get(), event2 -> categoryGui.previous()));
+        categoryGui.setItem(rows, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> categoryGui.previous()));
         // Next item
-        categoryGui.setItem(4, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page"), Map.of()).get(), event2 -> categoryGui.next()));
+        categoryGui.setItem(rows, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> categoryGui.next()));
 
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        categoryGui.setItem(4, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back"), Map.of()).get(), event2 -> {
+        categoryGui.setItem(rows, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get(), event2 -> {
             lastGui.open(viewer, pageNum);
         }));
 

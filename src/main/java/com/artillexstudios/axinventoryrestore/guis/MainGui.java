@@ -28,6 +28,7 @@ public class MainGui {
     private final Player viewer;
     private final UUID restoreUser;
     private final String name;
+    private final int rows = CONFIG.getInt("menu-rows.main-menu", 4);
 
     public MainGui(@NotNull UUID restoreUser, @NotNull Player viewer, String name) {
         this.viewer = viewer;
@@ -36,8 +37,8 @@ public class MainGui {
 
         mainGui = Gui.paginated()
                 .title(StringUtils.format(MESSAGES.getString("guis.maingui.title").replace("%player%", name)))
-                .rows(4)
-                .pageSize(27)
+                .rows(rows)
+                .pageSize(rows * 9 - 9)
                 .create();
     }
 
@@ -73,13 +74,13 @@ public class MainGui {
         });
 
         // Previous item
-        mainGui.setItem(4, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page"), Map.of()).get(), event2 -> mainGui.previous()));
+        mainGui.setItem(rows, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> mainGui.previous()));
         // Next item
-        mainGui.setItem(4, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page"), Map.of()).get(), event2 -> mainGui.next()));
+        mainGui.setItem(rows, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> mainGui.next()));
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(4, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.close"), Map.of()).get(), event2 -> {
+        mainGui.setItem(rows, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.close")).get(), event2 -> {
             mainGui.close(viewer);
         }));
 

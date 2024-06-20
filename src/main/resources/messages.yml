@@ -60,6 +60,15 @@ guis:
         - " &7- &#00FFFFThe player must be online for this to work!"
         - " "
         - "&#00CCFF&l(!) &#00CCFFClick here to replace!"
+    quick-restore-ender-chest:
+      material: ENDER_CHEST
+      name: "&#00CCFFReplace player's ender chest"
+      lore:
+        - " "
+        - " &7- &#00FFFFNote: &fthis will erase the current items in the ender chest!"
+        - " &7- &#00FFFFThe player must be online for this to work!"
+        - " "
+        - "&#00CCFF&l(!) &#00CCFFClick here to replace!"
     teleport:
       material: ENDER_PEARL
       name: "&#00CCFFTeleport to event location"
@@ -100,6 +109,13 @@ categories:
     lore:
       - " "
       - "&#FFCC00&l(!) &#FFCC00Click here to all view backups!"
+  ENDER_CHEST:
+    raw: "ENDER_CHEST"
+    material: ENDER_CHEST
+    name: "&#EE00FF&lENDER CHEST BACKUPS &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#EE00FF&l(!) &#EE00FFClick here to view backups!"
   DEATH:
     raw: "DEATH"
     material: TOTEM_OF_UNDYING
@@ -128,6 +144,13 @@ categories:
     lore:
       - " "
       - "&#33DD33&l(!) &#33DD33Click here to view backups!"
+  CONTAINER_CLOSE:
+    raw: "CONTAINER_CLOSE"
+    material: CHEST
+    name: "&#00DDFF&lCONTAINER CLOSE &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#00DDFF&l(!) &#00DDFFClick here to view backups!"
   MANUAL:
     raw: "MANUAL"
     material: LEVER

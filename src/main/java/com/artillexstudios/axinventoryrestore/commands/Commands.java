@@ -5,6 +5,7 @@ import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
+import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -78,6 +79,8 @@ public class Commands {
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fdiscord.yml&#00FF00!"));
         WebHooks.reload();
 
+        AutoBackupScheduler.start();
+
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╚ &#00FF00Successful reload!"));
         MESSAGEUTILS.sendLang(sender, "reloaded");
     }
@@ -94,9 +97,7 @@ public class Commands {
     public void save(CommandSender sender, Player player) {
         final String cause = MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
-        for (int i = 0; i < 10000; i++) {
-            AxInventoryRestore.getThreadedQueue().submit(() -> AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause));
-        }
+        AxInventoryRestore.getThreadedQueue().submit(() -> AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause));
         MESSAGEUTILS.sendLang(sender, "manual-backup", Map.of("%player%", player.getName()));
     }
 

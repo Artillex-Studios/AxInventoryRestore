@@ -15,14 +15,15 @@ public class AutoBackupScheduler {
         if (future != null) future.cancel(true);
 
         if (!AxInventoryRestore.CONFIG.getBoolean("automatic-backup.enabled")) return;
-        if (AxInventoryRestore.CONFIG.getLong("automatic-backup.minutes") < 1) return;
         final int backupMinutes = AxInventoryRestore.CONFIG.getInt("automatic-backup.minutes", 5);
+        final int backupSeconds = AxInventoryRestore.CONFIG.getInt("automatic-backup.seconds", 5);
+        final int backupTime = Math.max(1, Math.max(backupMinutes * 60, backupSeconds));
 
         future = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", null);
             }
-        }, backupMinutes, backupMinutes, TimeUnit.MINUTES);
+        }, backupTime, backupTime, TimeUnit.SECONDS);
     }
 
     public static void stop() {

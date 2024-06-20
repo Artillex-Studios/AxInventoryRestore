@@ -84,7 +84,8 @@ public class PreviewGui {
             viewer.closeInventory();
         }));
 
-        previewGui.setItem(starter + 4, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.quick-restore")).get(), event -> {
+        boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
+        previewGui.setItem(starter + 4, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.quick-restore" + (isEnder ? "-ender-chest" : ""))).get(), event -> {
             event.setCancelled(true);
 
             if (!PermissionUtils.hasPermission(viewer, "restore")) {
@@ -104,7 +105,10 @@ public class PreviewGui {
             for (ItemStack it : backupData.getItems()) {
                 if (it == null) it = new ItemStack(Material.AIR);
 
-                player.getInventory().setItem(n2, it);
+                if (isEnder)
+                    player.getEnderChest().setItem(n2, it);
+                else
+                    player.getInventory().setItem(n2, it);
                 n2++;
             }
         }));

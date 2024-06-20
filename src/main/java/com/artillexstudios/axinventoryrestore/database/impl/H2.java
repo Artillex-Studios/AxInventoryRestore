@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
+
 public class H2 extends Base {
     private H2Connection conn;
 
@@ -36,7 +38,8 @@ public class H2 extends Base {
     public void disable() {
         final String sql = "SHUTDOWN COMPACT;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.executeUpdate();
+            if (CONFIG.getBoolean("compact-database", true))
+                stmt.executeUpdate();
             conn.realClose();
         } catch (Exception ignored) {}
     }

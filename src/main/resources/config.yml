@@ -25,22 +25,34 @@ cleanup-after-days: 14
 # should there also be an all category that cointains all the backups of a player?
 enable-all-category: true
 
-# this setting is not reloadable, you have to restart the server
 # should the plugin make backups periodically?
-# do not set "minutes" to anything below 1
+# do not set "seconds" to anything below 1
 automatic-backup:
   enabled: true
-  minutes: 5
+  seconds: 180
+
+# minimum 2, maximum 6
+menu-rows:
+  main-menu: 4
+  backup-selector: 4
+
+# if your server often doesn't stop randomly and axir spams stuff, try disabling this
+# runs the databases builtin cleanup mechanism to decrease disk size
+# if you have 100K+ backups or a lot of storage you can disable this as this could slow down the server shutdown process
+compact-database: true
 
 # you can disable categories by setting them to false
+# some of these might take up a lot of storage
 enabled-backups:
+  ender-chest: true
   death: true
   join: true
   quit: true
   world-change: true
+  container-close: true
 
 # check out the discord.yml for more info
 enable-discord-addon: false
 
 # do not change this
-version: 4
+version: 5
