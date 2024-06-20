@@ -29,7 +29,7 @@ public interface Database {
 
     void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause);
 
-    Backup getDeathsOfPlayer(@NotNull UUID uuid);
+    Backup getBackupsOfPlayer(@NotNull UUID uuid);
 
     void join(@NotNull Player player);
 

@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
@@ -44,13 +45,14 @@ public class MainGui {
         mainGui.clearPageItems();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
-            final Backup backup = AxInventoryRestore.getDB().getDeathsOfPlayer(restoreUser);
+            final Backup backup = AxInventoryRestore.getDB().getBackupsOfPlayer(restoreUser);
             final ArrayList<String> reasons = new ArrayList<>();
             if (CONFIG.getBoolean("enable-all-category")) reasons.add("ALL");
             reasons.addAll(backup.getDeathsPerTypes().keySet());
 
             if (CONFIG.getBoolean("enable-all-category") && reasons.size() == 1 || reasons.isEmpty()) {
                 MESSAGEUTILS.sendLang(viewer, "errors.unknown-player");
+                Scheduler.get().runAt(viewer.getLocation(), t -> viewer.closeInventory());
                 return;
             }
 

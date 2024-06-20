@@ -8,6 +8,7 @@ import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.database.Converter2;
+import com.artillexstudios.axinventoryrestore.database.Converter3;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
@@ -21,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -82,24 +82,21 @@ public class Base implements Database {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-//        try (Connection conn = getConnection()) {
-//            final DatabaseMetaData dmb = conn.getMetaData();
-//            final ResultSet tables = dmb.getTables(null, null, "AXIR_BACKUPS", null);
-//            if (tables.next()) {
-//                for (int i = 1; i < tables.getMetaData().getColumnCount(); i++) {
-//                    tables.getMetaData().getColumnName(i);
-//                }
-//            }
-//            final ResultSet tables2 = dmb.getTables(null, null, "axir_backups", null);
-//            if (tables2.next()) {
-//                for (int i = 1; i < tables2.getMetaData().getColumnCount(); i++) {
-//                    tables2.getMetaData().getColumnName(i);
-//                }
-//            }
-////            System.out.println(rs.getMetaData().getColumnType(9));
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
+
+        try {
+            Statement stmt = getConnection().createStatement();
+            String query = "select * from axir_backups";
+            ResultSet rs = stmt.executeQuery(query);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            if (rsmd.getColumnType(8) == 2004) {
+                new Converter3(this);
+            }
+            stmt.close();
+            rs.close();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Nullable
@@ -191,7 +188,7 @@ public class Base implements Database {
         if (isEmpty) return;
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
-        byte[] inventory = Serializers.ITEM_ARRAY.serialize(player.getInventory().getContents()).getBytes();
+        String inventory = Serializers.ITEM_ARRAY.serialize(player.getInventory().getContents());
         final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
@@ -204,7 +201,7 @@ public class Base implements Database {
                 stmt.setInt(4, location.getBlockX());
                 stmt.setInt(5, location.getBlockY());
                 stmt.setInt(6, location.getBlockZ());
-                stmt.setBytes(7, inventory);
+                stmt.setString(7, inventory);
                 stmt.setLong(8, System.currentTimeMillis());
                 stmt.setString(9, cause);
                 stmt.executeUpdate();
@@ -215,7 +212,7 @@ public class Base implements Database {
     }
 
     @Override
-    public Backup getDeathsOfPlayer(@NotNull UUID uuid) {
+    public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
         final String sql = "SELECT id, userid, reasonid, world, x, y, z, time, cause FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
@@ -364,7 +361,7 @@ public class Base implements Database {
             stmt.setInt(1, backupId);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return Serializers.ITEM_ARRAY.deserialize(rs.getBinaryStream(1).toString());
+                if (rs.next()) return Serializers.ITEM_ARRAY.deserialize(rs.getString(1));
             }
 
         } catch (SQLException ex) {

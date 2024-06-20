@@ -72,7 +72,6 @@ public class SerializationUtils {
                 return (ItemStack[]) dataInput.readObject();
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return null;

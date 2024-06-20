@@ -1,23 +1,19 @@
 package com.artillexstudios.axinventoryrestore.database.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import org.h2.jdbc.JdbcConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Properties;
 
 public class H2 extends Base {
-    private HikariDataSource dataSource;
+    private H2Connection conn;
 
     @Override
     public Connection getConnection() {
-        try {
-            return dataSource.getConnection();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return conn;
     }
 
     @Override
@@ -27,20 +23,36 @@ public class H2 extends Base {
 
     @Override
     public void setup() {
-        final HikariConfig hConfig = new HikariConfig();
-        hConfig.setPoolName("axinventoryrestore-pool");
-        hConfig.setDriverClassName("org.h2.Driver");
-        hConfig.setJdbcUrl("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL;DB_CLOSE_ON_EXIT=FALSE");
-
-        this.dataSource = new HikariDataSource(hConfig);
+        try {
+            conn = new H2Connection("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL", new Properties(), null, null, false);
+            conn.setAutoCommit(true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         super.setup();
     }
 
     @Override
     public void disable() {
         final String sql = "SHUTDOWN COMPACT;";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
+            conn.realClose();
         } catch (Exception ignored) {}
+    }
+
+    private static class H2Connection extends JdbcConnection {
+
+        public H2Connection(String s, Properties properties, String s1, Object o, boolean b) throws SQLException {
+            super(s, properties, s1, o, b);
+        }
+
+        @Override
+        public synchronized void close() {
+        }
+
+        public synchronized void realClose() throws SQLException {
+            super.close();
+        }
     }
 }

@@ -10,8 +10,9 @@ manual-created-by: "by: %player%"
 help:
   - " "
   - "&#00aaff&lAxInventoryRestore &7» "
-  - " &7- &f/axir <player> &7| &#00aaffOpen restore GUI"
-  - " &7- &f/axir save <*/player> &7| &#00aaffCreate manual backup"
+  - " &7- &f/axir view <player> &7| &#00aaffOpen restore GUI"
+  - " &7- &f/axir save <player> &7| &#00aaffCreate manual backup"
+  - " &7- &f/axir saveall &7| &#00aaffCreate manual backup for all players"
   - " &7- &f/axir reload &7| &#00aaffReload plugin"
   - " &7- &f/axir cleanup &7| &#00aaffDelete old backups (look at config.yml)"
   - " "
@@ -142,5 +143,15 @@ categories:
       - " "
       - "&#AA00FF&l(!) &#AA00FFClick here to view backups!"
 
+commands:
+  invalid-value: "&#FF0000Invalid parameter: &#BB0000%value%"
+  invalid-command: "&#FF0000Invalid command or subcommand!"
+  missing-argument: "&#FF0000Missing argument! You must specify a value for &#BB0000%value%&#FF0000."
+  no-permission: "&#FF0000You don't have permission to access this command!"
+  out-of-range: "&#FF0000The &#BB0000%number% &#FF0000must be between &#BB0000%min% &#FF0000and &#BB0000%max%&#FF0000!"
+  player-only: "&#FF0000You must be a player to use this command!"
+  invalid-player: "&#FF0000The player &#BB0000%player% &#FF0000can not be found!"
+  invalid-selector: "&#FF0000You can not use this selector in this command!"
+
 # do not change this
-version: 4
+version: 5

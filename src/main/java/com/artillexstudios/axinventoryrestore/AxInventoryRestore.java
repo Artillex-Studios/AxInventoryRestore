@@ -9,9 +9,9 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
+import com.artillexstudios.axapi.utils.FastFieldAccessor;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
-import com.artillexstudios.axinventoryrestore.commands.TabComplete;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
@@ -21,12 +21,17 @@ import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
+import com.artillexstudios.axinventoryrestore.utils.CommandMessages;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
-import org.bukkit.Material;
+import org.bukkit.Bukkit;
+import org.bukkit.Warning;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
+import java.util.Locale;
 
 public final class AxInventoryRestore extends AxPlugin {
     public static Config CONFIG;
@@ -100,10 +105,20 @@ public final class AxInventoryRestore extends AxPlugin {
         database.cleanup();
         new RegisterListeners().register();
 
-        this.getCommand("axinventoryrestore").setExecutor(new Commands());
-        this.getCommand("axinventoryrestore").setTabCompleter(new TabComplete());
+        Warning.WarningState prevState = Bukkit.getWarningState();
+        FastFieldAccessor accessor = FastFieldAccessor.forClassField(Bukkit.getServer().getClass().getPackage().getName() + ".CraftServer", "warningState");
+        accessor.set(Bukkit.getServer(), Warning.WarningState.OFF);
+        final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
+        accessor.set(Bukkit.getServer(), prevState);
 
-        new AutoBackupScheduler().start();
+        handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+
+        handler.getTranslator().add(new CommandMessages());
+        handler.setLocale(new Locale("en", "US"));
+
+        handler.register(new Commands());
+
+        AutoBackupScheduler.start();
 
         boolean loadDiscordAddon = CONFIG.getBoolean("enable-discord-addon", false);
         if (loadDiscordAddon && !DISCORD.getString("token").isBlank()) discordAddon = new DiscordAddon();
@@ -111,6 +126,7 @@ public final class AxInventoryRestore extends AxPlugin {
     }
 
     public void disable() {
+        AutoBackupScheduler.stop();
         database.cleanup();
         database.disable();
     }

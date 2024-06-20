@@ -1,17 +1,8 @@
 name: AxInventoryRestore
 version: '${project.version}'
 main: com.artillexstudios.axinventoryrestore.AxInventoryRestore
-api-version: '1.13'
+api-version: '1.18'
 folia-supported: true
-
-commands:
-  axinventoryrestore:
-    usage: /<command>
-    aliases:
-      - axir
-      - axinvrestore
-      - invrestore
-      - inventoryrestore
 
 softdepend:
   - LuckPerms
@@ -35,26 +26,6 @@ permissions:
   axinventoryrestore.cleanup:
     default: op
   axinventoryrestore.admin:
-    default: op
-  axir.view:
-    default: op
-  axir.modify:
-    default: op
-  axir.teleport:
-    default: op
-  axir.restore:
-    default: op
-  axir.export:
-    default: op
-  axir.reload:
-    default: op
-  axir.manualbackup:
-    default: op
-  axir.cleanup:
-    default: op
-  axir.admin:
-    default: op
-  axir.discord-request:
     default: op
   axinventoryrestore.discord-request:
     default: op
