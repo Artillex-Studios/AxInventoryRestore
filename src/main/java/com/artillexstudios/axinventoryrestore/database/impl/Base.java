@@ -12,6 +12,7 @@ import com.artillexstudios.axinventoryrestore.database.Converter3;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
+import com.google.common.collect.HashBiMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -115,15 +116,23 @@ public class Base implements Database {
         }
     }
 
+    private final HashBiMap<Integer, UUID> uuidCache = HashBiMap.create();
+
     @Nullable
     @Override
     public Integer getUserId(@NotNull UUID uuid) {
+        if (uuidCache.containsValue(uuid)) return uuidCache.inverse().get(uuid);
+
         final String sql = "SELECT * FROM axir_users WHERE uuid = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    uuidCache.put(id, uuid);
+                    return id;
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -134,12 +143,18 @@ public class Base implements Database {
     @Nullable
     @Override
     public UUID getUserUUID(int id) {
+        if (uuidCache.containsKey(id)) return uuidCache.get(id);
+
         final String sql = "SELECT * FROM axir_users WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return UUID.fromString(rs.getString(2));
+                if (rs.next()) {
+                    final UUID uuid = UUID.fromString(rs.getString(2));
+                    uuidCache.put(id, uuid);
+                    return uuid;
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -147,15 +162,23 @@ public class Base implements Database {
         return null;
     }
 
+    private final HashBiMap<Integer, String> reasonCache = HashBiMap.create();
+
     @Nullable
     @Override
     public String getReasonName(int id) {
+        if (reasonCache.containsKey(id)) return reasonCache.get(id);
+
         final String sql = "SELECT * FROM axir_reasons WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getString(2);
+                if (rs.next()) {
+                    final String reason = rs.getString(2);
+                    reasonCache.put(id, reason);
+                    return reason;
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -166,6 +189,8 @@ public class Base implements Database {
     @Nullable
     @Override
     public Integer getReasonId(@NotNull String reason) {
+        if (reasonCache.containsValue(reason)) return reasonCache.inverse().get(reason);
+
         final String sql = "INSERT INTO axir_reasons(reason) VALUES (?);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, reason);
@@ -180,7 +205,11 @@ public class Base implements Database {
                 stmt.setString(1, reason);
 
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1);
+                    if (rs.next()) {
+                        int id = rs.getInt(1);
+                        reasonCache.put(id, reason);
+                        return id;
+                    }
                 }
             } catch (SQLException ex2) {
                 ex2.printStackTrace();
@@ -262,8 +291,12 @@ public class Base implements Database {
         throw new RuntimeException("Failed to save inventory!");
     }
 
+    private final HashBiMap<Integer, String> worldCache = HashBiMap.create();
+
     @Override
     public int storeWorld(String world) {
+        if (worldCache.containsValue(world)) return worldCache.inverse().get(world);
+
         final String sql0 = "SELECT id FROM axir_worlds WHERE name = ?";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
             stmt.setString(1, world);
@@ -282,7 +315,9 @@ public class Base implements Database {
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
+                int id = rs.getInt(1);
+                worldCache.put(id, world);
+                if (rs.next()) return id;
             }
 
         } catch (SQLException ex) {
@@ -290,18 +325,23 @@ public class Base implements Database {
         }
 
         throw new RuntimeException("Failed to save world!");
+
     }
 
     @Nullable
     @Override
     public World getWorld(int id) {
+        if (worldCache.containsKey(id)) return Bukkit.getWorld(worldCache.get(id));
+
         final String sql = "SELECT name FROM axir_worlds WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return Bukkit.getWorld(rs.getString(1));
+                    final World world = Bukkit.getWorld(rs.getString(1));
+                    if (world != null) worldCache.put(id, world.getName());
+                    return world;
                 }
             }
         } catch (SQLException ex) {
@@ -324,7 +364,7 @@ public class Base implements Database {
                     final World world = getWorld(rs.getInt(4));
                     if (world == null) continue;
                     backups.add(new BackupData(rs.getInt(1),
-                            getUserUUID(rs.getInt(2)),
+                            uuid,
                             getReasonName(rs.getInt(3)),
                             new Location(world, rs.getInt(5), rs.getInt(6), rs.getInt(7)),
                             rs.getLong(8),
@@ -514,22 +554,22 @@ public class Base implements Database {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, System.currentTimeMillis() - (86_400_000L * AxInventoryRestore.CONFIG.getLong("cleanup-after-days")));
             stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         final String sql2 = "DELETE FROM axir_storage WHERE id not IN ( SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
             stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         final String sql3 = "DELETE FROM axir_worlds WHERE id not IN ( SELECT worldId FROM axir_backups WHERE worldId IS NOT NULL);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql3)) {
             stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 

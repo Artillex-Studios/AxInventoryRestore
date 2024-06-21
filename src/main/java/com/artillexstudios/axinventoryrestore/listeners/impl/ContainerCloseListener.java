@@ -14,6 +14,7 @@ public class ContainerCloseListener implements Listener {
 
     @EventHandler
     public void onClose(@NotNull InventoryCloseEvent event) {
+        if (event.getInventory().getLocation() == null) return;
         var type = event.getInventory().getType();
         if (type != InventoryType.CHEST
                 && type != InventoryType.BARREL

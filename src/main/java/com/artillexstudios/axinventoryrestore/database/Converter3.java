@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,7 +40,7 @@ public class Converter3 {
     }
 
     public boolean insertWorld() {
-        final String sql = "ALTER TABLE AXIR_BACKUPS ADD worldId INT;";
+        final String sql = "ALTER TABLE AXIR_BACKUPS ADD worldId INT AFTER world;";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
             return true;
@@ -61,7 +62,7 @@ public class Converter3 {
     }
 
     public boolean insertInventory() {
-        final String sql = "ALTER TABLE AXIR_BACKUPS ADD inventoryId INT;";
+        final String sql = "ALTER TABLE AXIR_BACKUPS ADD inventoryId INT AFTER inventory;";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
             return true;
@@ -136,8 +137,8 @@ public class Converter3 {
             ItemStack[] items;
             try {
                 items = SerializationUtils.invFromBits(stream);
-                stmt.setInt(1, base.storeItems(Serializers.ITEM_ARRAY.serialize(items)));
-                stmt.setInt(2, base.storeWorld(world));
+                stmt.setInt(1, storeItems(Serializers.ITEM_ARRAY.serialize(items)));
+                stmt.setInt(2, storeWorld(world));
             } catch (Exception ex) {
                 final String sql = "DELETE FROM AXIR_BACKUPS WHERE id = ?;";
                 try (Connection conn = base.getConnection(); PreparedStatement stmt2 = conn.prepareStatement(sql)) {
@@ -160,5 +161,60 @@ public class Converter3 {
             ex.printStackTrace();
             latch.countDown();
         }
+    }
+
+
+    private int storeItems(String items) {
+        final String sql = "INSERT INTO axir_storage(inventory) VALUES (?);";
+        try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, items);
+            stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+
+        } catch (SQLException ex) {
+            final String sql1 = "SELECT id FROM axir_storage WHERE inventory = ?";
+            try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql1)) {
+                stmt.setString(1, items);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException ex2) {
+                ex2.printStackTrace();
+            }
+        }
+
+        throw new RuntimeException("Failed to save inventory!");
+    }
+
+    private int storeWorld(String world) {
+        final String sql = "INSERT INTO axir_worlds(name) VALUES (?);";
+        try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, world);
+            stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+
+        } catch (SQLException ex) {
+            final String sql0 = "SELECT id FROM axir_worlds WHERE name = ?";
+            try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
+                stmt.setString(1, world);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException ex2) {
+                ex2.printStackTrace();
+            }
+        }
+
+        throw new RuntimeException("Failed to save world!");
     }
 }

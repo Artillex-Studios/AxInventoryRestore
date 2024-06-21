@@ -19,10 +19,10 @@ database:
     connection-timeout: 5000
 
 # how long should the plugin keep backups? (in days)
-# this will run at server start/stop and when usign /axir cleanup
+# this will run at server start and when using /axir cleanup
 cleanup-after-days: 14
 
-# should there also be an all category that cointains all the backups of a player?
+# should there also be an all category that contains all the backups of a player?
 enable-all-category: true
 
 # should the plugin make backups periodically?

@@ -102,7 +102,7 @@ public final class AxInventoryRestore extends AxPlugin {
         metrics.addCustomChart(new SimplePie("database_type", () -> database.getType()));
 
         database.setup();
-        database.cleanup();
+        AxInventoryRestore.getThreadedQueue().submit(() -> database.cleanup());
         new RegisterListeners().register();
 
         Warning.WarningState prevState = Bukkit.getWarningState();
@@ -127,7 +127,6 @@ public final class AxInventoryRestore extends AxPlugin {
 
     public void disable() {
         AutoBackupScheduler.stop();
-        database.cleanup();
         database.disable();
     }
 }
