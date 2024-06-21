@@ -32,7 +32,7 @@ public interface Database {
 
     void saveInventory(ItemStack[] items, @NotNull Player player, @NotNull String reason, @Nullable String cause);
 
-    int storeItems(String items);
+    int storeItems(byte[] items);
 
     int storeWorld(String world);
 

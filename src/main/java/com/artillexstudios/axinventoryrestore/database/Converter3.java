@@ -2,6 +2,7 @@ package com.artillexstudios.axinventoryrestore.database;
 
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.database.impl.Base;
 import com.artillexstudios.axinventoryrestore.utils.SerializationUtils;
 import org.bukkit.Bukkit;
@@ -37,6 +38,8 @@ public class Converter3 {
         } else {
             Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxInventoryRestore] Something went wrong while converting!"));
         }
+        base.disable();
+        AxInventoryRestore.getDB().setup();
     }
 
     public boolean insertWorld() {
@@ -164,10 +167,10 @@ public class Converter3 {
     }
 
 
-    private int storeItems(String items) {
+    private int storeItems(byte[] items) {
         final String sql = "INSERT INTO axir_storage(inventory) VALUES (?);";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, items);
+            stmt.setBytes(1, items);
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
@@ -177,7 +180,7 @@ public class Converter3 {
         } catch (SQLException ex) {
             final String sql1 = "SELECT id FROM axir_storage WHERE inventory = ?";
             try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql1)) {
-                stmt.setString(1, items);
+                stmt.setBytes(1, items);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getInt(1);

@@ -25,8 +25,8 @@ public class H2 extends Base {
 
     @Override
     public void setup() {
-        try {
-            conn = new H2Connection("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL;TRACE_LEVEL_FILE=2", new Properties(), null, null, false);
+        try { // ;TRACE_LEVEL_FILE=2
+            conn = new H2Connection("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL", new Properties(), null, null, false);
             conn.setAutoCommit(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
