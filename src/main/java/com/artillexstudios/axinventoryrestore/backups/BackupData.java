@@ -32,14 +32,16 @@ public class BackupData {
     private final long date;
     private final String cause;
     private final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
+    private final int inventoryId;
 
-    public BackupData(int id, @NotNull UUID player, @NotNull String reason, @NotNull Location location, long date, String cause) {
+    public BackupData(int id, @NotNull UUID player, @NotNull String reason, @NotNull Location location, long date, String cause, int inventoryId) {
         this.id = id;
         this.player = player;
         this.reason = reason;
         this.location = location;
         this.date = date;
         this.cause = cause;
+        this.inventoryId = inventoryId;
     }
 
     public int getId() {
@@ -53,7 +55,7 @@ public class BackupData {
     // todo: make the db request async
     public ItemStack[] getItems() {
         if (items == null) {
-            items = AxInventoryRestore.getDB().getItemsFromBackup(id);
+            items = AxInventoryRestore.getDB().getItemsFromBackup(inventoryId);
             for (ItemStack it : this.items) {
                 if (it == null) continue;
                 // axshulkers compatibility

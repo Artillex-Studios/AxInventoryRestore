@@ -45,7 +45,7 @@ public class Base implements Database {
 
     @Override
     public void setup() {
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, world VARCHAR(1024) NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventory VARCHAR NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
+        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, worldId INT NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventoryId INT NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
@@ -72,6 +72,22 @@ public class Base implements Database {
         final String CREATE_TABLE4 = "CREATE TABLE IF NOT EXISTS axir_restorerequests ( id INT(128) NOT NULL AUTO_INCREMENT, backupId INT(128) NOT NULL, granted BOOLEAN, PRIMARY KEY (id));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE4)) {
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        final String CREATE_TABLE5 = "CREATE TABLE IF NOT EXISTS axir_storage (id INT NOT NULL AUTO_INCREMENT, inventory VARCHAR NOT NULL, PRIMARY KEY (id), UNIQUE (inventory));";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE5)) {
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE6)) {
             stmt.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -192,7 +208,7 @@ public class Base implements Database {
 
         if (isEmpty) return;
 
-        final String sql = "INSERT INTO axir_backups(userId, reasonId, world, x, y, z, inventory, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
+        final String sql = "INSERT INTO axir_backups(userId, reasonId, worldId, x, y, z, inventoryId, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
         String inventory = Serializers.ITEM_ARRAY.serialize(items);
         final Location location = player.getLocation();
 
@@ -202,11 +218,11 @@ public class Base implements Database {
                 if (userId == null) return;
                 stmt.setInt(1, userId);
                 stmt.setInt(2, getReasonId(reason));
-                stmt.setString(3, location.getWorld().getName());
+                stmt.setInt(3, storeWorld(location.getWorld().getName()));
                 stmt.setInt(4, location.getBlockX());
                 stmt.setInt(5, location.getBlockY());
                 stmt.setInt(6, location.getBlockZ());
-                stmt.setString(7, inventory);
+                stmt.setInt(7, storeItems(inventory));
                 stmt.setLong(8, System.currentTimeMillis());
                 stmt.setString(9, cause);
                 stmt.executeUpdate();
@@ -217,24 +233,103 @@ public class Base implements Database {
     }
 
     @Override
+    public int storeItems(String items) {
+        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ?";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
+            stmt.setString(1, items);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        final String sql = "INSERT INTO axir_storage(inventory) VALUES (?);";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, items);
+            stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        throw new RuntimeException("Failed to save inventory!");
+    }
+
+    @Override
+    public int storeWorld(String world) {
+        final String sql0 = "SELECT id FROM axir_worlds WHERE name = ?";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
+            stmt.setString(1, world);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        final String sql = "INSERT INTO axir_worlds(name) VALUES (?);";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, world);
+            stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        throw new RuntimeException("Failed to save world!");
+    }
+
+    @Nullable
+    @Override
+    public World getWorld(int id) {
+        final String sql = "SELECT name FROM axir_worlds WHERE id = ?;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Bukkit.getWorld(rs.getString(1));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
-        final String sql = "SELECT id, userid, reasonid, world, x, y, z, time, cause FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
+        final String sql = "SELECT id, userid, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, getUserId(uuid));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    final World world = Bukkit.getWorld(rs.getString(4));
+                    final World world = getWorld(rs.getInt(4));
                     if (world == null) continue;
                     backups.add(new BackupData(rs.getInt(1),
                             getUserUUID(rs.getInt(2)),
                             getReasonName(rs.getInt(3)),
                             new Location(world, rs.getInt(5), rs.getInt(6), rs.getInt(7)),
                             rs.getLong(8),
-                            rs.getString(9))
+                            rs.getString(9),
+                            rs.getInt(10))
                     );
                 }
             }
@@ -333,20 +428,21 @@ public class Base implements Database {
 
     @Override
     public BackupData getBackupDataById(int backupId) {
-        final String sql = "SELECT id, userid, reasonid, world, x, y, z, time, cause FROM axir_backups WHERE id = ?;";
+        final String sql = "SELECT id, userid, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, backupId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    final World world = Bukkit.getWorld(rs.getString(4));
+                    final World world = getWorld(rs.getInt(4));
                     if (world == null) continue;
                     return new BackupData(rs.getInt(1),
                             getUserUUID(rs.getInt(2)),
                             getReasonName(rs.getInt(3)),
                             new Location(world, rs.getInt(5), rs.getInt(6), rs.getInt(7)),
                             rs.getLong(8),
-                            rs.getString(9)
+                            rs.getString(9),
+                            rs.getInt(10)
                     );
                 }
             }
@@ -360,7 +456,7 @@ public class Base implements Database {
 
     @Override
     public ItemStack[] getItemsFromBackup(int backupId) {
-        final String sql = "SELECT inventory FROM axir_backups WHERE id = ?;";
+        final String sql = "SELECT inventory FROM axir_storage WHERE id = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, backupId);
 
@@ -414,9 +510,23 @@ public class Base implements Database {
 
     @Override
     public void cleanup() {
-        final String ex = "DELETE FROM axir_backups WHERE time < ?;";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
+        final String sql = "DELETE FROM axir_backups WHERE time < ?;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, System.currentTimeMillis() - (86_400_000L * AxInventoryRestore.CONFIG.getLong("cleanup-after-days")));
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        final String sql2 = "DELETE FROM axir_storage WHERE id not IN ( SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        final String sql3 = "DELETE FROM axir_worlds WHERE id not IN ( SELECT worldId FROM axir_backups WHERE worldId IS NOT NULL);";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql3)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

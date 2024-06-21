@@ -2,6 +2,7 @@ package com.artillexstudios.axinventoryrestore.database;
 
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,13 @@ public interface Database {
     void saveInventory(@NotNull Player player, @NotNull String reason, @Nullable String cause);
 
     void saveInventory(ItemStack[] items, @NotNull Player player, @NotNull String reason, @Nullable String cause);
+
+    int storeItems(String items);
+
+    int storeWorld(String world);
+
+    @Nullable
+    World getWorld(int id);
 
     Backup getBackupsOfPlayer(@NotNull UUID uuid);
 
