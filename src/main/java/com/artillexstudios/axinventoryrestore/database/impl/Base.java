@@ -31,6 +31,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
@@ -89,12 +90,20 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while creating axir_storage table!", exception);
         }
 
-        final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
+        final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(1024) NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE6)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while creating axir_worlds table!", exception);
+        }
+
+        final String CREATE_INDEX1 = "CREATE INDEX IF NOT EXISTS idx_user ON axir_backups (userId);";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX1)) {
+            stmt.executeUpdate();
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while creating idx_user index!", exception);
         }
 
         try {
@@ -106,10 +115,10 @@ public abstract class Base implements Database {
         }
 
         try (Statement stmt = getConnection().createStatement()) {
-            String query = "SELECT * FROM axir_backups";
+            String query = "SELECT * FROM axir_backups LIMIT 1";
             try (ResultSet rs = stmt.executeQuery(query)) {
                 ResultSetMetaData rsmd = rs.getMetaData();
-                if (rsmd.getColumnType(8) == 2004) {
+                if (rsmd.getColumnName(8).equalsIgnoreCase("inventory")) {
                     new Converter3(this);
                 }
             }
@@ -207,7 +216,11 @@ public abstract class Base implements Database {
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    reasonCache.put(id, reason);
+                    return id;
+                }
             }
         } catch (SQLException ex) {
             final String sql2 = "SELECT * FROM axir_reasons WHERE reason = ? LIMIT 1;";
@@ -273,7 +286,7 @@ public abstract class Base implements Database {
 
     @Override
     public int storeItems(byte[] items) {
-        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ? LIMIT 1;";
+        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
             stmt.setBytes(1, items);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -325,9 +338,11 @@ public abstract class Base implements Database {
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
-                int id = rs.getInt(1);
-                worldCache.put(id, world);
-                if (rs.next()) return id;
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    worldCache.put(id, world);
+                    return id;
+                }
             }
 
         } catch (SQLException exception) {
@@ -368,7 +383,7 @@ public abstract class Base implements Database {
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
-        final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
+        final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ?;";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, getUserId(uuid));
@@ -391,6 +406,7 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while getting backups of player {}!", uuid, exception);
         }
 
+        Collections.reverse(backups);
         return new Backup(backups);
     }
 
@@ -574,14 +590,14 @@ public abstract class Base implements Database {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
-            log.error("An unexpected error occurred while removing restore request!", exception);
+            log.error("An unexpected error occurred while cleaning up!", exception);
         }
 
         final String sql3 = "DELETE FROM axir_worlds WHERE id not IN ( SELECT worldId FROM axir_backups WHERE worldId IS NOT NULL);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql3)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
-            log.error("An unexpected error occurred while removing restore request!", exception);
+            log.error("An unexpected error occurred while cleaning up!", exception);
         }
     }
 

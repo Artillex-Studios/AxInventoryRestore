@@ -2,7 +2,6 @@ prefix: "&#00aaff&lAxInventoryRestore &7» "
 
 database:
   # h2, mysql, postgresql
-  # for single server setups we recommend h2 because it's way faster than sqlite
   type: "h2"
 
   # you only need to touch these when using mysql/postgresql

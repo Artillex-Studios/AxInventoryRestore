@@ -14,9 +14,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Converter3 {
     private final Base base;
@@ -34,7 +36,7 @@ public class Converter3 {
 
         service.shutdown();
         if (success == 5) {
-            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00FF00[AxInventoryRestore] Successful conversion!"));
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00FF00[AxInventoryRestore] Successful conversion! Optimizing database & starting the server.."));
         } else {
             Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxInventoryRestore] Something went wrong while converting!"));
         }
@@ -43,7 +45,7 @@ public class Converter3 {
     }
 
     public boolean insertWorld() {
-        final String sql = "ALTER TABLE AXIR_BACKUPS ADD worldId INT AFTER world;";
+        final String sql = "ALTER TABLE axir_backups ADD worldId INT AFTER world;";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
             return true;
@@ -54,7 +56,7 @@ public class Converter3 {
     }
 
     public boolean deleteWorld() {
-        final String sql = "ALTER TABLE AXIR_BACKUPS DROP COLUMN world;";
+        final String sql = "ALTER TABLE axir_backups DROP COLUMN world;";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
             return true;
@@ -65,7 +67,7 @@ public class Converter3 {
     }
 
     public boolean insertInventory() {
-        final String sql = "ALTER TABLE AXIR_BACKUPS ADD inventoryId INT AFTER inventory;";
+        final String sql = "ALTER TABLE axir_backups ADD inventoryId INT AFTER inventory;";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
             return true;
@@ -76,7 +78,7 @@ public class Converter3 {
     }
 
     public boolean deleteInventory() {
-        final String sql = "ALTER TABLE AXIR_BACKUPS DROP COLUMN inventory;";
+        final String sql = "ALTER TABLE axir_backups DROP COLUMN inventory;";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
             return true;
@@ -87,12 +89,13 @@ public class Converter3 {
     }
 
     private ExecutorService service;
+    private AtomicInteger progress;
 
     public boolean convert() {
         service = Executors.newFixedThreadPool(5);
 
         int am = 0;
-        try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM AXIR_BACKUPS;")) {
+        try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM axir_backups;")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     am = rs.getInt(1);
@@ -104,11 +107,12 @@ public class Converter3 {
         }
 
         final CountDownLatch latch = new CountDownLatch(am);
-        final String sql = "SELECT inventory, id, world FROM AXIR_BACKUPS;";
+        progress = new AtomicInteger(am);
+        final String sql = "SELECT inventory, id, world FROM axir_backups;";
         long time = System.currentTimeMillis();
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
-                PreparedStatement stmt2 = conn.prepareStatement("UPDATE AXIR_BACKUPS SET inventoryId = ?, worldId = ? WHERE id = ?;");
+                PreparedStatement stmt2 = conn.prepareStatement("UPDATE axir_backups SET inventoryId = ?, worldId = ? WHERE id = ?;");
                 while (rs.next()) {
                     var stream = rs.getBinaryStream(1);
                     int id = rs.getInt(2);
@@ -124,6 +128,7 @@ public class Converter3 {
                     ex.printStackTrace();
                 }
 
+                stmt.executeBatch();
                 stmt2.close();
                 Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF6600[AxInventoryRestore] Converted users!"));
             }
@@ -143,7 +148,7 @@ public class Converter3 {
                 stmt.setInt(1, storeItems(Serializers.ITEM_ARRAY.serialize(items)));
                 stmt.setInt(2, storeWorld(world));
             } catch (Exception ex) {
-                final String sql = "DELETE FROM AXIR_BACKUPS WHERE id = ?;";
+                final String sql = "DELETE FROM axir_backups WHERE id = ?;";
                 try (Connection conn = base.getConnection(); PreparedStatement stmt2 = conn.prepareStatement(sql)) {
                     stmt2.setInt(1, id);
                     stmt2.executeUpdate();
@@ -154,11 +159,14 @@ public class Converter3 {
                 return;
             }
             stmt.setInt(3, id);
-            long processed = latch.getCount();
+
+            int processed = progress.getAndDecrement();
             if (processed % 1000 == 0) {
                 Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF6600[AxInventoryRestore] " + processed + " backups remaining (running: " + (System.currentTimeMillis() - time) + "ms)"));
+                stmt.executeBatch();
             }
-            stmt.executeUpdate();
+//            stmt.executeUpdate();
+            stmt.addBatch();
             latch.countDown();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -166,29 +174,26 @@ public class Converter3 {
         }
     }
 
+    private final HashMap<byte[], Integer> cache = new HashMap<>();
 
     private int storeItems(byte[] items) {
+        var res = cache.get(items);
+        if (res != null) return res;
+
         final String sql = "INSERT INTO axir_storage(inventory) VALUES (?);";
         try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setBytes(1, items);
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-
-        } catch (SQLException ex) {
-            final String sql1 = "SELECT id FROM axir_storage WHERE inventory = ?";
-            try (Connection conn = base.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql1)) {
-                stmt.setBytes(1, items);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    cache.put(items, id);
+                    return id;
                 }
-            } catch (SQLException ex2) {
-                ex2.printStackTrace();
             }
+        } catch (SQLException ex2) {
+            ex2.printStackTrace();
         }
 
         throw new RuntimeException("Failed to save inventory!");
