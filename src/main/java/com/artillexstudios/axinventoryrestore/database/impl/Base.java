@@ -126,7 +126,7 @@ public abstract class Base implements Database {
             return userId;
         }
 
-        final String sql = "SELECT * FROM axir_users WHERE uuid = ?;";
+        final String sql = "SELECT * FROM axir_users WHERE uuid = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
 
@@ -151,7 +151,7 @@ public abstract class Base implements Database {
             return uid;
         }
 
-        final String sql = "SELECT * FROM axir_users WHERE id = ?;";
+        final String sql = "SELECT * FROM axir_users WHERE id = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
@@ -176,7 +176,7 @@ public abstract class Base implements Database {
             return cachedReason;
         }
 
-        final String sql = "SELECT * FROM axir_reasons WHERE id = ?;";
+        final String sql = "SELECT * FROM axir_reasons WHERE id = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
@@ -273,7 +273,7 @@ public abstract class Base implements Database {
 
     @Override
     public int storeItems(byte[] items) {
-        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ?";
+        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
             stmt.setBytes(1, items);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -307,7 +307,7 @@ public abstract class Base implements Database {
             return worldId;
         }
 
-        final String sql0 = "SELECT id FROM axir_worlds WHERE name = ?";
+        final String sql0 = "SELECT id FROM axir_worlds WHERE name = ? LIMIT 1";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
             stmt.setString(1, world);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -346,7 +346,7 @@ public abstract class Base implements Database {
             return Bukkit.getWorld(worldName);
         }
 
-        final String sql = "SELECT name FROM axir_worlds WHERE id = ?;";
+        final String sql = "SELECT name FROM axir_worlds WHERE id = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
@@ -368,22 +368,22 @@ public abstract class Base implements Database {
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         final ArrayList<BackupData> backups = new ArrayList<>();
 
-        final String sql = "SELECT id, userid, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
+        final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, getUserId(uuid));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    final World world = getWorld(rs.getInt(4));
+                    final World world = getWorld(rs.getInt(3));
                     if (world == null) continue;
                     backups.add(new BackupData(rs.getInt(1),
                             uuid,
-                            getReasonName(rs.getInt(3)),
-                            new Location(world, rs.getInt(5), rs.getInt(6), rs.getInt(7)),
-                            rs.getLong(8),
-                            rs.getString(9),
-                            rs.getInt(10))
+                            getReasonName(rs.getInt(2)),
+                            new Location(world, rs.getInt(4), rs.getInt(5), rs.getInt(6)),
+                            rs.getLong(7),
+                            rs.getString(8),
+                            rs.getInt(9))
                     );
                 }
             }
@@ -480,7 +480,7 @@ public abstract class Base implements Database {
 
     @Override
     public BackupData getBackupDataById(int backupId) {
-        final String sql = "SELECT id, userid, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE id = ?;";
+        final String sql = "SELECT id, userid, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE id = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, backupId);
 
@@ -508,7 +508,7 @@ public abstract class Base implements Database {
 
     @Override
     public ItemStack[] getItemsFromBackup(int backupId) {
-        final String sql = "SELECT inventory FROM axir_storage WHERE id = ?;";
+        final String sql = "SELECT inventory FROM axir_storage WHERE id = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, backupId);
 
