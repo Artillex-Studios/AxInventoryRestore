@@ -1,6 +1,6 @@
 package com.artillexstudios.axinventoryrestore.backups;
 
-import com.artillexstudios.axapi.utils.ClassUtils;
+import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;

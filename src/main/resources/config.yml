@@ -54,5 +54,12 @@ enabled-backups:
 # check out the discord.yml for more info
 enable-discord-addon: false
 
+# should be plugin notify you if there is a new update?
+update-notifier:
+  # if enabled, it will display the message in the console
+  enabled: true
+  # if enabled, it will broadcast the update message to all players who have the <plugin-name>.update-notify permission
+  on-join: true
+
 # do not change this
-version: 5
+version: 6

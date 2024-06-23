@@ -9,7 +9,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
-import com.artillexstudios.axapi.utils.FastFieldAccessor;
+import com.artillexstudios.axapi.reflection.FastFieldAccessor;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
 import com.artillexstudios.axinventoryrestore.database.Database;
@@ -22,6 +22,7 @@ import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
 import com.artillexstudios.axinventoryrestore.utils.CommandMessages;
+import com.artillexstudios.axinventoryrestore.utils.UpdateNotifier;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
@@ -123,6 +124,8 @@ public final class AxInventoryRestore extends AxPlugin {
         boolean loadDiscordAddon = CONFIG.getBoolean("enable-discord-addon", false);
         if (loadDiscordAddon && !DISCORD.getString("token").isBlank()) discordAddon = new DiscordAddon();
         metrics.addCustomChart(new SimplePie("uses_discord_addon", () -> "" + loadDiscordAddon));
+
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 4610);
     }
 
     public void disable() {

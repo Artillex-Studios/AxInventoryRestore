@@ -52,6 +52,7 @@ public class PreviewGui {
         for (ItemStack it : backupData.getItems()) {
             n++;
             if (it == null) continue;
+            if (it.getType().isAir()) continue;
 
             previewGui.setItem(n, new GuiItem(new ItemBuilder(it.clone()).get(), event -> {
                 if (!PermissionUtils.hasPermission(viewer, "modify")) {

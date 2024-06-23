@@ -1,6 +1,6 @@
 package com.artillexstudios.axinventoryrestore.discord;
 
-import com.artillexstudios.axapi.utils.ClassUtils;
+import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
