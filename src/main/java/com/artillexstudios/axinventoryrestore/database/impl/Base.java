@@ -261,10 +261,11 @@ public abstract class Base implements Database {
         if (isEmpty) return;
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, worldId, x, y, z, inventoryId, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
-        byte[] inventory = Serializers.ITEM_ARRAY.serialize(items);
         final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
+            byte[] inventory = Serializers.ITEM_ARRAY.serialize(items);
+
             try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
                 final Integer userId = getUserId(player.getUniqueId());
                 if (userId == null) return;
