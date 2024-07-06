@@ -39,23 +39,14 @@ public class Commands {
     @CommandPermission("axinventoryrestore.view")
     @AutoComplete("@offlinePlayers")
     public void view(Player sender, String player) {
-        long start = System.nanoTime();
         AxInventoryRestore.getThreadedQueue().submit(() -> {
-            long t1 = System.nanoTime() - start;
-            System.out.println("First took: " + t1 + " nanos!");
-            long s2 = System.nanoTime();
             final UUID uuid = AxInventoryRestore.getDB().getUUID(player);
-            long t2 = System.nanoTime() - s2;
-            System.out.println("Second took: " + t2 + " nanos!");
             if (uuid == null) {
                 MESSAGEUTILS.sendLang(sender, "errors.unknown-player");
                 return;
             }
 
-            long s3 = System.nanoTime();
             final Integer userId = AxInventoryRestore.getDB().getUserId(uuid);
-            long t3 = System.nanoTime() - s3;
-            System.out.println("Third took: " + t3 + " nanos!");
             if (userId == null) {
                 MESSAGEUTILS.sendLang(sender, "errors.unknown-player");
                 return;

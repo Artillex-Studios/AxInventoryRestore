@@ -40,7 +40,7 @@ public final class AxInventoryRestore extends AxPlugin {
     public static Config DISCORD;
     public static MessageUtils MESSAGEUTILS;
     private static AxInventoryRestore instance;
-    private static com.artillexstudios.axinventoryrestore.database.ThreadedQueue<Runnable> threadedQueue;
+    private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
     private static DiscordAddon discordAddon = null;
 
@@ -84,7 +84,7 @@ public final class AxInventoryRestore extends AxPlugin {
         DISCORD = new Config(new File(getDataFolder(), "discord.yml"), getResource("discord.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
         WebHooks.reload();
-        threadedQueue = new com.artillexstudios.axinventoryrestore.database.ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
+        threadedQueue = new ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
 
