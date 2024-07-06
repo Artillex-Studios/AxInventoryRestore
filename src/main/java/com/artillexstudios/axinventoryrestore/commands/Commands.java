@@ -39,21 +39,32 @@ public class Commands {
     @CommandPermission("axinventoryrestore.view")
     @AutoComplete("@offlinePlayers")
     public void view(Player sender, String player) {
+        long start = System.nanoTime();
         AxInventoryRestore.getThreadedQueue().submit(() -> {
+            long t1 = System.nanoTime() - start;
+            System.out.println("First took: " + t1 + " nanos!");
+            long s2 = System.nanoTime();
             final UUID uuid = AxInventoryRestore.getDB().getUUID(player);
+            long t2 = System.nanoTime() - s2;
+            System.out.println("Second took: " + t2 + " nanos!");
             if (uuid == null) {
                 MESSAGEUTILS.sendLang(sender, "errors.unknown-player");
                 return;
             }
 
+            long s3 = System.nanoTime();
             final Integer userId = AxInventoryRestore.getDB().getUserId(uuid);
+            long t3 = System.nanoTime() - s3;
+            System.out.println("Third took: " + t3 + " nanos!");
             if (userId == null) {
                 MESSAGEUTILS.sendLang(sender, "errors.unknown-player");
                 return;
             }
 
             final String name = Bukkit.getOfflinePlayer(uuid).getName();
-            Scheduler.get().runAt(sender.getLocation(), t -> new MainGui(uuid, sender, name == null ? player : name).openMainGui());
+            Scheduler.get().runAt(sender.getLocation(), t -> {
+                new MainGui(uuid, sender, name == null ? player : name).openMainGui();
+            });
         });
     }
 
@@ -97,7 +108,7 @@ public class Commands {
     public void save(CommandSender sender, Player player) {
         final String cause = MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
-        AxInventoryRestore.getThreadedQueue().submit(() -> AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause));
+        AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause);
         MESSAGEUTILS.sendLang(sender, "manual-backup", Map.of("%player%", player.getName()));
     }
 
@@ -106,11 +117,9 @@ public class Commands {
     public void saveall(CommandSender sender) {
         final String cause = MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
-        AxInventoryRestore.getThreadedQueue().submit(() -> {
-            for (Player pl : Bukkit.getOnlinePlayers()) {
-                AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
-            }
-        });
+        for (Player pl : Bukkit.getOnlinePlayers()) {
+            AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
+        }
 
         MESSAGEUTILS.sendLang(sender, "manual-backup-all");
     }

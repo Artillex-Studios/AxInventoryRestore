@@ -107,7 +107,7 @@ public abstract class Base implements Database {
         }
 
         try {
-            if (SQLUtils.tableExist(getConnection(), "axinventoryrestore_data"))  {
+            if (SQLUtils.tableExist(getConnection(), "axinventoryrestore_data")) {
                 new Converter2(this);
             }
         } catch (Exception exception) {

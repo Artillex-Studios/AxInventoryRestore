@@ -16,7 +16,7 @@ public class JoinListener implements Listener {
         AxInventoryRestore.getThreadedQueue().submit(() -> {
             AxInventoryRestore.getDB().join(event.getPlayer());
             AxInventoryRestore.getDB().fetchRestoreRequests(event.getPlayer().getUniqueId());
-            AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "JOIN", null);
         });
+        AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "JOIN", null);
     }
 }
