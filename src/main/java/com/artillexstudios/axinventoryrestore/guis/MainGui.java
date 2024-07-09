@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
+import com.artillexstudios.axinventoryrestore.queue.Priority;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
@@ -71,7 +72,7 @@ public class MainGui {
                 }));
                 mainGui.update();
             }
-        });
+        }, Priority.HIGH);
 
         // Previous item
         mainGui.setItem(rows, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> mainGui.previous()));

@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
+import com.artillexstudios.axinventoryrestore.queue.Priority;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -76,7 +77,7 @@ public class CategoryGui {
                 }
             }
             categoryGui.update();
-        });
+        }, Priority.HIGH);
 
 
         // Previous item
