@@ -293,7 +293,7 @@ public abstract class Base implements Database {
 
     @Override
     public int storeItems(byte[] items) {
-        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ?;";
+        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ? LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
             stmt.setBytes(1, items);
             try (ResultSet rs = stmt.executeQuery()) {
