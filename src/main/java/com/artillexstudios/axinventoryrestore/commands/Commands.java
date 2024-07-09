@@ -5,6 +5,7 @@ import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
+import com.artillexstudios.axinventoryrestore.queue.Priority;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -56,7 +57,7 @@ public class Commands {
             Scheduler.get().runAt(sender.getLocation(), t -> {
                 new MainGui(uuid, sender, name == null ? player : name).openMainGui();
             });
-        });
+        }, Priority.HIGH);
     }
 
     @Subcommand("reload")

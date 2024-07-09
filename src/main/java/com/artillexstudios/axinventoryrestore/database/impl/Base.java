@@ -248,7 +248,9 @@ public abstract class Base implements Database {
 
     @Override
     public void saveInventory(ItemStack[] items, @NotNull Player player, @NotNull String reason, @Nullable String cause) {
-        if (AxirEvents.callInventoryBackupEvent(player, reason, cause)) return;
+        if (AxirEvents.callInventoryBackupEvent(player, reason, cause)) {
+            return;
+        }
 
         boolean isEmpty = true;
 
@@ -258,7 +260,9 @@ public abstract class Base implements Database {
             break;
         }
 
-        if (isEmpty) return;
+        if (isEmpty) {
+            return;
+        }
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, worldId, x, y, z, inventoryId, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
         final Location location = player.getLocation();
@@ -268,7 +272,9 @@ public abstract class Base implements Database {
 
             try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
                 final Integer userId = getUserId(player.getUniqueId());
-                if (userId == null) return;
+                if (userId == null) {
+                    return;
+                }
                 stmt.setInt(1, userId);
                 stmt.setInt(2, getReasonId(reason));
                 stmt.setInt(3, storeWorld(location.getWorld().getName()));
@@ -305,7 +311,9 @@ public abstract class Base implements Database {
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while storing items!", exception);

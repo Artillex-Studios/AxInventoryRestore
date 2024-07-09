@@ -2,7 +2,7 @@ package com.artillexstudios.axinventoryrestore;
 
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
-import com.artillexstudios.axapi.data.ThreadedQueue;
+import com.artillexstudios.axinventoryrestore.queue.PriorityThreadedQueue;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.dvs.versioning.BasicVersioning;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.DumperSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
@@ -40,7 +40,7 @@ public final class AxInventoryRestore extends AxPlugin {
     public static Config DISCORD;
     public static MessageUtils MESSAGEUTILS;
     private static AxInventoryRestore instance;
-    private static ThreadedQueue<Runnable> threadedQueue;
+    private static PriorityThreadedQueue<Runnable> threadedQueue;
     private static Database database;
     private static DiscordAddon discordAddon = null;
 
@@ -57,7 +57,7 @@ public final class AxInventoryRestore extends AxPlugin {
         return database;
     }
 
-    public static ThreadedQueue<Runnable> getThreadedQueue() {
+    public static PriorityThreadedQueue<Runnable> getThreadedQueue() {
         return threadedQueue;
     }
 
@@ -84,7 +84,7 @@ public final class AxInventoryRestore extends AxPlugin {
         DISCORD = new Config(new File(getDataFolder(), "discord.yml"), getResource("discord.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
         WebHooks.reload();
-        threadedQueue = new ThreadedQueue<>("AxInventoryRestore-Datastore-thread");
+        threadedQueue = new PriorityThreadedQueue<>("AxInventoryRestore-Datastore-thread");
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
 
@@ -130,6 +130,7 @@ public final class AxInventoryRestore extends AxPlugin {
 
     public void disable() {
         AutoBackupScheduler.stop();
+        threadedQueue.stop();
         database.disable();
     }
 }
