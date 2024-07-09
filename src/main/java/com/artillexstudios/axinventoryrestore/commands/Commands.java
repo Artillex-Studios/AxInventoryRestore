@@ -20,6 +20,7 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
@@ -91,8 +92,7 @@ public class Commands {
     @Subcommand("cleanup")
     @CommandPermission("axinventoryrestore.cleanup")
     public void cleanup(CommandSender sender) {
-        AxInventoryRestore.getThreadedQueue().submit(() -> AxInventoryRestore.getDB().cleanup());
-        MESSAGEUTILS.sendLang(sender, "cleaned-up");
+        CompletableFuture.runAsync(() -> AxInventoryRestore.getDB().cleanup()).thenRun(() -> MESSAGEUTILS.sendLang(sender, "cleaned-up"));
     }
 
     @Subcommand("save")

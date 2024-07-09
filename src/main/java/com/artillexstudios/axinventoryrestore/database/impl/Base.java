@@ -31,19 +31,19 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
 
 public abstract class Base implements Database {
     private static final Logger log = LoggerFactory.getLogger(Base.class);
+    private static volatile boolean shutdown = false;
     private final HashBiMap<Integer, UUID> uuidCache = HashBiMap.create();
     private final HashBiMap<Integer, String> reasonCache = HashBiMap.create();
     private final HashBiMap<Integer, String> worldCache = HashBiMap.create();
-    private static volatile boolean shutdown = false;
 
     public abstract Connection getConnection();
 
@@ -277,18 +277,36 @@ public abstract class Base implements Database {
         AxInventoryRestore.getThreadedQueue().submit(() -> {
             byte[] inventory = Serializers.ITEM_ARRAY.serialize(items);
 
-            try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-                final Integer userId = getUserId(player.getUniqueId());
-                if (userId == null) {
-                    return;
+            final Integer userId = getUserId(player.getUniqueId());
+            if (userId == null) {
+                return;
+            }
+
+            // It is most likely that the inventory is the same for the same user in the last backup
+            // Sadly this costs more storage space, but it should be a lot faster
+            Integer storedId = null;
+            Integer backupId = getLastBackupInventoryId(userId);
+            if (backupId != null) {
+                byte[] bytes = getBytesFromBackup(backupId);
+                if (bytes != null) {
+                    if (Arrays.equals(inventory, bytes)) {
+                        storedId = backupId;
+                    }
                 }
+            }
+
+            if (storedId == null) {
+                storedId = storeItems(inventory);
+            }
+
+            try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, userId);
                 stmt.setInt(2, getReasonId(reason));
                 stmt.setInt(3, storeWorld(location.getWorld().getName()));
                 stmt.setInt(4, location.getBlockX());
                 stmt.setInt(5, location.getBlockY());
                 stmt.setInt(6, location.getBlockZ());
-                stmt.setInt(7, storeItems(inventory));
+                stmt.setInt(7, storedId);
                 stmt.setLong(8, System.currentTimeMillis());
                 stmt.setString(9, cause);
                 stmt.executeUpdate();
@@ -300,18 +318,6 @@ public abstract class Base implements Database {
 
     @Override
     public int storeItems(byte[] items) {
-        final String sql0 = "SELECT id FROM axir_storage WHERE inventory = ? LIMIT 1;";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql0)) {
-            stmt.setBytes(1, items);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (SQLException exception) {
-            log.error("An unexpected error occurred while storing items!", exception);
-        }
-
         final String sql = "INSERT INTO axir_storage(inventory) VALUES (?);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setBytes(1, items);
@@ -426,6 +432,21 @@ public abstract class Base implements Database {
         return new Backup(backups);
     }
 
+    public Integer getLastBackupInventoryId(int userId) {
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT inventoryId FROM axir_backups WHERE userId = ? ORDER BY id DESC LIMIT 1;")) {
+            statement.setInt(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("inventoryId");
+                }
+            }
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while getting last backup id for usre {}!", userId, exception);
+        }
+
+        return null;
+    }
+
     @Override
     public void join(@NotNull Player player) {
         final String sql = "INSERT INTO axir_users(uuid, name) VALUES (?,?);";
@@ -533,6 +554,22 @@ public abstract class Base implements Database {
 
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while getting backup data by id {}!", backupId, exception);
+        }
+
+        return null;
+    }
+
+    public byte[] getBytesFromBackup(int backupId) {
+        final String sql = "SELECT inventory FROM axir_storage WHERE id = ? LIMIT 1;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, backupId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getBytes(1);
+            }
+
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while getting items from backup by id {}!", backupId, exception);
         }
 
         return null;
