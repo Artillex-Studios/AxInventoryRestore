@@ -36,6 +36,7 @@ public class H2 extends Base {
 
     @Override
     public void disable() {
+        super.disable();
         final String sql = "SHUTDOWN COMPACT;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             if (CONFIG.getBoolean("compact-database", true))

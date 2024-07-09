@@ -33,6 +33,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
@@ -42,6 +43,7 @@ public abstract class Base implements Database {
     private final HashBiMap<Integer, UUID> uuidCache = HashBiMap.create();
     private final HashBiMap<Integer, String> reasonCache = HashBiMap.create();
     private final HashBiMap<Integer, String> worldCache = HashBiMap.create();
+    private static volatile boolean shutdown = false;
 
     public abstract Connection getConnection();
 
@@ -248,6 +250,11 @@ public abstract class Base implements Database {
 
     @Override
     public void saveInventory(ItemStack[] items, @NotNull Player player, @NotNull String reason, @Nullable String cause) {
+        if (shutdown) {
+            // Don't try to save if the database is already closed
+            return;
+        }
+
         if (AxirEvents.callInventoryBackupEvent(player, reason, cause)) {
             return;
         }
@@ -612,5 +619,6 @@ public abstract class Base implements Database {
 
     @Override
     public void disable() {
+        shutdown = true;
     }
 }

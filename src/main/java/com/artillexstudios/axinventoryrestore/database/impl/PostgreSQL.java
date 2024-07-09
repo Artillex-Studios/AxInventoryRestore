@@ -48,6 +48,7 @@ public class PostgreSQL extends Base {
 
     @Override
     public void disable() {
+        super.disable();
         try {
             dataSource.close();
         } catch (Exception ex) {
