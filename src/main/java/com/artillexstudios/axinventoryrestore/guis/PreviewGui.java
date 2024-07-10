@@ -48,99 +48,107 @@ public class PreviewGui {
     }
 
     public void openPreviewGui() {
-        int n = -1;
-        for (ItemStack it : backupData.getItems()) {
-            n++;
-            if (it == null) continue;
-            if (it.getType().isAir()) continue;
+        backupData.getItems().thenAccept(items -> {
+            int n = -1;
 
-            previewGui.setItem(n, new GuiItem(new ItemBuilder(it.clone()).get(), event -> {
-                if (!PermissionUtils.hasPermission(viewer, "modify")) {
-                    event.setCancelled(true);
-                    return;
-                }
+            for (ItemStack it : items) {
+                n++;
+                if (it == null) continue;
+                if (it.getType().isAir()) continue;
 
-                event.setCurrentItem(it);
+                previewGui.setItem(n, new GuiItem(it, event -> {
+                    if (!PermissionUtils.hasPermission(viewer, "modify")) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    event.setCurrentItem(it);
+                }));
+            }
+
+            int starter = 46;
+            final DiscordAddon discordAddon = AxInventoryRestore.getDiscordAddon();
+            if (discordAddon != null) starter = 45;
+
+            previewGui.setItem(starter, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get(), event -> {
+                lastGui.open(viewer, pageNum);
+                event.setCancelled(true);
             }));
-        }
 
-        int starter = 46;
-        final DiscordAddon discordAddon = AxInventoryRestore.getDiscordAddon();
-        if (discordAddon != null) starter = 45;
-
-        previewGui.setItem(starter, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get(), event -> {
-            lastGui.open(viewer, pageNum);
-            event.setCancelled(true);
-        }));
-
-        previewGui.setItem(starter + 2, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.teleport"), Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).get(), event -> {
-            event.setCancelled(true);
-
-            if (!PermissionUtils.hasPermission(viewer, "teleport")) {
-                MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
-                return;
-            }
-
-            PaperUtils.teleportAsync(viewer, backupData.getLocation());
-            viewer.closeInventory();
-        }));
-
-        boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
-        previewGui.setItem(starter + 4, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.quick-restore" + (isEnder ? "-ender-chest" : ""))).get(), event -> {
-            event.setCancelled(true);
-
-            if (!PermissionUtils.hasPermission(viewer, "restore")) {
-                MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
-                return;
-            }
-
-            final Player player = Bukkit.getPlayer(restoreUser);
-            if (player == null) {
-                MESSAGEUTILS.sendLang(viewer, "errors.player-offline");
-                return;
-            }
-
-            if (AxirEvents.callInventoryRestoreEvent(viewer, backupData)) return;
-
-            int n2 = 0;
-            for (ItemStack it : backupData.getItems()) {
-                if (it == null) it = new ItemStack(Material.AIR);
-
-                if (isEnder)
-                    player.getEnderChest().setItem(n2, it);
-                else
-                    player.getInventory().setItem(n2, it);
-                n2++;
-            }
-        }));
-
-        previewGui.setItem(starter + 6, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.export-as-shulker"), Map.of("%shulker-amount%", Integer.toString(backupData.getInShulkers(viewer.getName()).size()))).get(), event -> {
-            event.setCancelled(true);
-
-            if (!PermissionUtils.hasPermission(viewer, "export")) {
-                MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
-                return;
-            }
-
-            AxirEvents.callBackupExportEvent(viewer, backupData);
-
-            for (ItemStack it : backupData.getInShulkers(viewer.getName())) {
-                viewer.getInventory().addItem(it);
-            }
-        }));
-
-        if (discordAddon != null) {
-            previewGui.setItem(starter + 8, new GuiItem(discordAddon.getRequestItem(), event -> {
+            previewGui.setItem(starter + 2, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.teleport"), Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).get(), event -> {
                 event.setCancelled(true);
 
-                if (!PermissionUtils.hasPermission(viewer, "discord-request")) {
+                if (!PermissionUtils.hasPermission(viewer, "teleport")) {
                     MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
                     return;
                 }
 
-                discordAddon.sendRequest((Player) event.getWhoClicked(), backupData);
+                PaperUtils.teleportAsync(viewer, backupData.getLocation());
+                viewer.closeInventory();
             }));
-        }
+
+            boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
+            previewGui.setItem(starter + 4, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.quick-restore" + (isEnder ? "-ender-chest" : ""))).get(), event -> {
+                event.setCancelled(true);
+
+                if (!PermissionUtils.hasPermission(viewer, "restore")) {
+                    MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
+                    return;
+                }
+
+                final Player player = Bukkit.getPlayer(restoreUser);
+                if (player == null) {
+                    MESSAGEUTILS.sendLang(viewer, "errors.player-offline");
+                    return;
+                }
+
+                if (AxirEvents.callInventoryRestoreEvent(viewer, backupData)) return;
+
+                int n2 = 0;
+                for (ItemStack it : items) {
+                    if (it == null) it = new ItemStack(Material.AIR);
+
+                    if (isEnder)
+                        player.getEnderChest().setItem(n2, it);
+                    else
+                        player.getInventory().setItem(n2, it);
+                    n2++;
+                }
+            }));
+
+            final int starterFinal = starter;
+            backupData.getInShulkers(viewer.getName()).thenAccept(item -> {
+                previewGui.setItem(starterFinal + 6, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.export-as-shulker"), Map.of("%shulker-amount%", Integer.toString(item.size()))).get(), event -> {
+                    event.setCancelled(true);
+
+                    if (!PermissionUtils.hasPermission(viewer, "export")) {
+                        MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
+                        return;
+                    }
+
+                    AxirEvents.callBackupExportEvent(viewer, backupData);
+
+                    for (ItemStack i : item) {
+                        viewer.getInventory().addItem(i);
+                    }
+                }));
+            });
+
+            if (discordAddon != null) {
+                previewGui.setItem(starter + 8, new GuiItem(discordAddon.getRequestItem(), event -> {
+                    event.setCancelled(true);
+
+                    if (!PermissionUtils.hasPermission(viewer, "discord-request")) {
+                        MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
+                        return;
+                    }
+
+                    discordAddon.sendRequest((Player) event.getWhoClicked(), backupData);
+                }));
+            }
+
+            previewGui.update();
+        });
 
         previewGui.open(viewer);
     }

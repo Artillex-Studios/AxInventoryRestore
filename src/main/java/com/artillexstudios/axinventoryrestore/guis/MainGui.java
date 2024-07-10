@@ -68,7 +68,9 @@ public class MainGui {
                 }
 
                 mainGui.addItem(new GuiItem(item, event -> {
-                    new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
+                    Scheduler.get().run(task -> {
+                        new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
+                    });
                 }));
                 mainGui.update();
             }

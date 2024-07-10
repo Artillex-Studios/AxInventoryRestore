@@ -2,9 +2,7 @@ package com.artillexstudios.axinventoryrestore.guis;
 
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
-import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
-import com.artillexstudios.axinventoryrestore.queue.Priority;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -52,33 +50,30 @@ public class CategoryGui {
         categoryGui.clearPageItems();
 
         final CategoryGui cGui = this;
-        AxInventoryRestore.getThreadedQueue().submit(() -> {
-            int n = 1;
-            for (BackupData backupData : backupDataList) {
-                final Map<String, String> replacements = new HashMap<>();
+        int n = 1;
+        for (BackupData backupData : backupDataList) {
+            final Map<String, String> replacements = new HashMap<>();
 
-                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                final Date resultdate = new Date(backupData.getDate());
-                replacements.put("%date%", sdf.format(resultdate));
-                replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
-                replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            final Date resultdate = new Date(backupData.getDate());
+            replacements.put("%date%", sdf.format(resultdate));
+            replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
+            replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
-                final ItemStack it = new ItemBuilder(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
-                it.setAmount(n);
+            final ItemStack it = new ItemBuilder(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
+            it.setAmount(n);
 
-                categoryGui.addItem(new GuiItem(it, event -> {
-                    new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
-                }));
+            categoryGui.addItem(new GuiItem(it, event -> {
+                new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
+            }));
 
-                n++;
-                if (n > 64) {
-                    categoryGui.update();
-                    n = 1;
-                }
+            n++;
+            if (n > 64) {
+                categoryGui.update();
+                n = 1;
             }
-            categoryGui.update();
-        }, Priority.HIGH);
-
+        }
+        categoryGui.update();
 
         // Previous item
         categoryGui.setItem(rows, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> categoryGui.previous()));

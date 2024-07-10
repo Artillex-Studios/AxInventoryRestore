@@ -605,8 +605,8 @@ public abstract class Base implements Database {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     final BackupData backupData = getBackupDataById(rs.getInt(2));
-                    Scheduler.get().run(scheduledTask -> ContainerUtils.INSTANCE.addOrDrop(player.getInventory(), backupData.getInShulkers("---"), player.getLocation()));
 
+                    backupData.getInShulkers("---").thenAccept(items -> Scheduler.get().run(scheduledTask -> ContainerUtils.INSTANCE.addOrDrop(player.getInventory(), items, player.getLocation())));
                     player.sendMessage(StringUtils.formatToString(CONFIG.getString("prefix") + DISCORD.getString("messages.restored")));
                     int id = rs.getInt(1);
                     removeRestoreRequest(id);
