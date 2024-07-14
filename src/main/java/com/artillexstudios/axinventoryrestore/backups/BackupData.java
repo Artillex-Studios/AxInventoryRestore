@@ -63,6 +63,7 @@ public class BackupData {
             ItemStack[] items = AxInventoryRestore.getDB().getItemsFromBackup(inventoryId);
             if (!ClassUtils.INSTANCE.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
                 future.complete(items);
+                return;
             }
 
             List<CompletableFuture<ItemStack>> futures = new ArrayList<>();
