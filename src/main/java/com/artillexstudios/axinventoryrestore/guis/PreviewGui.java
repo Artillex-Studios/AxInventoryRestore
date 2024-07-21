@@ -132,6 +132,7 @@ public class PreviewGui {
                         viewer.getInventory().addItem(i);
                     }
                 }));
+                previewGui.update();
             });
 
             if (discordAddon != null) {
