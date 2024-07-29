@@ -100,7 +100,7 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while creating axir_worlds table!", exception);
         }
 
-        final String CREATE_INDEX1 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(768) NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
+        final String CREATE_INDEX1 = "ALTER axir_backups table_name ADD INDEX (userId);";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX1)) {
             stmt.executeUpdate();
