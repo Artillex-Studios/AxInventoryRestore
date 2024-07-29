@@ -100,12 +100,11 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while creating axir_worlds table!", exception);
         }
 
-        final String CREATE_INDEX1 = "CREATE INDEX IF NOT EXISTS idx_user ON axir_backups (userId);";
+        final String CREATE_INDEX1 = "CREATE INDEX idx_user ON axir_backups (userId);";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX1)) {
             stmt.executeUpdate();
-        } catch (SQLException exception) {
-            log.error("An unexpected error occurred while creating idx_user index!", exception);
+        } catch (SQLException ignored) {
         }
 
         try {
