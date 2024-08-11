@@ -8,7 +8,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
-import com.artillexstudios.axapi.reflection.FastFieldAccessor;
+import com.artillexstudios.axapi.utils.FeatureFlags;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
 import com.artillexstudios.axinventoryrestore.database.Database;
@@ -26,7 +26,6 @@ import com.artillexstudios.axinventoryrestore.utils.UpdateNotifier;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
-import org.bukkit.Warning;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
@@ -106,11 +105,7 @@ public final class AxInventoryRestore extends AxPlugin {
         AxInventoryRestore.getThreadedQueue().submit(() -> database.cleanup());
         new RegisterListeners().register();
 
-        Warning.WarningState prevState = Bukkit.getWarningState();
-        FastFieldAccessor accessor = FastFieldAccessor.forClassField(Bukkit.getServer().getClass().getPackage().getName() + ".CraftServer", "warningState");
-        accessor.set(Bukkit.getServer(), Warning.WarningState.OFF);
         final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
-        accessor.set(Bukkit.getServer(), prevState);
 
         handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
 
@@ -132,5 +127,9 @@ public final class AxInventoryRestore extends AxPlugin {
         AutoBackupScheduler.stop();
         threadedQueue.stop();
         database.disable();
+    }
+
+    public void updateFlags() {
+        FeatureFlags.USE_LEGACY_HEX_FORMATTER.set(true);
     }
 }
