@@ -7,6 +7,7 @@ import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.queue.Priority;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
+import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -101,6 +102,7 @@ public class Commands {
         final String cause = MESSAGES.getString("manual-created-by").replace("%player%", sender.getName());
 
         AxInventoryRestore.getDB().saveInventory(player, "MANUAL", cause);
+        BackupLimiter.tryLimit(player.getUniqueId(), "manual", "MANUAL");
         MESSAGEUTILS.sendLang(sender, "manual-backup", Map.of("%player%", player.getName()));
     }
 
@@ -111,6 +113,7 @@ public class Commands {
 
         for (Player pl : Bukkit.getOnlinePlayers()) {
             AxInventoryRestore.getDB().saveInventory(pl, "MANUAL", cause);
+            BackupLimiter.tryLimit(pl.getUniqueId(), "manual", "MANUAL");
         }
 
         MESSAGEUTILS.sendLang(sender, "manual-backup-all");

@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -18,5 +19,6 @@ public class JoinListener implements Listener {
             AxInventoryRestore.getDB().fetchRestoreRequests(event.getPlayer().getUniqueId());
         });
         AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "JOIN", null);
+        BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "join", "JOIN");
     }
 }

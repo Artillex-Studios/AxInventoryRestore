@@ -592,6 +592,54 @@ public abstract class Base implements Database {
     }
 
     @Override
+    public int getSaves(UUID uuid, @Nullable String reason) {
+        String noReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ?;";
+        String withReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ? AND reasonId = ?;";
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(reason == null ? noReason : withReason)) {
+            statement.setInt(1, getUserId(uuid));
+            if (reason != null) {
+                statement.setInt(2, getReasonId(reason));
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while getting save-count for {}!", uuid, exception);
+            return -1;
+        }
+    }
+
+    @Override
+    public void removeLastSaves(UUID uuid, @Nullable String reason, int amount) {
+        final String noReason = "DELETE FROM axir_backups WHERE id IN (SELECT id FROM axir_backups WHERE userId = ? ORDER BY time ASC LIMIT ?);";
+        final String withReason = "DELETE FROM axir_backups WHERE id IN (SELECT id FROM axir_backups WHERE userId = ? AND reasonId = ? ORDER BY time ASC LIMIT ?);";
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(reason == null ? noReason : withReason)) {
+            if (reason == null) {
+                statement.setInt(1, getUserId(uuid));
+                statement.setInt(2, amount);
+            } else {
+                statement.setInt(1, getUserId(uuid));
+                statement.setInt(2, getReasonId(reason));
+                statement.setInt(3, amount);
+            }
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while removing last save for {}!", uuid, exception);
+        }
+
+        final String sql2 = "DELETE FROM axir_storage WHERE id not IN ( SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
+            stmt.executeUpdate();
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while cleaning up!", exception);
+        }
+    }
+
+    @Override
     public void fetchRestoreRequests(@NotNull UUID uuid) {
         if (AxInventoryRestore.getDiscordAddon() == null) return;
         final Player player = Bukkit.getPlayer(uuid);

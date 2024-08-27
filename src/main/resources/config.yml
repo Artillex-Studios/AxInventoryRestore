@@ -51,6 +51,20 @@ enabled-backups:
   world-change: true
   container-close: true
 
+# how many saves should we allow per player in these categories?
+# set to -1 to allow unlimited
+# you can add your own categories here, that you save to via the api
+save-limits:
+  ender-chest: -1
+  death: -1
+  join: -1
+  quit: -1
+  world-change: -1
+  container-close: -1
+  manual: -1
+  automatic: -1
+  total: -1
+
 # check out the discord.yml for more info
 enable-discord-addon: false
 
@@ -62,4 +76,4 @@ update-notifier:
   on-join: true
 
 # do not change this
-version: 6
+version: 7
