@@ -260,7 +260,7 @@ public abstract class Base implements Database {
 
         boolean isEmpty = true;
 
-        for (ItemStack it : player.getInventory().getContents()) {
+        for (ItemStack it : items) {
             if (it == null || it.getType().isAir()) continue;
             isEmpty = false;
             break;
