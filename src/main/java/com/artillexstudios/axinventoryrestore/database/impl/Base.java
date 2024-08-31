@@ -631,8 +631,9 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while removing last save for {}!", uuid, exception);
         }
 
-        final String sql2 = "DELETE FROM axir_storage WHERE id not IN ( SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
+        final String sql2 = "DELETE FROM axir_storage WHERE id not IN (SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL LIMIT ?);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
+            stmt.setInt(1, amount);
             stmt.executeUpdate();
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while cleaning up!", exception);
