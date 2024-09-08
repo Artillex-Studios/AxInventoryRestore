@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -15,5 +16,6 @@ public class WorldChangeListener implements Listener {
         if (!CONFIG.getBoolean("enabled-backups.world-change", true)) return;
         final String cause = event.getFrom().getName() + " -> " + event.getPlayer().getWorld().getName();
         AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "WORLD_CHANGE", cause);
+        BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "world-change", "WORLD_CHANGE");
     }
 }

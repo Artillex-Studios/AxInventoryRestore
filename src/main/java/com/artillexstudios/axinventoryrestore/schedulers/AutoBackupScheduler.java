@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.schedulers;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -32,6 +33,7 @@ public class AutoBackupScheduler {
         future = executor.scheduleAtFixedRate(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 AxInventoryRestore.getDB().saveInventory(player, "AUTOMATIC", null);
+                BackupLimiter.tryLimit(player.getUniqueId(), "automatic", "AUTOMATIC");
             }
         }, backupTime, backupTime, TimeUnit.SECONDS);
     }
