@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,6 +45,7 @@ public abstract class Base implements Database {
     private final HashBiMap<Integer, UUID> uuidCache = HashBiMap.create();
     private final HashBiMap<Integer, String> reasonCache = HashBiMap.create();
     private final HashBiMap<Integer, String> worldCache = HashBiMap.create();
+    private long lastClear = 0;
 
     public abstract Connection getConnection();
 
@@ -631,13 +633,17 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while removing last save for {}!", uuid, exception);
         }
 
-        clean(amount);
+        clean();
     }
 
-    private void clean(int amount) {
-        final String sql2 = "DELETE FROM axir_storage WHERE id not IN (SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL LIMIT ?);";
+    private void clean() {
+        if (System.currentTimeMillis() - lastClear < Duration.ofSeconds(60).toMillis()) {
+            return;
+        }
+        lastClear = System.currentTimeMillis();
+
+        final String sql2 = "DELETE FROM axir_storage WHERE id not IN (SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
-            stmt.setInt(1, amount);
             stmt.executeUpdate();
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while cleaning up!", exception);
