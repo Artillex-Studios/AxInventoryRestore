@@ -92,7 +92,7 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while creating axir_storage table!", exception);
         }
 
-        final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(1024) NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
+        final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE6)) {
             stmt.executeUpdate();
