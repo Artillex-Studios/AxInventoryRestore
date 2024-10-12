@@ -45,13 +45,13 @@ public class Commands {
         AxInventoryRestore.getThreadedQueue().submit(() -> {
             final UUID uuid = AxInventoryRestore.getDB().getUUID(player);
             if (uuid == null) {
-                MESSAGEUTILS.sendLang(sender, "errors.unknown-player");
+                MESSAGEUTILS.sendLang(sender, "errors.unknown-player", Map.of("%number%", "1"));
                 return;
             }
 
             final Integer userId = AxInventoryRestore.getDB().getUserId(uuid);
             if (userId == null) {
-                MESSAGEUTILS.sendLang(sender, "errors.unknown-player");
+                MESSAGEUTILS.sendLang(sender, "errors.unknown-player", Map.of("%number%", "2"));
                 return;
             }
 

@@ -53,7 +53,7 @@ public class MainGui {
             reasons.addAll(backup.getDeathsPerTypes().keySet());
 
             if ((CONFIG.getBoolean("enable-all-category") && reasons.size() == 1) || reasons.isEmpty()) {
-                MESSAGEUTILS.sendLang(viewer, "errors.unknown-player");
+                MESSAGEUTILS.sendLang(viewer, "errors.unknown-player", Map.of("%number%", "3"));
                 Scheduler.get().runAt(viewer.getLocation(), t -> viewer.closeInventory());
                 return;
             }

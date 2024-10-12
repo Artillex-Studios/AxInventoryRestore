@@ -54,10 +54,10 @@ public interface Database {
 
     ItemStack[] getItemsFromBackup(int backupId);
 
-    // Null reason is any reason
+    // null reason = any reason
     int getSaves(UUID uuid, @Nullable String reason);
 
-    // Null reason is any reason
+    // null reason = any reason
     void removeLastSaves(UUID uuid, @Nullable String reason, int amount);
 
     void fetchRestoreRequests(@NotNull UUID uuid);

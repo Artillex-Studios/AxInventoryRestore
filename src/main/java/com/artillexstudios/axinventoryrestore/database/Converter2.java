@@ -39,7 +39,7 @@ public class Converter2 {
     }
 
     public boolean convertUsers() {
-        if (!SQLUtils.tableExist(base.getConnection(), "axinventoryrestore_uuids")) return true;
+        if (!SQLUtils.tableExists(base.getConnection(), "axinventoryrestore_uuids")) return true;
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF6600[AxInventoryRestore] Converting users..."));
 
@@ -73,7 +73,7 @@ public class Converter2 {
     }
 
     public boolean convertBackups() {
-        if (!SQLUtils.tableExist(base.getConnection(), "axinventoryrestore_data")) return true;
+        if (!SQLUtils.tableExists(base.getConnection(), "axinventoryrestore_data")) return true;
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF6600[AxInventoryRestore] Converting backups... This might take a while!"));
 

@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 
 public class SQLUtils {
 
-    public static boolean tableExist(Connection connection, String table) {
+    public static boolean tableExists(Connection connection, String table) {
         try {
             final DatabaseMetaData dmb = connection.getMetaData();
             final ResultSet tables = dmb.getTables(null, null, table.toUpperCase(), null);

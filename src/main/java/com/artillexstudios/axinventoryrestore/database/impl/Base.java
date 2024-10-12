@@ -62,7 +62,7 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while creating axir_backups table!", exception);
         }
 
-        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(1024) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
+        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(255) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
 
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
@@ -110,7 +110,7 @@ public abstract class Base implements Database {
         }
 
         try {
-            if (SQLUtils.tableExist(getConnection(), "axinventoryrestore_data")) {
+            if (SQLUtils.tableExists(getConnection(), "axinventoryrestore_data")) {
                 new Converter2(this);
             }
         } catch (Exception exception) {
@@ -469,7 +469,6 @@ public abstract class Base implements Database {
         }
     }
 
-    @Nullable
     @Override
     public UUID getUUID(@NotNull String name) {
         final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
@@ -485,8 +484,6 @@ public abstract class Base implements Database {
             } catch (SQLException exception) {
                 log.error("An unexpected error occurred while getting the uuid of {}!", name, exception);
             }
-
-            return null;
         }
 
         return offlinePlayer.getUniqueId();
