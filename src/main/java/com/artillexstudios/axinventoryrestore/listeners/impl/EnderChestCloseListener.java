@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,5 +18,6 @@ public class EnderChestCloseListener implements Listener {
         if (event.getInventory().getType() != InventoryType.ENDER_CHEST) return;
         if (!CONFIG.getBoolean("enabled-backups.ender-chest", true)) return;
         AxInventoryRestore.getDB().saveInventory(event.getPlayer().getEnderChest().getStorageContents(), (Player) event.getPlayer(), "ENDER_CHEST", null);
+        BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "ender-chest", "ENDER_CHEST");
     }
 }
