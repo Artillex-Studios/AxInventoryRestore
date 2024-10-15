@@ -276,7 +276,12 @@ public abstract class Base implements Database {
         final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
-            byte[] inventory = Serializers.ITEM_ARRAY.serialize(items);
+            // Before serializing, explicitly filter out null or air items from the inventory
+            ItemStack[] filteredItems = Arrays.stream(items)
+                    .filter(it -> it != null && !it.getType().isAir())
+                    .toArray(ItemStack[]::new);
+
+            byte[] inventory = Serializers.ITEM_ARRAY.serialize(filteredItems);
 
             final Integer userId = getUserId(player.getUniqueId());
             if (userId == null) {
@@ -289,10 +294,8 @@ public abstract class Base implements Database {
             Integer backupId = getLastBackupInventoryId(userId);
             if (backupId != null) {
                 byte[] bytes = getBytesFromBackup(backupId);
-                if (bytes != null) {
-                    if (Arrays.equals(inventory, bytes)) {
-                        storedId = backupId;
-                    }
+                if (bytes != null && Arrays.equals(inventory, bytes)) {
+                    storedId = backupId;
                 }
             }
 
