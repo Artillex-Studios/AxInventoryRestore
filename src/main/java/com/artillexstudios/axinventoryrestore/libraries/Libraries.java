@@ -7,13 +7,11 @@ public enum Libraries {
 
     MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:8.0.33"),
 
-    MARIADB_CONNECTOR("org{}mariadb{}jdbc:mariadb-java-client:3.1.3"),
-
     H2_JDBC("com{}h2database:h2:2.1.214"),
 
     POSTGRESQL("org{}postgresql:postgresql:42.5.4"),
 
-    JDA("net{}dv8tion:JDA:5.0.0-beta.18");
+    HIKARICP("com{}zaxxer:HikariCP:5.1.0", new Relocation("com{}zaxxer{}hikari", "com.artillexstudios.axinventoryrestore.libs.hikari"));
 
     private final Library library;
 

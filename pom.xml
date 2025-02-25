@@ -6,7 +6,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.1</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -55,7 +55,7 @@
                                     <shadedPattern>com.artillexstudios.axinventoryrestore.libs.bstats</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.zaxxer</pattern>
+                                    <pattern>com.zaxxer.hikari</pattern>
                                     <shadedPattern>com.artillexstudios.axinventoryrestore.libs.hikari</shadedPattern>
                                 </relocation>
                                 <relocation>
@@ -108,20 +108,20 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.435</version>
+            <version>1.4.513</version>
             <scope>compile</scope>
             <classifier>all</classifier>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.18.2-R0.1-SNAPSHOT</version>
+            <version>1.19.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>dev.triumphteam</groupId>
             <artifactId>triumph-gui</artifactId>
-            <version>3.1.10</version>
+            <version>3.1.11</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -176,12 +176,12 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.1.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.19</version>
+            <version>5.2.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

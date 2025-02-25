@@ -116,14 +116,18 @@ public class DiscordAddon extends ListenerAdapter {
             return;
         }
 
-        event.deferReply().queue();
-
-        final MessageEmbed embed = event.getMessage().getEmbeds().get(0);
-        event.getMessage().editMessageEmbeds(net.dv8tion.jda.api.EmbedBuilder.fromData(embed.toData())
-                .setAuthor(event.getUser().getName(), null, event.getUser().getAvatarUrl())
-                .setColor(Integer.parseInt(DISCORD.getString("messages." + status +"-color").replace("#", ""), 16)).build())
-                .queue();
-        event.getMessage().editMessageComponents().queue();
-        event.getHook().sendMessage((DISCORD.getString("messages." + status))).setEphemeral(true).queue();
+        try {
+            event.deferReply().queue(interactionHook -> {
+                final MessageEmbed embed = event.getMessage().getEmbeds().get(0);
+                event.getMessage().editMessageEmbeds(net.dv8tion.jda.api.EmbedBuilder.fromData(embed.toData())
+                                .setAuthor(event.getUser().getName(), null, event.getUser().getAvatarUrl())
+                                .setColor(Integer.parseInt(DISCORD.getString("messages." + status +"-color").replace("#", ""), 16)).build())
+                        .queue();
+                event.getMessage().editMessageComponents().queue();
+                interactionHook.sendMessage((DISCORD.getString("messages." + status))).setEphemeral(true).queue();
+            });
+        } catch (Exception ex) {
+            // ignore jda's spam if interaction fails
+        }
     }
 }

@@ -8,6 +8,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
+import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.featureflags.FeatureFlags;
 import com.artillexstudios.axinventoryrestore.commands.Commands;
@@ -38,17 +39,18 @@ public final class AxInventoryRestore extends AxPlugin {
     public static Config MESSAGES;
     public static Config DISCORD;
     public static MessageUtils MESSAGEUTILS;
-    private static AxInventoryRestore instance;
+    private static AxPlugin instance;
     private static PriorityThreadedQueue<Runnable> threadedQueue;
     private static Database database;
     private static DiscordAddon discordAddon = null;
+    private static AxMetrics metrics;
 
     @Nullable
     public static DiscordAddon getDiscordAddon() {
         return discordAddon;
     }
 
-    public static AxInventoryRestore getInstance() {
+    public static AxPlugin getInstance() {
         return instance;
     }
 
@@ -76,7 +78,7 @@ public final class AxInventoryRestore extends AxPlugin {
         instance = this;
 
         int pluginId = 19446;
-        final Metrics metrics = new Metrics(this, pluginId);
+        final Metrics bstats = new Metrics(this, pluginId);
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
@@ -99,7 +101,7 @@ public final class AxInventoryRestore extends AxPlugin {
                 break;
         }
 
-        metrics.addCustomChart(new SimplePie("database_type", () -> database.getType()));
+        bstats.addCustomChart(new SimplePie("database_type", () -> database.getType()));
 
         database.setup();
         AxInventoryRestore.getThreadedQueue().submit(() -> database.cleanup());
@@ -118,12 +120,16 @@ public final class AxInventoryRestore extends AxPlugin {
 
         boolean loadDiscordAddon = CONFIG.getBoolean("enable-discord-addon", false);
         if (loadDiscordAddon && !DISCORD.getString("token").isBlank()) discordAddon = new DiscordAddon();
-        metrics.addCustomChart(new SimplePie("uses_discord_addon", () -> "" + loadDiscordAddon));
+        bstats.addCustomChart(new SimplePie("uses_discord_addon", () -> "" + loadDiscordAddon));
+
+        metrics = new AxMetrics(19);
+        metrics.start();
 
         if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 4610);
     }
 
     public void disable() {
+        if (metrics != null) metrics.cancel();
         AutoBackupScheduler.stop();
         threadedQueue.stop();
         database.disable();

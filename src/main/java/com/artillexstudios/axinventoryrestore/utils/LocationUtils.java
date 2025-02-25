@@ -21,7 +21,6 @@ public class LocationUtils {
 
     @NotNull
     public static String serializeLocation(@NotNull Location loc, boolean exact) {
-
         final String world = loc.getWorld().getName();
         double x = loc.getX();
         double y = loc.getY();
@@ -38,7 +37,6 @@ public class LocationUtils {
 
     @NotNull
     public static String serializeLocationReadable(@NotNull Location loc) {
-
         final String world = loc.getWorld().getName();
         double x = loc.getX();
         double y = loc.getY();

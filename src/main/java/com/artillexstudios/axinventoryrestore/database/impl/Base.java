@@ -35,6 +35,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
@@ -598,12 +599,12 @@ public abstract class Base implements Database {
     public int getSaves(UUID uuid, @Nullable String reason) {
         String noReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ?;";
         String withReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ? AND reasonId = ?;";
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(reason == null ? noReason : withReason)) {
-            statement.setInt(1, getUserId(uuid));
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(reason == null ? noReason : withReason)) {
+            stmt.setInt(1, getUserId(uuid));
             if (reason != null) {
-                statement.setInt(2, getReasonId(reason));
+                stmt.setInt(2, getReasonId(reason));
             }
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet = stmt.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt(1);
                 }
@@ -618,18 +619,29 @@ public abstract class Base implements Database {
 
     @Override
     public void removeLastSaves(UUID uuid, @Nullable String reason, int amount) {
-        final String noReason = "DELETE FROM axir_backups WHERE id IN (SELECT id FROM axir_backups WHERE userId = ? ORDER BY time ASC LIMIT ?);";
-        final String withReason = "DELETE FROM axir_backups WHERE id IN (SELECT id FROM axir_backups WHERE userId = ? AND reasonId = ? ORDER BY time ASC LIMIT ?);";
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(reason == null ? noReason : withReason)) {
+        final String noReason = "SELECT id FROM axir_backups WHERE userId = ? ORDER BY time ASC LIMIT ?;";
+        final String withReason = "SELECT id FROM axir_backups WHERE userId = ? AND reasonId = ? ORDER BY time ASC LIMIT ?;";
+        try (Connection connection = getConnection(); PreparedStatement stmt = connection.prepareStatement(reason == null ? noReason : withReason)) {
+            stmt.setInt(1, getUserId(uuid));
             if (reason == null) {
-                statement.setInt(1, getUserId(uuid));
-                statement.setInt(2, amount);
+                stmt.setInt(2, amount);
             } else {
-                statement.setInt(1, getUserId(uuid));
-                statement.setInt(2, getReasonId(reason));
-                statement.setInt(3, amount);
+                stmt.setInt(2, getReasonId(reason));
+                stmt.setInt(3, amount);
             }
-            statement.executeUpdate();
+
+            List<String> ids = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ids.add("" + rs.getInt(1));
+                }
+            }
+
+            // there is no way to inject anything in here, so we can insert the values right into the update sql
+            final String delete = "DELETE FROM axir_backups WHERE id IN (" + String.join(",", ids) + ");";
+            try (PreparedStatement stmt2 = connection.prepareStatement(delete)) {
+                stmt2.executeUpdate();
+            }
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while removing last save for {}!", uuid, exception);
         }

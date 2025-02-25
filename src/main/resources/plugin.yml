@@ -1,7 +1,7 @@
 name: AxInventoryRestore
 version: '${project.version}'
 main: com.artillexstudios.axinventoryrestore.AxInventoryRestore
-api-version: '1.18'
+api-version: '1.19'
 folia-supported: true
 
 softdepend:
@@ -31,5 +31,5 @@ permissions:
     default: op
 
 libraries:
-  - net.dv8tion:JDA:5.0.0-beta.18
+  - net.dv8tion:JDA:5.2.2
   - club.minnced:discord-webhooks:0.8.4
