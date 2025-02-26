@@ -637,6 +637,7 @@ public abstract class Base implements Database {
                 }
             }
 
+            if (ids.isEmpty()) return;
             // there is no way to inject anything in here, so we can insert the values right into the update sql
             final String delete = "DELETE FROM axir_backups WHERE id IN (" + String.join(",", ids) + ");";
             try (PreparedStatement stmt2 = connection.prepareStatement(delete)) {
