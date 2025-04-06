@@ -70,7 +70,7 @@ public class MainGui {
 
                     ItemStack finalItem = item;
                     mainGui.addItem(new GuiItem(finalItem, event -> {
-                        Scheduler.get().run(() -> {
+                        Scheduler.get().runAt(viewer.getLocation(), task -> {
                             new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
                         });
                     }));
