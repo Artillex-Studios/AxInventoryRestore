@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -71,8 +72,8 @@ public class PreviewGui {
             if (discordAddon != null) starter = 45;
 
             previewGui.setItem(starter, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get(), event -> {
-                lastGui.open(viewer, pageNum);
                 event.setCancelled(true);
+                Scheduler.get().runAt(viewer.getLocation(), task -> lastGui.open(viewer, pageNum));
             }));
 
             previewGui.setItem(starter + 2, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.teleport"), Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).get(), event -> {
@@ -83,8 +84,11 @@ public class PreviewGui {
                     return;
                 }
 
-                PaperUtils.teleportAsync(viewer, backupData.getLocation());
-                viewer.closeInventory();
+                PaperUtils.teleportAsync(viewer, backupData.getLocation()).thenRun(() -> {
+                    Scheduler.get().runAt(viewer.getLocation(), t -> {
+                        viewer.closeInventory();
+                    });
+                });
             }));
 
             boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
@@ -128,9 +132,11 @@ public class PreviewGui {
 
                     AxirEvents.callBackupExportEvent(viewer, backupData);
 
-                    for (ItemStack i : item) {
-                        viewer.getInventory().addItem(i);
-                    }
+                    Scheduler.get().runAt(viewer.getLocation(), task -> {
+                        for (ItemStack i : item) {
+                            viewer.getInventory().addItem(i);
+                        }
+                    });
                 }));
                 previewGui.update();
             });
