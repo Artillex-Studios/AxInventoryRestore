@@ -597,13 +597,24 @@ public abstract class Base implements Database {
 
     @Override
     public int getSaves(UUID uuid, @Nullable String reason) {
+        Integer userId = getUserId(uuid);
+        if (userId == null) {
+            return 0;
+        }
+
         String noReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ?;";
         String withReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ? AND reasonId = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(reason == null ? noReason : withReason)) {
-            stmt.setInt(1, getUserId(uuid));
+            stmt.setInt(1, userId);
             if (reason != null) {
-                stmt.setInt(2, getReasonId(reason));
+                Integer reasonId = getReasonId(reason);
+                if (reasonId == null) {
+                    return 0;
+                }
+
+                stmt.setInt(2, reasonId);
             }
+
             try (ResultSet resultSet = stmt.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt(1);
