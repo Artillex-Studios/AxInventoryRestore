@@ -1,6 +1,6 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
+import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

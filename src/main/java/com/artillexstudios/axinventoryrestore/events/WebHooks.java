@@ -4,7 +4,7 @@ import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
+import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axinventoryrestore.utils.WebhookEmbedBuilder;
 
 import java.time.Instant;

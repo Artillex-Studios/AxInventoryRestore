@@ -1,7 +1,7 @@
 name: AxInventoryRestore
 version: '${project.version}'
 main: com.artillexstudios.axinventoryrestore.AxInventoryRestore
-api-version: '1.19'
+api-version: '1.20'
 folia-supported: true
 
 softdepend:
