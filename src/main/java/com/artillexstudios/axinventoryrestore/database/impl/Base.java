@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.database.impl;
 
-import com.artillexstudios.axapi.nms.NMSHandlers;
+import com.artillexstudios.axapi.nms.wrapper.ServerWrapper;
+import com.artillexstudios.axapi.nms.wrapper.WrapperRegistry;
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.ContainerUtils;
@@ -473,9 +474,10 @@ public abstract class Base implements Database {
 
     @Override
     public UUID getUUID(@NotNull String name) {
-        OfflinePlayer offlinePlayer = NMSHandlers.getNmsHandler().getCachedOfflinePlayer(name);
+        ServerWrapper serverWrapper = WrapperRegistry.SERVER.map(null);
+        OfflinePlayer offlinePlayer = serverWrapper.getCachedOfflinePlayer(name);
         if (offlinePlayer == null) {
-            offlinePlayer = Bukkit.getOfflinePlayer(name);;
+            offlinePlayer = Bukkit.getOfflinePlayer(name);
         }
 
         if (offlinePlayer.getName() == null) {

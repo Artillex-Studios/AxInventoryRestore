@@ -1,7 +1,7 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
+import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
