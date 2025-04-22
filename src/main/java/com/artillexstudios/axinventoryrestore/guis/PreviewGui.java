@@ -72,8 +72,8 @@ public class PreviewGui {
             if (discordAddon != null) starter = 45;
 
             previewGui.setItem(starter, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get(), event -> {
-                event.setCancelled(true);
                 Scheduler.get().runAt(viewer.getLocation(), task -> lastGui.open(viewer, pageNum));
+                event.setCancelled(true);
             }));
 
             previewGui.setItem(starter + 2, new GuiItem(new ItemBuilder(MESSAGES.getSection("guis.previewgui.teleport"), Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).get(), event -> {
