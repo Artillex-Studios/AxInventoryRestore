@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
@@ -48,7 +49,8 @@ public abstract class Base implements Database {
     private final HashBiMap<Integer, UUID> uuidCache = HashBiMap.create();
     private final HashBiMap<Integer, String> reasonCache = HashBiMap.create();
     private final HashBiMap<Integer, String> worldCache = HashBiMap.create();
-    private long lastClear = 0;
+    private final AtomicBoolean cleaning = new AtomicBoolean(false);
+    private long nextClear = 0;
 
     public abstract Connection getConnection();
 
@@ -649,21 +651,27 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while removing last save for {}!", uuid, exception);
         }
 
-        clean();
+        this.clean();
     }
 
     private void clean() {
-        if (System.currentTimeMillis() - lastClear < Duration.ofSeconds(60).toMillis()) {
+        if (System.currentTimeMillis() < this.nextClear) {
             return;
         }
-        lastClear = System.currentTimeMillis();
 
+        if (this.cleaning.get()) {
+            return;
+        }
+
+        this.nextClear = System.currentTimeMillis() + Duration.ofMinutes(30).toMillis();
+        this.cleaning.set(true);
         final String sql2 = "DELETE FROM axir_storage WHERE id not IN (SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while cleaning up!", exception);
         }
+        this.cleaning.set(false);
     }
 
     @Override
