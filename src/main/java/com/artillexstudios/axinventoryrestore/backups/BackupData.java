@@ -4,6 +4,8 @@ import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
+import com.artillexstudios.axinventoryrestore.hooks.AxShulkersHook;
+import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.queue.Priority;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import org.bukkit.Location;
@@ -61,7 +63,8 @@ public class BackupData {
         CompletableFuture<ItemStack[]> future = new CompletableFuture<>();
         AxInventoryRestore.getThreadedQueue().submit(() -> {
             ItemStack[] items = AxInventoryRestore.getDB().getItemsFromBackup(inventoryId);
-            if (!ClassUtils.INSTANCE.classExists("com.artillexstudios.axshulkers.utils.ShulkerUtils")) {
+            AxShulkersHook hook = HookManager.getAxShulkersHook();
+            if (hook == null) {
                 future.complete(items);
                 return;
             }
@@ -72,7 +75,7 @@ public class BackupData {
 
                 CompletableFuture<ItemStack> itemFuture = new CompletableFuture<>();
                 Scheduler.get().run(task -> {
-                    com.artillexstudios.axshulkers.utils.ShulkerUtils.removeShulkerUUID(item);
+                    hook.clean(item);
                     itemFuture.complete(item);
                 });
                 futures.add(itemFuture);

@@ -18,6 +18,7 @@ import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
 import com.artillexstudios.axinventoryrestore.events.WebHooks;
+import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.queue.PriorityThreadedQueue;
@@ -111,6 +112,8 @@ public final class AxInventoryRestore extends AxPlugin {
         database.setup();
         AxInventoryRestore.getThreadedQueue().submit(() -> database.cleanup());
         new RegisterListeners().register();
+
+        HookManager.setupHooks();
 
         final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
 
