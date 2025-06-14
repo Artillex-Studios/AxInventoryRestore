@@ -37,7 +37,7 @@ public class MySQL extends Base {
         hConfig.setKeepaliveTime(CONFIG.getInt("database.pool.keepalive-time"));
         hConfig.setConnectionTimeout(CONFIG.getInt("database.pool.connection-timeout"));
 
-        hConfig.setDriverClassName("com.mysql.jdbc.Driver");
+        hConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
         hConfig.setJdbcUrl("jdbc:mysql://" + CONFIG.getString("database.address") + ":"+ CONFIG.getString("database.port") +"/" + CONFIG.getString("database.database"));
         hConfig.addDataSourceProperty("user", CONFIG.getString("database.username"));
         hConfig.addDataSourceProperty("password", CONFIG.getString("database.password"));
