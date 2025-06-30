@@ -6,7 +6,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>3.6.3</version>
+    <version>3.8.0</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -55,16 +55,16 @@
                                     <shadedPattern>com.artillexstudios.axinventoryrestore.libs.bstats</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.zaxxer.hikari</pattern>
-                                    <shadedPattern>com.artillexstudios.axinventoryrestore.libs.hikari</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>net.kyori</pattern>
                                     <shadedPattern>com.artillexstudios.axinventoryrestore.libs.kyori</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>revxrsal.commands</pattern>
                                     <shadedPattern>com.artillexstudios.axinventoryrestore.libs.lamp</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>com.artillexstudios.axinventoryrestore.libs.hikari</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.mysql</pattern>
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.671</version>
+            <version>1.4.710</version>
             <scope>compile</scope>
             <classifier>all</classifier>
         </dependency>
@@ -182,7 +182,7 @@
         <dependency>
             <groupId>com.artillexstudios</groupId>
             <artifactId>AxShulkers</artifactId>
-            <version>1.5.6</version>
+            <version>1.19.0</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

@@ -18,6 +18,7 @@ import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
 import com.artillexstudios.axinventoryrestore.events.WebHooks;
+import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
 import com.artillexstudios.axinventoryrestore.queue.PriorityThreadedQueue;
@@ -112,6 +113,8 @@ public final class AxInventoryRestore extends AxPlugin {
         AxInventoryRestore.getThreadedQueue().submit(() -> database.cleanup());
         new RegisterListeners().register();
 
+        HookManager.setupHooks();
+
         final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
 
         handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
@@ -140,7 +143,7 @@ public final class AxInventoryRestore extends AxPlugin {
         database.disable();
     }
 
-    public void updateFlags(FeatureFlags flags) {
-        flags.USE_LEGACY_HEX_FORMATTER.set(true);
+    public void updateFlags() {
+        FeatureFlags.USE_LEGACY_HEX_FORMATTER.set(true);
     }
 }
