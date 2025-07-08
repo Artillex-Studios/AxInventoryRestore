@@ -3,7 +3,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>3.8.1</version>
+    <version>3.8.2</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -50,10 +50,6 @@
                                 <relocation>
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>com.artillexstudios.axinventoryrestore.libs.bstats</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>net.kyori</pattern>
-                                    <shadedPattern>com.artillexstudios.axinventoryrestore.libs.kyori</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>revxrsal.commands</pattern>
@@ -118,7 +114,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.720</version>
+            <version>1.4.732</version>
             <scope>compile</scope>
             <classifier>all</classifier>
         </dependency>
