@@ -114,6 +114,27 @@ public abstract class Base implements Database {
         } catch (SQLException ignored) {
         }
 
+        final String CREATE_INDEX2 = "CREATE INDEX idx_worldId ON axir_backups(worldId);";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX2)) {
+            stmt.executeUpdate();
+        } catch (SQLException ignored) {
+        }
+
+        final String CREATE_INDEX3 = "CREATE INDEX idx_inventoryId ON axir_backups(inventoryId);";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX3)) {
+            stmt.executeUpdate();
+        } catch (SQLException ignored) {
+        }
+
+        final String CREATE_INDEX4 = "CREATE INDEX idx_time ON axir_backups(time);";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX4)) {
+            stmt.executeUpdate();
+        } catch (SQLException ignored) {
+        }
+
         try {
             if (SQLUtils.tableExists(getConnection(), "axinventoryrestore_data")) {
                 new Converter2(this);
@@ -721,14 +742,14 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while cleaning up!", exception);
         }
 
-        final String sql2 = "DELETE FROM axir_storage WHERE id not IN ( SELECT inventoryId FROM axir_backups WHERE inventoryId IS NOT NULL);";
+        final String sql2 = "DELETE FROM axir_storage WHERE NOT EXISTS (SELECT 1 FROM axir_backups WHERE axir_backups.inventoryId = axir_storage.id);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while cleaning up!", exception);
         }
 
-        final String sql3 = "DELETE FROM axir_worlds WHERE id not IN ( SELECT worldId FROM axir_backups WHERE worldId IS NOT NULL);";
+        final String sql3 = "DELETE FROM axir_worlds WHERE NOT EXISTS (SELECT 1 FROM axir_backups WHERE axir_backups.worldId = axir_worlds.id);";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql3)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
