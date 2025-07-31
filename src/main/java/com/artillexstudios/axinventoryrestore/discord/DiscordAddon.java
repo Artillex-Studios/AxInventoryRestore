@@ -9,7 +9,6 @@ import com.artillexstudios.axinventoryrestore.utils.JDAEmbedBuilder;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -32,6 +31,7 @@ import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES
 
 public class DiscordAddon extends ListenerAdapter {
     private JDA jda = null;
+    String requiredRoleId = DISCORD.getString("required-role-id");
 
     public DiscordAddon() {
         if (DISCORD.getString("token").isBlank()) return;
@@ -82,12 +82,12 @@ public class DiscordAddon extends ListenerAdapter {
 
         final MessageCreateAction action = channel.sendMessageEmbeds(new JDAEmbedBuilder(DISCORD.getSection("prompt"), replacements).get());
         action.addActionRow(
-            Button.success("axir-accept:" + id, DISCORD.getString("messages.restore")),
-            Button.danger("axir-deny:" + id, DISCORD.getString("messages.decline")))
-        .queue((message -> {
-            if (!DISCORD.getBoolean("create-thread", true)) return;
-            channel.createThreadChannel(DISCORD.getString("thread-name", "-"), message.getId()).queue();
-        }));
+                        Button.success("axir-accept:" + id, DISCORD.getString("messages.restore")),
+                        Button.danger("axir-deny:" + id, DISCORD.getString("messages.decline")))
+                .queue((message -> {
+                    if (!DISCORD.getBoolean("create-thread", true)) return;
+                    channel.createThreadChannel(DISCORD.getString("thread-name", "-"), message.getId()).queue();
+                }));
 
     }
 
@@ -97,6 +97,19 @@ public class DiscordAddon extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        //first check if member is null
+        if (event.getMember() == null) {
+            event.reply("Something went wrong! member = null").setEphemeral(true).queue();
+            return;
+        }
+        // after that check if the interaction user has required role id
+        if (requiredRoleId == null || requiredRoleId.isEmpty() ||
+                event.getMember().getRoles().stream().noneMatch(role -> role.getId().equals(requiredRoleId))) {
+            event.reply(DISCORD.getString("messages.no-permission")).setEphemeral(true).queue();
+            return;
+        }
+
+        // perform actions if permissions are verified
         String status;
         if (event.getComponentId().startsWith("axir-accept")) {
             status = "accepted";
@@ -107,14 +120,6 @@ public class DiscordAddon extends ListenerAdapter {
             AxInventoryRestore.getDB().removeRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
         } else return;
 
-        if (event.getMember() == null) {
-            event.reply("Something went wrong! member = null").setEphemeral(true).queue();
-            return;
-        }
-        if (!event.getMember().hasPermission(Permission.valueOf(DISCORD.getString("required-permission", "ADMINISTRATOR")))) {
-            event.reply(DISCORD.getString("messages.no-permission")).setEphemeral(true).queue();
-            return;
-        }
 
         try {
             event.deferReply().queue(interactionHook -> {
