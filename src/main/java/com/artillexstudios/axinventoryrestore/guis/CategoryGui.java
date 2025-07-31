@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
@@ -64,7 +65,9 @@ public class CategoryGui {
             it.setAmount(n);
 
             categoryGui.addItem(new GuiItem(it, event -> {
-                new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
+                Scheduler.get().runAt(viewer.getLocation(), t -> {
+                    new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
+                });
             }));
 
             n++;
