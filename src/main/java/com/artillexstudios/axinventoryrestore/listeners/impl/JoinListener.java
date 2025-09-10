@@ -13,11 +13,11 @@ public class JoinListener implements Listener {
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent event) {
-        if (!CONFIG.getBoolean("enabled-backups.join", true)) return;
         AxInventoryRestore.getThreadedQueue().submit(() -> {
             AxInventoryRestore.getDB().join(event.getPlayer());
             AxInventoryRestore.getDB().fetchRestoreRequests(event.getPlayer().getUniqueId());
         });
+        if (!CONFIG.getBoolean("enabled-backups.join", true)) return;
         AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "JOIN", null);
         BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "join", "JOIN");
     }
