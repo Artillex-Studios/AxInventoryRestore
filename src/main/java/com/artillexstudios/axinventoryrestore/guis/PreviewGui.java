@@ -84,11 +84,9 @@ public class PreviewGui {
                     return;
                 }
 
-                PaperUtils.teleportAsync(viewer, backupData.getLocation()).thenRun(() -> {
-                    Scheduler.get().runAt(viewer.getLocation(), t -> {
-                        viewer.closeInventory();
-                    });
-                });
+            Scheduler.get().runAt(viewer.getLocation(), () ->
+                    PaperUtils.teleportAsync(viewer, backupData.getLocation().clone())
+                            .thenRun(() -> Scheduler.get().runAt(viewer.getLocation(), viewer::closeInventory)));
             }));
 
             boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
@@ -132,11 +130,9 @@ public class PreviewGui {
 
                     AxirEvents.callBackupExportEvent(viewer, backupData);
 
-                    Scheduler.get().runAt(viewer.getLocation(), task -> {
-                        for (ItemStack i : item) {
-                            viewer.getInventory().addItem(i);
-                        }
-                    });
+                    for (ItemStack i : item) {
+                        viewer.getInventory().addItem(i);
+                    }
                 }));
                 previewGui.update();
             });

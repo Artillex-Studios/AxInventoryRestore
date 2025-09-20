@@ -58,26 +58,21 @@ public class MainGui {
                 return;
             }
 
-            Scheduler.get().runAt(viewer.getLocation(), t -> {
-                for (String saveReason : reasons) {
-                    ItemStack item = new ItemBuilder(Material.PAPER).setName(StringUtils.formatToString("<!i>&#FFFF00&l" + saveReason)).get();
+            for (String saveReason : reasons) {
+                ItemStack item = new ItemBuilder(Material.PAPER).setName(StringUtils.formatToString("<!i>&#FFFF00&l" + saveReason)).get();
 
-                    final List<BackupData> backupDataList = backup.getDeathsByReason(saveReason);
+                final List<BackupData> backupDataList = backup.getDeathsByReason(saveReason);
 
-                    if (MESSAGES.getSection("categories." + saveReason) != null) {
-                        item = new ItemBuilder(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
-                    }
-
-                    ItemStack finalItem = item;
-                    mainGui.addItem(new GuiItem(finalItem, event -> {
-                        Scheduler.get().runAt(viewer.getLocation(), task -> {
-                            new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
-                        });
-                    }));
+                if (MESSAGES.getSection("categories." + saveReason) != null) {
+                    item = new ItemBuilder(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
+                mainGui.addItem(new GuiItem(item, event ->
+                        Scheduler.get().runAt(viewer.getLocation(), task ->
+                                new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui())));
+
                 mainGui.update();
-            });
+            }
         }, Priority.HIGH);
 
         // Previous item
