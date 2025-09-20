@@ -67,11 +67,10 @@ public class MainGui {
                     item = new ItemBuilder(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
-                mainGui.addItem(new GuiItem(item, event -> {
-                    Scheduler.get().run(task -> {
-                        new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui();
-                    });
-                }));
+                mainGui.addItem(new GuiItem(item, event ->
+                        Scheduler.get().runAt(viewer.getLocation(), task ->
+                                new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui())));
+
                 mainGui.update();
             }
         }, Priority.HIGH);
