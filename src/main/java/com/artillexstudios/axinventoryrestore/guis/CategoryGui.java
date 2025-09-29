@@ -1,9 +1,9 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
-import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
+import com.artillexstudios.axinventoryrestore.utils.DateUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -12,8 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +45,7 @@ public class CategoryGui {
                 .create();
     }
 
-    public void openCategoryGui() {
+    public void open() {
         categoryGui.clearPageItems();
 
         final CategoryGui cGui = this;
@@ -55,19 +53,15 @@ public class CategoryGui {
         for (BackupData backupData : backupDataList) {
             final Map<String, String> replacements = new HashMap<>();
 
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            final Date resultdate = new Date(backupData.getDate());
-            replacements.put("%date%", sdf.format(resultdate));
+            replacements.put("%date%", DateUtils.formatDate(backupData.getDate()));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
             replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
-            final ItemStack it = new ItemBuilder(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
+            final ItemStack it = ItemBuilder.create(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
             it.setAmount(n);
 
             categoryGui.addItem(new GuiItem(it, event -> {
-                Scheduler.get().runAt(viewer.getLocation(), t -> {
-                    new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).openPreviewGui();
-                });
+                new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).open();
             }));
 
             n++;
@@ -79,13 +73,13 @@ public class CategoryGui {
         categoryGui.update();
 
         // Previous item
-        categoryGui.setItem(rows, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> categoryGui.previous()));
+        categoryGui.setItem(rows, 3, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> categoryGui.previous()));
         // Next item
-        categoryGui.setItem(rows, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> categoryGui.next()));
+        categoryGui.setItem(rows, 7, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> categoryGui.next()));
 
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        categoryGui.setItem(rows, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get(), event2 -> {
+        categoryGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.back")).get(), event2 -> {
             lastGui.open(viewer, pageNum);
         }));
 

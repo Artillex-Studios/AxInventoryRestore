@@ -3,6 +3,7 @@ package com.artillexstudios.axinventoryrestore.guis;
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axapi.utils.logging.LogUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
@@ -43,11 +44,15 @@ public class MainGui {
                 .create();
     }
 
-    public void openMainGui() {
+    public void open() {
         mainGui.clearPageItems();
 
+        long time = System.currentTimeMillis();
+        if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Opening gui for {}", viewer.getName());
         AxInventoryRestore.getThreadedQueue().submit(() -> {
-            final Backup backup = AxInventoryRestore.getDB().getBackupsOfPlayer(restoreUser);
+            if (AxInventoryRestore.isDebugMode()) LogUtils.debug("ThreadedQueue submit for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
+            final Backup backup = AxInventoryRestore.getDatabase().getBackupsOfPlayer(restoreUser);
+            if (AxInventoryRestore.isDebugMode()) LogUtils.debug("getBackupsOfPlayer for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
             final ArrayList<String> reasons = new ArrayList<>();
             if (CONFIG.getBoolean("enable-all-category")) reasons.add("ALL");
             reasons.addAll(backup.getDeathsPerTypes().keySet());
@@ -59,30 +64,32 @@ public class MainGui {
             }
 
             for (String saveReason : reasons) {
-                ItemStack item = new ItemBuilder(Material.PAPER).setName(StringUtils.formatToString("<!i>&#FFFF00&l" + saveReason)).get();
+                ItemStack item = ItemBuilder.create(Material.PAPER).setName(StringUtils.formatToString("<!i>&#FFFF00&l" + saveReason)).get();
 
                 final List<BackupData> backupDataList = backup.getDeathsByReason(saveReason);
 
                 if (MESSAGES.getSection("categories." + saveReason) != null) {
-                    item = new ItemBuilder(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
+                    item = ItemBuilder.create(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
-                mainGui.addItem(new GuiItem(item, event ->
-                        Scheduler.get().runAt(viewer.getLocation(), task ->
-                                new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).openCategoryGui())));
-
-                mainGui.update();
+                mainGui.addItem(new GuiItem(item, event -> {
+                    Scheduler.get().run(task -> {
+                        new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open();
+                    });
+                }));
             }
+            mainGui.update();
+            if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Opened gui for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
         }, Priority.HIGH);
 
         // Previous item
-        mainGui.setItem(rows, 3, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> mainGui.previous()));
+        mainGui.setItem(rows, 3, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> mainGui.previous()));
         // Next item
-        mainGui.setItem(rows, 7, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> mainGui.next()));
+        mainGui.setItem(rows, 7, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> mainGui.next()));
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(rows, 5, new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.close")).get(), event2 -> {
+        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.close")).get(), event2 -> {
             mainGui.close(viewer);
         }));
 

@@ -1,11 +1,10 @@
 package com.artillexstudios.axinventoryrestore.database.impl;
 
-import com.artillexstudios.axapi.nms.wrapper.ServerWrapper;
-import com.artillexstudios.axapi.nms.wrapper.WrapperRegistry;
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.ContainerUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axapi.utils.logging.LogUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
@@ -17,7 +16,6 @@ import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
 import com.google.common.collect.HashBiMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -298,10 +296,14 @@ public abstract class Base implements Database {
             return;
         }
 
+        long time = System.currentTimeMillis();
+        if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Creatig backup for {} [reason: {}] [cause: {}]", player.getName(), reason, cause);
+
         final String sql = "INSERT INTO axir_backups(userId, reasonId, worldId, x, y, z, inventoryId, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
         final Location location = player.getLocation();
 
         AxInventoryRestore.getThreadedQueue().submit(() -> {
+            if (AxInventoryRestore.isDebugMode()) LogUtils.debug("ThreadedQueue submit for {} in {}ms", player.getName(), System.currentTimeMillis() - time);
             byte[] inventory = Serializers.ITEM_ARRAY.serialize(items);
 
             final Integer userId = getUserId(player.getUniqueId());
@@ -340,6 +342,7 @@ public abstract class Base implements Database {
             } catch (Exception exception) {
                 log.error("An unexpected error occurred while saving inventory of user {}!", player.getName(), exception);
             }
+            if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Backup ready for {} in {}ms", player.getName(), System.currentTimeMillis() - time);
         });
     }
 
@@ -431,9 +434,7 @@ public abstract class Base implements Database {
     @Override
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         final ArrayList<BackupData> backups = new ArrayList<>();
-
         final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ?;";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, getUserId(uuid));
 
@@ -481,14 +482,12 @@ public abstract class Base implements Database {
             stmt.setString(1, player.getUniqueId().toString());
             stmt.setString(2, player.getName());
             stmt.executeUpdate();
-
         } catch (SQLException ex) {
             final String sql2 = "UPDATE axir_users SET name = ? WHERE uuid = ?;";
             try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql2)) {
                 stmt.setString(1, player.getName());
                 stmt.setString(2, player.getUniqueId().toString());
                 stmt.executeUpdate();
-
             } catch (SQLException exception) {
                 log.error("An unexpected error occurred while updating the name of {}!", player.getName(), exception);
             }
@@ -497,26 +496,16 @@ public abstract class Base implements Database {
 
     @Override
     public UUID getUUID(@NotNull String name) {
-        ServerWrapper serverWrapper = WrapperRegistry.SERVER.map(null);
-        OfflinePlayer offlinePlayer = serverWrapper.getCachedOfflinePlayer(name);
-        if (offlinePlayer == null) {
-            offlinePlayer = Bukkit.getOfflinePlayer(name);
-        }
-
-        if (offlinePlayer.getName() == null) {
-            String ex = "SELECT uuid FROM axir_users WHERE name = ? LIMIT 1;";
-            try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
-                stmt.setString(1, name);
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) return UUID.fromString(rs.getString(1));
-                }
-            } catch (SQLException exception) {
-                log.error("An unexpected error occurred while getting the uuid of {}!", name, exception);
+        String ex = "SELECT uuid FROM axir_users WHERE name = ? LIMIT 1;";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return UUID.fromString(rs.getString(1));
             }
+        } catch (SQLException exception) {
+            log.error("An unexpected error occurred while getting the uuid of {}!", name, exception);
         }
-
-        return offlinePlayer.getUniqueId();
+        return null;
     }
 
     @Override
@@ -529,7 +518,6 @@ public abstract class Base implements Database {
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) return rs.getInt(1);
             }
-
         } catch (SQLException exception) {
             log.error("An unexpected error occurred while adding restore request!", exception);
         }
@@ -623,23 +611,14 @@ public abstract class Base implements Database {
     @Override
     public int getSaves(UUID uuid, @Nullable String reason) {
         Integer userId = getUserId(uuid);
-        if (userId == null) {
-            return 0;
-        }
-
+        if (userId == null) return -1;
         String noReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ?;";
         String withReason = "SELECT COUNT(*) FROM axir_backups WHERE userId = ? AND reasonId = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(reason == null ? noReason : withReason)) {
-            stmt.setInt(1, userId);
+            stmt.setInt(1, getUserId(uuid));
             if (reason != null) {
-                Integer reasonId = getReasonId(reason);
-                if (reasonId == null) {
-                    return 0;
-                }
-
-                stmt.setInt(2, reasonId);
+                stmt.setInt(2, getReasonId(reason));
             }
-
             try (ResultSet resultSet = stmt.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt(1);

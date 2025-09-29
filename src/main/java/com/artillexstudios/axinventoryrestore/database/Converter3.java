@@ -41,7 +41,7 @@ public class Converter3 {
             Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxInventoryRestore] Something went wrong while converting!"));
         }
         base.disable();
-        AxInventoryRestore.getDB().setup();
+        AxInventoryRestore.getDatabase().setup();
     }
 
     public boolean insertWorld() {

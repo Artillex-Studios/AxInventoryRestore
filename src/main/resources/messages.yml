@@ -143,6 +143,13 @@ categories:
     lore:
       - " "
       - "&#33DD33&l(!) &#33DD33Click here to view backups!"
+  GAMEMODE_CHANGE:
+    raw: "WORLD CHANGE"
+    material: GOLDEN_APPLE
+    name: "&#FFFF00&lGAMEMODE CHANGES &7(%amount% backups)"
+    lore:
+      - " "
+      - "&#FFFF00&l(!) &#FFFF00Click here to view backups!"
   CONTAINER_CLOSE:
     raw: "CONTAINER_CLOSE"
     material: CHEST
@@ -178,4 +185,4 @@ commands:
 update-notifier: "&#88CCFFThere is a new version of AxInventoryRestore available! &#DDDDDD(&#FFFFFFcurrent: &#FF0000%current% &#DDDDDD| &#FFFFFFlatest: &#00FF00%latest%&#DDDDDD)"
 
 # do not change this
-version: 6
+version: 7

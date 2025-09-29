@@ -1,23 +1,22 @@
 package com.artillexstudios.axinventoryrestore.backups;
 
-import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.hooks.AxShulkersHook;
 import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.queue.Priority;
+import com.artillexstudios.axinventoryrestore.utils.DateUtils;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import org.bukkit.Location;
+import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +61,7 @@ public class BackupData {
 
         CompletableFuture<ItemStack[]> future = new CompletableFuture<>();
         AxInventoryRestore.getThreadedQueue().submit(() -> {
-            ItemStack[] items = AxInventoryRestore.getDB().getItemsFromBackup(inventoryId);
+            ItemStack[] items = AxInventoryRestore.getDatabase().getItemsFromBackup(inventoryId);
             AxShulkersHook hook = HookManager.getAxShulkersHook();
             if (hook == null) {
                 future.complete(items);
@@ -107,37 +106,35 @@ public class BackupData {
 
     public CompletableFuture<ArrayList<ItemStack>> getInShulkers(@NotNull String restorerName) {
         return getItems().thenApply(items -> {
-            final ArrayList<ItemStack> shulkerItems = new ArrayList<>();
-            final List<ItemStack> itemsCopy = new ArrayList<>();
-            itemsCopy.addAll(Arrays.asList(items));
+            ArrayList<ItemStack> shulkerItems = new ArrayList<>();
+            List<ItemStack> itemsCopy = Arrays.asList(items);
 
             while (!itemsCopy.isEmpty()) {
-                final Map<String, String> replacements = new HashMap<>();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date resultdate = new Date(date);
-                replacements.put("%date%", sdf.format(resultdate));
+                Map<String, String> replacements = new HashMap<>();
+                replacements.put("%date%", DateUtils.formatDate(date));
                 replacements.put("%location%", LocationUtils.serializeLocationReadable(location));
                 replacements.put("%cause%", cause == null ? "---" : cause);
                 replacements.put("%staff%", restorerName);
                 replacements.put("%player-uuid%", player.toString());
 
-                final ItemStack shulkerIt = new ItemBuilder(MESSAGES.getSection("restored-shulker"), replacements).get();
-                final BlockStateMeta im = (BlockStateMeta) shulkerIt.getItemMeta();
-                final ShulkerBox shulker = (ShulkerBox) im.getBlockState();
+                ItemStack shulkerIt = ItemBuilder.create(MESSAGES.getSection("restored-shulker"), replacements).get();
+                BlockStateMeta im = (BlockStateMeta) shulkerIt.getItemMeta();
+                ShulkerBox shulker = (ShulkerBox) im.getBlockState();
 
                 final Iterator<ItemStack> iterator = itemsCopy.iterator();
                 while (iterator.hasNext()) {
-                    final ItemStack it = iterator.next();
+                    ItemStack it = iterator.next();
                     if (it == null) {
                         iterator.remove();
                         continue;
                     }
                     if (shulker.getInventory().firstEmpty() == -1) break;
 
-                    if (it.getType().toString().endsWith("SHULKER_BOX"))
+                    if (Tag.SHULKER_BOXES.isTagged(it.getType())) {
                         shulkerItems.add(it);
-                    else
+                    } else {
                         shulker.getInventory().addItem(it);
+                    }
                     iterator.remove();
                 }
 
