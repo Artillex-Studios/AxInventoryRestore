@@ -11,7 +11,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.settings.updater.UpdaterSettin
 import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.featureflags.FeatureFlags;
-import com.artillexstudios.axinventoryrestore.commands.Commands;
+import com.artillexstudios.axinventoryrestore.commands.CommandManager;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
@@ -20,22 +20,17 @@ import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
 import com.artillexstudios.axinventoryrestore.events.WebHooks;
 import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
-import com.artillexstudios.axinventoryrestore.listeners.RegisterListeners;
+import com.artillexstudios.axinventoryrestore.listeners.ListenerManager;
 import com.artillexstudios.axinventoryrestore.queue.PriorityThreadedQueue;
 import com.artillexstudios.axinventoryrestore.schedulers.AutoBackupScheduler;
-import com.artillexstudios.axinventoryrestore.utils.CommandMessages;
 import com.artillexstudios.axinventoryrestore.utils.UpdateNotifier;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.zapper.DependencyManager;
 import revxrsal.zapper.relocation.Relocation;
 
 import java.io.File;
-import java.util.Locale;
 
 public final class AxInventoryRestore extends AxPlugin {
     public static Config CONFIG;
@@ -47,6 +42,7 @@ public final class AxInventoryRestore extends AxPlugin {
     private static Database database;
     private static DiscordAddon discordAddon = null;
     private static AxMetrics metrics;
+    private static boolean debug;
 
     @Nullable
     public static DiscordAddon getDiscordAddon() {
@@ -57,12 +53,20 @@ public final class AxInventoryRestore extends AxPlugin {
         return instance;
     }
 
-    public static Database getDB() {
+    public static Database getDatabase() {
         return database;
     }
 
     public static PriorityThreadedQueue<Runnable> getThreadedQueue() {
         return threadedQueue;
+    }
+
+    public static boolean isDebugMode() {
+        return debug;
+    }
+
+    public static void setDebugMode(boolean debug) {
+        AxInventoryRestore.debug = debug;
     }
 
     @Override
@@ -82,9 +86,9 @@ public final class AxInventoryRestore extends AxPlugin {
         }
     }
 
+    @Override
     public void enable() {
-        int pluginId = 19446;
-        final Metrics bstats = new Metrics(this, pluginId);
+        Metrics bstats = new Metrics(this, 19446);
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
@@ -92,8 +96,10 @@ public final class AxInventoryRestore extends AxPlugin {
 
         WebHooks.reload();
         threadedQueue = new PriorityThreadedQueue<>("AxInventoryRestore-Datastore-thread");
+        debug = CONFIG.getBoolean("debug", false);
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
+
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
             case "mysql":
@@ -111,20 +117,11 @@ public final class AxInventoryRestore extends AxPlugin {
 
         database.setup();
         AxInventoryRestore.getThreadedQueue().submit(() -> database.cleanup());
-        new RegisterListeners().register();
 
         HookManager.setupHooks();
-
-        final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
-
-        handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
-
-        handler.getTranslator().add(new CommandMessages());
-        handler.setLocale(Locale.of("en", "US"));
-
-        handler.register(new Commands());
-
+        CommandManager.load();
         AutoBackupScheduler.start();
+        ListenerManager.register();
 
         boolean loadDiscordAddon = CONFIG.getBoolean("enable-discord-addon", false);
         if (loadDiscordAddon && !DISCORD.getString("token").isBlank()) discordAddon = new DiscordAddon();
@@ -136,6 +133,7 @@ public final class AxInventoryRestore extends AxPlugin {
         if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 4610);
     }
 
+    @Override
     public void disable() {
         if (metrics != null) metrics.cancel();
         AutoBackupScheduler.stop();
@@ -143,6 +141,7 @@ public final class AxInventoryRestore extends AxPlugin {
         database.disable();
     }
 
+    @Override
     public void updateFlags() {
         FeatureFlags.USE_LEGACY_HEX_FORMATTER.set(true);
     }

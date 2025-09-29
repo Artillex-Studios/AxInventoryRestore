@@ -22,10 +22,17 @@ database:
 # this will run at server start and when using /axir cleanup
 cleanup-after-days: 14
 
+# https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/text/SimpleDateFormat.html
+# some examples:
+# - day/month/year (most used) format: dd/MM/yyyy hh:mm:ss
+# - month/day/year (usa) format: MM/dd/yyyy h:mm:ss a
+# - year/month/day (default) format: yyyy/MM/dd hh:mm:ss
+date-format: "yyyy/MM/dd HH:mm:ss"
+
 # should there also be an all category that contains all the backups of a player?
 enable-all-category: true
 
-# should the plugin make backups periodically?
+# should the plugin make automatic backups periodically?
 # do not set "seconds" to anything below 1
 automatic-backup:
   enabled: true
@@ -49,6 +56,7 @@ enabled-backups:
   join: true
   quit: true
   world-change: true
+  gamemode-change: true
   container-close: true
 
 # how many saves should we allow per player in these categories?
@@ -60,6 +68,7 @@ save-limits:
   join: -1
   quit: -1
   world-change: -1
+  gamemode-change: -1
   container-close: -1
   manual: -1
   automatic: -1
@@ -75,5 +84,9 @@ update-notifier:
   # if enabled, it will broadcast the update message to all players who have the <plugin-name>.update-notify permission
   on-join: true
 
+# prints out a lot of information about the plugin in the console
+# this can cause a lot of spam, only use if a developer asks you to
+debug: false
+
 # do not change this
-version: 7
+version: 8

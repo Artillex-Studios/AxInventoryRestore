@@ -25,7 +25,7 @@ public class ContainerCloseListener implements Listener {
                 && type != InventoryType.DROPPER) return;
         if (!CONFIG.getBoolean("enabled-backups.container-close", true)) return;
         final String cause = event.getInventory().getType().name();
-        AxInventoryRestore.getDB().saveInventory((Player) event.getPlayer(), "CONTAINER_CLOSE", cause);
+        AxInventoryRestore.getDatabase().saveInventory((Player) event.getPlayer(), "CONTAINER_CLOSE", cause);
         BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "container-close", "CONTAINER_CLOSE");
     }
 }

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 public class AxInventoryRestoreAPI {
 
     public static void saveInventory(@NotNull Player player, @NotNull String category, @Nullable String extraInfo) {
-        AxInventoryRestore.getDB().saveInventory(player, category, extraInfo);
+        AxInventoryRestore.getDatabase().saveInventory(player, category, extraInfo);
         BackupLimiter.tryLimit(player.getUniqueId(), category, category);
     }
 }

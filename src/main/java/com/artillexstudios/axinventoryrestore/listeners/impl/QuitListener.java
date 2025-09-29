@@ -14,7 +14,7 @@ public class QuitListener implements Listener {
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent event) {
         if (!CONFIG.getBoolean("enabled-backups.quit", true)) return;
-        AxInventoryRestore.getDB().saveInventory(event.getPlayer(), "QUIT", null);
+        AxInventoryRestore.getDatabase().saveInventory(event.getPlayer(), "QUIT", null);
         BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "quit", "QUIT");
     }
 }

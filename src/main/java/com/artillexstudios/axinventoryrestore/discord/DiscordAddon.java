@@ -5,6 +5,7 @@ import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
+import com.artillexstudios.axinventoryrestore.utils.DateUtils;
 import com.artillexstudios.axinventoryrestore.utils.JDAEmbedBuilder;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
 import net.dv8tion.jda.api.JDA;
@@ -23,8 +24,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
@@ -55,14 +54,12 @@ public class DiscordAddon extends ListenerAdapter {
             return;
         }
 
-        int id = AxInventoryRestore.getDB().addRestoreRequest(backupData.getId());
+        int id = AxInventoryRestore.getDatabase().addRestoreRequest(backupData.getId());
 
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName());
         replacements.put("%requester%", requester.getName());
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date resultdate = new Date(backupData.getDate());
-        replacements.put("%date%", sdf.format(resultdate));
+        replacements.put("%date%", DateUtils.formatDate(backupData.getDate()));
         replacements.put("%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", "---"));
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
@@ -92,7 +89,7 @@ public class DiscordAddon extends ListenerAdapter {
     }
 
     public ItemStack getRequestItem() {
-        return new ItemBuilder(DISCORD.getSection("request-restore")).get();
+        return ItemBuilder.create(DISCORD.getSection("request-restore")).get();
     }
 
     @Override
@@ -100,11 +97,11 @@ public class DiscordAddon extends ListenerAdapter {
         String status;
         if (event.getComponentId().startsWith("axir-accept")) {
             status = "accepted";
-            AxInventoryRestore.getDB().grantRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
+            AxInventoryRestore.getDatabase().grantRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
         }
         else if (event.getComponentId().startsWith("axir-deny")) {
             status = "declined";
-            AxInventoryRestore.getDB().removeRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
+            AxInventoryRestore.getDatabase().removeRestoreRequest(Integer.parseInt(event.getComponentId().split(":")[1]));
         } else return;
 
         if (event.getMember() == null) {
