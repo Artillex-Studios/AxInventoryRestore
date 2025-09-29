@@ -72,11 +72,9 @@ public class MainGui {
                     item = ItemBuilder.create(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
-                mainGui.addItem(new GuiItem(item, event -> {
-                    Scheduler.get().run(task -> {
-                        new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open();
-                    });
-                }));
+                mainGui.addItem(new GuiItem(item, event ->
+                    Scheduler.get().runAt(viewer.getLocation(), task ->
+                        new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open())));
             }
             mainGui.update();
             if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Opened gui for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
@@ -89,11 +87,10 @@ public class MainGui {
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.close")).get(), event2 -> {
-            mainGui.close(viewer);
-        }));
+        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.close")).get(), event2 ->
+            Scheduler.get().runAt(viewer.getLocation(), task -> mainGui.close(viewer))));
 
-        mainGui.open(viewer);
+        Scheduler.get().runAt(viewer.getLocation(), task -> mainGui.open(viewer));
     }
 
     public PaginatedGui getMainGui() {
