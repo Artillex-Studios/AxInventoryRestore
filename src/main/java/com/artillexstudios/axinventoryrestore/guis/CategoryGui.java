@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
@@ -60,9 +61,9 @@ public class CategoryGui {
             final ItemStack it = ItemBuilder.create(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
             it.setAmount(n);
 
-            categoryGui.addItem(new GuiItem(it, event -> {
-                new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).open();
-            }));
+            categoryGui.addItem(new GuiItem(it, event ->
+                Scheduler.get().runAt(viewer.getLocation(), task ->
+                    new PreviewGui(cGui, backupData, categoryGui, categoryGui.getCurrentPageNum()).open())));
 
             n++;
             if (n > 64) {
@@ -79,11 +80,10 @@ public class CategoryGui {
 
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        categoryGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.back")).get(), event2 -> {
-            lastGui.open(viewer, pageNum);
-        }));
+        categoryGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.back")).get(), event2 ->
+            Scheduler.get().runAt(viewer.getLocation(), task -> lastGui.open(viewer, pageNum))));
 
-        categoryGui.open(viewer);
+        Scheduler.get().runAt(viewer.getLocation(), task -> categoryGui.open(viewer));
     }
 
     public Player getViewer() {
