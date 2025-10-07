@@ -1,4 +1,4 @@
-prefix: "&#00aaff&lAxInventoryRestore &7» "
+prefix: "<gradient:#00AAFF:#00CCFF><b>AxInventoryRestore</b></gradient> &7» "
 
 database:
   # h2, mysql, postgresql

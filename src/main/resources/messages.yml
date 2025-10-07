@@ -9,12 +9,12 @@ manual-created-by: "by: %player%"
 
 help:
   - " "
-  - "&#00aaff&lAxInventoryRestore &7» "
-  - " &7- &f/axir view <player> &7| &#00aaffOpen restore GUI"
-  - " &7- &f/axir save <player> &7| &#00aaffCreate manual backup"
-  - " &7- &f/axir saveall &7| &#00aaffCreate manual backup for all players"
-  - " &7- &f/axir reload &7| &#00aaffReload plugin"
-  - " &7- &f/axir cleanup &7| &#00aaffDelete old backups (look at config.yml)"
+  - "<gradient:#00AAFF:#00CCFF><b>AxInventoryRestore</b></gradient> <#00DDFF>Help"
+  - " <#00DDFF>➤ <white>/axir view <player> <#DDDDDD>| <#AAFFFF>Open restore GUI"
+  - " <#00DDFF>➤ <white>/axir save <player> <#DDDDDD>| <#AAFFFF>Create manual backup"
+  - " <#00DDFF>➤ <white>/axir saveall <#DDDDDD>| <#AAFFFF>Create manual backup for all players"
+  - " <#00DDFF>➤ <white>/axir reload <#DDDDDD>| <#AAFFFF>Reload plugin"
+  - " <#00DDFF>➤ <white>/axir cleanup <#DDDDDD>| <#AAFFFF>Delete old backups (look at config.yml)"
   - " "
 
 errors:

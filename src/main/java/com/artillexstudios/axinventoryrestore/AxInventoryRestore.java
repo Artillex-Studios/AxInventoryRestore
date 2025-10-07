@@ -100,17 +100,10 @@ public final class AxInventoryRestore extends AxPlugin {
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
 
-
         switch (CONFIG.getString("database.type").toLowerCase()) {
-            case "mysql":
-                database = new MySQL();
-                break;
-            case "postgresql":
-                database = new PostgreSQL();
-                break;
-            default:
-                database = new H2();
-                break;
+            case "mysql" -> database = new MySQL();
+            case "postgresql" -> database = new PostgreSQL();
+            default -> database = new H2();
         }
 
         bstats.addCustomChart(new SimplePie("database_type", () -> database.getType()));

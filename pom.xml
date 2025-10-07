@@ -3,7 +3,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>3.9.0</version>
+    <version>3.10.0</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
@@ -108,13 +108,13 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <version>1.20.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.779</version>
+            <version>1.4.802</version>
             <scope>compile</scope>
             <classifier>all</classifier>
         </dependency>
@@ -123,6 +123,18 @@
             <artifactId>triumph-gui</artifactId>
             <version>3.1.11</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.25.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.bstats</groupId>
