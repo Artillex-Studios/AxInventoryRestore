@@ -107,7 +107,7 @@ public class BackupData {
     public CompletableFuture<ArrayList<ItemStack>> getInShulkers(@NotNull String restorerName) {
         return getItems().thenApply(items -> {
             ArrayList<ItemStack> shulkerItems = new ArrayList<>();
-            List<ItemStack> itemsCopy = Arrays.asList(items);
+            List<ItemStack> itemsCopy = new ArrayList<>(Arrays.asList(items));
 
             while (!itemsCopy.isEmpty()) {
                 Map<String, String> replacements = new HashMap<>();
