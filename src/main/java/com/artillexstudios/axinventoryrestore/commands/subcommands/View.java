@@ -5,6 +5,7 @@ import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.guis.MainGui;
 import com.artillexstudios.axinventoryrestore.queue.Priority;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -18,15 +19,28 @@ public enum View {
 
     public void execute(Player sender, String player) {
         AxInventoryRestore.getThreadedQueue().submit(() -> {
-            UUID uuid = AxInventoryRestore.getDatabase().getUUID(player);
+            UUID uuid = null;
+            if (player.contains("-")) {
+                try {
+                    uuid = UUID.fromString(player);
+                }   catch (IllegalArgumentException ignored) {}
+            }   else    {
+                uuid = AxInventoryRestore.getDatabase().getUUID(player);
+            }
             if (uuid == null) {
                 MESSAGEUTILS.sendLang(sender, "errors.unknown-player", Map.of("%number%", "1"));
                 return;
             }
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if(!offlinePlayer.isOnline() && !offlinePlayer.hasPlayedBefore()) {
+                MESSAGEUTILS.sendLang(sender, "errors.unknown-player", Map.of("%number%", "1"));
+                return;
+            }
 
-            String name = Bukkit.getOfflinePlayer(uuid).getName();
+            String name = offlinePlayer.getName();
+            final UUID finalUuid = uuid;
             Scheduler.get().runAt(sender.getLocation(), t -> {
-                new MainGui(uuid, sender, Optional.ofNullable(name).orElse(player)).open();
+                new MainGui(finalUuid, sender, Optional.ofNullable(name).orElse(player)).open();
             });
         }, Priority.HIGH);
     }
