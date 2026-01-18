@@ -433,10 +433,12 @@ public abstract class Base implements Database {
 
     @Override
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
+        Integer userId = getUserId(uuid);
+        if (userId == null) return null;
         final ArrayList<BackupData> backups = new ArrayList<>();
         final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ?;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, getUserId(uuid));
+            stmt.setInt(1, userId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -496,7 +498,7 @@ public abstract class Base implements Database {
 
     @Override
     public UUID getUUID(@NotNull String name) {
-        String ex = "SELECT uuid FROM axir_users WHERE name = ? LIMIT 1;";
+        String ex = "SELECT uuid FROM axir_users WHERE lower(name) = lower(?) LIMIT 1;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(ex)) {
             stmt.setString(1, name);
             try (ResultSet rs = stmt.executeQuery()) {

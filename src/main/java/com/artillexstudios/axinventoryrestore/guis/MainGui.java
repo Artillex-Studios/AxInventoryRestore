@@ -55,10 +55,10 @@ public class MainGui {
             if (AxInventoryRestore.isDebugMode()) LogUtils.debug("getBackupsOfPlayer for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
             final ArrayList<String> reasons = new ArrayList<>();
             if (CONFIG.getBoolean("enable-all-category")) reasons.add("ALL");
-            reasons.addAll(backup.getDeathsPerTypes().keySet());
+            if (backup != null) reasons.addAll(backup.getDeathsPerTypes().keySet());
 
             if ((CONFIG.getBoolean("enable-all-category") && reasons.size() == 1) || reasons.isEmpty()) {
-                MESSAGEUTILS.sendLang(viewer, "errors.unknown-player", Map.of("%number%", "3"));
+                MESSAGEUTILS.sendLang(viewer, "errors.unknown-player", Map.of("%number%", "no backups found"));
                 Scheduler.get().runAt(viewer.getLocation(), t -> viewer.closeInventory());
                 return;
             }

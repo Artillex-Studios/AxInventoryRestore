@@ -3,7 +3,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxInventoryRestore</artifactId>
-    <version>3.11.1</version>
+    <version>3.11.2</version>
     <packaging>jar</packaging>
 
     <name>AxInventoryRestore</name>
