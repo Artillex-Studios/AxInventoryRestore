@@ -53,6 +53,7 @@ public class CategoryGui {
         for (BackupData backupData : backupDataList) {
             final Map<String, String> replacements = new HashMap<>();
 
+            replacements.put("%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()));
             replacements.put("%date%", DateUtils.formatDate(backupData.getDate()));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
             replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());

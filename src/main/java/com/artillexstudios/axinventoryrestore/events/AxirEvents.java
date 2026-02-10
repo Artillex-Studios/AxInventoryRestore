@@ -22,7 +22,9 @@ public class AxirEvents {
         WebHooks.sendBackupWebHook(
                 Map.of("%player%", player.getName(),
                     "%category%", MESSAGES.getString("categories." + category + ".raw", category),
-                    "%extrainfo%", extraInfo == null ? "---" : extraInfo
+                    "%extrainfo%", extraInfo == null ? "---" : extraInfo,
+                    "%location%", LocationUtils.serializeLocationReadable(player.getLocation()),
+                    "%date%", DateUtils.formatDate(System.currentTimeMillis())
                 )
         );
         return inventoryBackupEvent.isCancelled();
