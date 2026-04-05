@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.commands.subcommands;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,7 +16,6 @@ public enum SaveAll {
 
         for (Player pl : Bukkit.getOnlinePlayers()) {
             AxInventoryRestore.getDatabase().saveInventory(pl, "MANUAL", cause);
-            BackupLimiter.tryLimit(pl.getUniqueId(), "manual", "MANUAL");
         }
 
         MESSAGEUTILS.sendLang(sender, "manual-backup-all");

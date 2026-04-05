@@ -123,7 +123,8 @@ public final class AxInventoryRestore extends AxPlugin {
         metrics = new AxMetrics(this, 19);
         metrics.start();
 
-        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 4610);
+        UpdateNotifier.init(CONFIG, MESSAGES);
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 
     @Override

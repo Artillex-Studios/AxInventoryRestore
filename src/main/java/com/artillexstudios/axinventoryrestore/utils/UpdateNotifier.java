@@ -1,9 +1,9 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
-import com.artillexstudios.axapi.AxPlugin;
+import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.scheduler.Scheduler;
-import com.artillexstudios.axapi.utils.NumberUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,28 +17,40 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
 
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class UpdateNotifier implements Listener {
-    private final int id;
+    private static Config config;
+    private static Config lang;
+    private static boolean onJoin;
+    private static String prefix;
+    private static String updateNotifier;
+
     private final String current;
-    private final AxPlugin instance;
     private String latest = null;
     private boolean newest = true;
 
-    public UpdateNotifier(AxPlugin instance, int id) {
-        this.id = id;
-        this.current = instance.getDescription().getVersion();
-        this.instance = instance;
+    public static void init(Config config, Config lang) {
+        UpdateNotifier.config = config;
+        UpdateNotifier.lang = lang;
+        reload();
+    }
 
-        instance.getServer().getPluginManager().registerEvents(this, instance);
+    public static void reload() {
+        onJoin = config.getBoolean("update-notifier.on-join", true);
+        prefix = config.getString("prefix");
+        updateNotifier = lang.getString("update-notifier");
+    }
+
+    public UpdateNotifier() {
+        this.current = AxInventoryRestore.getInstance().getDescription().getVersion();
+
+        AxInventoryRestore.getInstance().getServer().getPluginManager().registerEvents(this, AxInventoryRestore.getInstance());
 
         long time = 30L * 60L * 20L;
         Scheduler.get().runAsyncTimer(t -> {
             this.latest = readVersion();
-            this.newest = isLatest(current);
+            this.newest = !isOutdated(current);
 
             if (latest == null || newest) return;
             Scheduler.get().runLaterAsync(t2 -> {
@@ -51,8 +63,8 @@ public class UpdateNotifier implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         if (latest == null || newest) return;
-        if (!CONFIG.getBoolean("update-notifier.on-join", true)) return;
-        if (!event.getPlayer().hasPermission(instance.getName().toLowerCase() + ".update-notify")) return;
+        if (!onJoin) return;
+        if (!event.getPlayer().hasPermission(AxInventoryRestore.getInstance().getName().toLowerCase() + ".update-notify")) return;
         Scheduler.get().runLaterAsync(t -> {
             event.getPlayer().sendMessage(getMessage());
         }, 50L);
@@ -62,20 +74,20 @@ public class UpdateNotifier implements Listener {
         HashMap<String, String> map = new HashMap<>();
         map.put("%current%", current);
         map.put("%latest%", latest);
-        return StringUtils.formatToString(CONFIG.getString("prefix") + MESSAGES.getString("update-notifier"), map);
+        return StringUtils.formatToString(String.format("%s %s", prefix, updateNotifier), map);
     }
 
     @Nullable
     private String readVersion() {
-        try {
-            final HttpClient client = HttpClient.newHttpClient();
-            final HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("https://api.polymart.org/v1/getResourceInfoSimple/?resource_id=" + id + "&key=version"))
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("https://www.artillex-studios.com/api/v1/resource/%s/latest-version".formatted(AxInventoryRestore.getInstance().getName())))
                     .timeout(Duration.of(10, SECONDS))
                     .GET()
                     .build();
 
-            final HttpResponse<?> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<?> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) return null;
             return response.body().toString();
         } catch (Exception ex) {
             return null;
@@ -86,18 +98,19 @@ public class UpdateNotifier implements Listener {
         return latest;
     }
 
-    public boolean isLatest(String current) {
-        return getWeight(latest) <= getWeight(current);
-    }
-
-    private int getWeight(String version) {
-        if (version == null) return 0;
-        String[] s = version.split("\\.");
-        if (!NumberUtils.isInt(s[0]) || !NumberUtils.isInt(s[1]) || !NumberUtils.isInt(s[2])) return 0;
-        int res = 0;
-        res += Integer.parseInt(s[0]) * 1000000;
-        res += Integer.parseInt(s[1]) * 1000;
-        res += Integer.parseInt(s[2]);
-        return res;
+    public boolean isOutdated(String current) {
+        if (latest == null) return false;
+        String[] parts1 = latest.split("\\.");
+        String[] parts2 = current.split("\\.");
+        for (int i = 0; i < 3; i++) {
+            int num1 = Integer.parseInt(parts1[i]);
+            int num2 = Integer.parseInt(parts2[i]);
+            if (num1 > num2) {
+                return true;
+            } else if (num1 < num2) {
+                return false;
+            }
+        }
+        return false;
     }
 }

@@ -29,6 +29,8 @@ permissions:
     default: op
   axinventoryrestore.discord-request:
     default: op
+  axinventoryrestore.dontsave:
+    default: false
 
 libraries:
   - net.dv8tion:JDA:5.2.2

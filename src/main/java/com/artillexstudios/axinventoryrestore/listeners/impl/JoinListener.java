@@ -2,7 +2,6 @@ package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,7 +35,6 @@ public class JoinListener implements Listener {
         future.thenRun(() -> {
             Scheduler.get().run(() -> {
                 AxInventoryRestore.getDatabase().saveInventory(event.getPlayer(), "JOIN", null);
-                BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "join", "JOIN");
             });
         });
     }

@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +25,5 @@ public class ContainerCloseListener implements Listener {
         if (!CONFIG.getBoolean("enabled-backups.container-close", true)) return;
         final String cause = event.getInventory().getType().name();
         AxInventoryRestore.getDatabase().saveInventory((Player) event.getPlayer(), "CONTAINER_CLOSE", cause);
-        BackupLimiter.tryLimit(event.getPlayer().getUniqueId(), "container-close", "CONTAINER_CLOSE");
     }
 }

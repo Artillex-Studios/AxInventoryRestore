@@ -1,7 +1,6 @@
 package com.artillexstudios.axinventoryrestore.listeners.impl;
 
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
-import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,6 +23,5 @@ public class DeathListener implements Listener {
         }
 
         AxInventoryRestore.getDatabase().saveInventory(player, "DEATH", cause);
-        BackupLimiter.tryLimit(player.getUniqueId(), "death", "DEATH");
     }
 }
