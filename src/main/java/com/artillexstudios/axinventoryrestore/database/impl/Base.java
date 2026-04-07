@@ -12,6 +12,7 @@ import com.artillexstudios.axinventoryrestore.database.Converter2;
 import com.artillexstudios.axinventoryrestore.database.Converter3;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
+import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
 import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
 import com.google.common.collect.HashBiMap;
 import org.bukkit.Bukkit;
@@ -19,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -280,6 +283,11 @@ public abstract class Base implements Database {
             return;
         }
 
+        for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
+            if (!permission.getValue()) continue;
+            if (permission.getPermission().equalsIgnoreCase("axinventoryrestore.dontsave")) return;
+        }
+
         if (AxirEvents.callInventoryBackupEvent(player, reason, cause)) {
             return;
         }
@@ -343,6 +351,8 @@ public abstract class Base implements Database {
                 log.error("An unexpected error occurred while saving inventory of user {}!", player.getName(), exception);
             }
             if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Backup ready for {} in {}ms", player.getName(), System.currentTimeMillis() - time);
+
+            BackupLimiter.tryLimit(player.getUniqueId(), reason.toLowerCase(Locale.ENGLISH), reason);
         });
     }
 
