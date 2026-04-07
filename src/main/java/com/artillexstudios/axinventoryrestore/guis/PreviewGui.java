@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -75,7 +76,7 @@ public class PreviewGui {
             if (discordAddon != null) starter = 45;
 
             previewGui.setItem(starter, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.back")).get(), event -> {
-                lastGui.open(viewer, pageNum);
+                Scheduler.get().runAt(viewer.getLocation(), task -> lastGui.open(viewer, pageNum));
                 event.setCancelled(true);
             }));
 
@@ -87,8 +88,9 @@ public class PreviewGui {
                     return;
                 }
 
-                PaperUtils.teleportAsync(viewer, backupData.getLocation());
-                viewer.closeInventory();
+                Scheduler.get().runAt(viewer.getLocation(), () ->
+                        PaperUtils.teleportAsync(viewer, backupData.getLocation().clone())
+                                .thenRun(() -> Scheduler.get().runAt(viewer.getLocation(), viewer::closeInventory)));
             }));
 
             boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
@@ -155,7 +157,7 @@ public class PreviewGui {
             previewGui.update();
         });
 
-        previewGui.open(viewer);
+        Scheduler.get().runAt(viewer.getLocation(), () -> previewGui.open(viewer));
         if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Preview gui opened for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
     }
 }
