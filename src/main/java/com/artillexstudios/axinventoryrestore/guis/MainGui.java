@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGEUTILS;
 
 public class MainGui {
@@ -38,7 +38,7 @@ public class MainGui {
         this.name = name;
 
         mainGui = Gui.paginated()
-                .title(StringUtils.format(MESSAGES.getString("guis.maingui.title").replace("%player%", name)))
+                .title(StringUtils.format(LANG.getString("guis.maingui.title").replace("%player%", name)))
                 .rows(rows)
                 .pageSize(rows * 9 - 9)
                 .create();
@@ -59,7 +59,9 @@ public class MainGui {
 
             if ((CONFIG.getBoolean("enable-all-category") && reasons.size() == 1) || reasons.isEmpty()) {
                 MESSAGEUTILS.sendLang(viewer, "errors.unknown-player", Map.of("%number%", "no backups found"));
-                Scheduler.get().runAt(viewer.getLocation(), t -> viewer.closeInventory());
+                Scheduler.get().run(viewer, task -> {
+                    viewer.closeInventory();
+                }, () -> {});
                 return;
             }
 
@@ -68,14 +70,12 @@ public class MainGui {
 
                 final List<BackupData> backupDataList = backup.getDeathsByReason(saveReason);
 
-                if (MESSAGES.getSection("categories." + saveReason) != null) {
-                    item = ItemBuilder.create(MESSAGES.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
+                if (LANG.getSection("categories." + saveReason) != null) {
+                    item = ItemBuilder.create(LANG.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
                 mainGui.addItem(new GuiItem(item, event -> {
-                    Scheduler.get().run(task -> {
-                        new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open();
-                    });
+                    new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open();
                 }));
             }
             mainGui.update();
@@ -83,13 +83,13 @@ public class MainGui {
         }, Priority.HIGH);
 
         // Previous item
-        mainGui.setItem(rows, 3, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> mainGui.previous()));
+        mainGui.setItem(rows, 3, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.previous-page")).get(), event2 -> mainGui.previous()));
         // Next item
-        mainGui.setItem(rows, 7, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> mainGui.next()));
+        mainGui.setItem(rows, 7, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.next-page")).get(), event2 -> mainGui.next()));
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.close")).get(), event2 -> {
+        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.close")).get(), event2 -> {
             mainGui.close(viewer);
         }));
 

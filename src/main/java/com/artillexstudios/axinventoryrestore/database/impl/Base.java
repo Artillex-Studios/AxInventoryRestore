@@ -8,12 +8,9 @@ import com.artillexstudios.axapi.utils.logging.LogUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
-import com.artillexstudios.axinventoryrestore.database.Converter2;
-import com.artillexstudios.axinventoryrestore.database.Converter3;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
-import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
 import com.google.common.collect.HashBiMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
@@ -61,7 +57,6 @@ public abstract class Base implements Database {
     @Override
     public void setup() {
         final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, worldId INT NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventoryId INT NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -69,7 +64,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(255) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -77,7 +71,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axir_users ( id INT(128) NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL, name VARCHAR(512) NOT NULL, PRIMARY KEY (id), UNIQUE (uuid));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -85,7 +78,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE4 = "CREATE TABLE IF NOT EXISTS axir_restorerequests ( id INT(128) NOT NULL AUTO_INCREMENT, backupId INT(128) NOT NULL, granted BOOLEAN, PRIMARY KEY (id));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE4)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -93,7 +85,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE5 = "CREATE TABLE IF NOT EXISTS axir_storage (id INT NOT NULL AUTO_INCREMENT, inventory MEDIUMBLOB, PRIMARY KEY (id));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE5)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -101,7 +92,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE6)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -109,51 +99,27 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_INDEX1 = "CREATE INDEX idx_user ON axir_backups (userId);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX1)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
         }
 
         final String CREATE_INDEX2 = "CREATE INDEX idx_worldId ON axir_backups(worldId);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX2)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
         }
 
         final String CREATE_INDEX3 = "CREATE INDEX idx_inventoryId ON axir_backups(inventoryId);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX3)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
         }
 
         final String CREATE_INDEX4 = "CREATE INDEX idx_time ON axir_backups(time);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX4)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
-        }
-
-        try {
-            if (SQLUtils.tableExists(getConnection(), "axinventoryrestore_data")) {
-                new Converter2(this);
-            }
-        } catch (Exception exception) {
-            log.error("An unexpected error occurred while running v2 converter!", exception);
-        }
-
-        try (Statement stmt = getConnection().createStatement()) {
-            String query = "SELECT * FROM axir_backups LIMIT 1";
-            try (ResultSet rs = stmt.executeQuery(query)) {
-                ResultSetMetaData rsmd = rs.getMetaData();
-                if (rsmd.getColumnName(8).equalsIgnoreCase("inventory")) {
-                    new Converter3(this);
-                }
-            }
-        } catch (Exception exception) {
-            log.error("An unexpected error occurred while running v3 converter!", exception);
         }
     }
 

@@ -13,7 +13,7 @@ import java.util.Collections;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGEUTILS;
 
 public enum Reload {
@@ -27,7 +27,7 @@ public enum Reload {
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00aaff╠ &#00FF00Reloaded &fconfig.yml&#00FF00!"));
 
-        if (!MESSAGES.reload()) {
+        if (!LANG.reload()) {
             MESSAGEUTILS.sendLang(sender, "reload-fail", Collections.singletonMap("%file%", "messages.yml"));
             return;
         }

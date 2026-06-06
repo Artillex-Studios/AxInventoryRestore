@@ -12,7 +12,6 @@ public class Backup {
 
     public Backup(ArrayList<BackupData> backupDataList) {
         this.backupDataList = backupDataList;
-
         calculate();
     }
 

@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 
 public class CategoryGui {
     private final PaginatedGui categoryGui;
@@ -39,7 +39,7 @@ public class CategoryGui {
         this.pageNum = pageNum;
 
         categoryGui = Gui.paginated()
-                .title(StringUtils.format(MESSAGES.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
+                .title(StringUtils.format(LANG.getString("guis.categorygui.title").replace("%player%", mainGui.getName())))
                 .rows(rows)
                 .pageSize(rows * 9 - 9)
                 .create();
@@ -53,12 +53,12 @@ public class CategoryGui {
         for (BackupData backupData : backupDataList) {
             final Map<String, String> replacements = new HashMap<>();
 
-            replacements.put("%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()));
+            replacements.put("%category%", LANG.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()));
             replacements.put("%date%", DateUtils.formatDate(backupData.getDate()));
             replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
             replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
 
-            final ItemStack it = ItemBuilder.create(MESSAGES.getSection("guis.categorygui.item"), replacements).get();
+            final ItemStack it = ItemBuilder.create(LANG.getSection("guis.categorygui.item"), replacements).get();
             it.setAmount(n);
 
             categoryGui.addItem(new GuiItem(it, event -> {
@@ -74,13 +74,13 @@ public class CategoryGui {
         categoryGui.update();
 
         // Previous item
-        categoryGui.setItem(rows, 3, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.previous-page")).get(), event2 -> categoryGui.previous()));
+        categoryGui.setItem(rows, 3, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.previous-page")).get(), event2 -> categoryGui.previous()));
         // Next item
-        categoryGui.setItem(rows, 7, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.next-page")).get(), event2 -> categoryGui.next()));
+        categoryGui.setItem(rows, 7, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.next-page")).get(), event2 -> categoryGui.next()));
 
         categoryGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        categoryGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.back")).get(), event2 -> {
+        categoryGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.back")).get(), event2 -> {
             lastGui.open(viewer, pageNum);
         }));
 

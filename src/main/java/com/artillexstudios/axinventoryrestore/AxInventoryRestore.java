@@ -34,7 +34,7 @@ import java.io.File;
 
 public final class AxInventoryRestore extends AxPlugin {
     public static Config CONFIG;
-    public static Config MESSAGES;
+    public static Config LANG;
     public static Config DISCORD;
     public static MessageUtils MESSAGEUTILS;
     private static AxPlugin instance;
@@ -91,14 +91,14 @@ public final class AxInventoryRestore extends AxPlugin {
         Metrics bstats = new Metrics(this, 19446);
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
-        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        LANG = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         DISCORD = new Config(new File(getDataFolder(), "discord.yml"), getResource("discord.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
         WebHooks.reload();
         threadedQueue = new PriorityThreadedQueue<>("AxInventoryRestore-Datastore-thread");
         debug = CONFIG.getBoolean("debug", false);
 
-        MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
+        MESSAGEUTILS = new MessageUtils(LANG.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
             case "mysql" -> database = new MySQL();
@@ -123,7 +123,7 @@ public final class AxInventoryRestore extends AxPlugin {
         metrics = new AxMetrics(this, 19);
         metrics.start();
 
-        UpdateNotifier.init(CONFIG, MESSAGES);
+        UpdateNotifier.init(CONFIG, LANG);
         if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 
 public class BackupData {
     private final int id;
@@ -117,7 +117,7 @@ public class BackupData {
                 replacements.put("%staff%", restorerName);
                 replacements.put("%player-uuid%", player.toString());
 
-                ItemStack shulkerIt = ItemBuilder.create(MESSAGES.getSection("restored-shulker"), replacements).get();
+                ItemStack shulkerIt = ItemBuilder.create(LANG.getSection("restored-shulker"), replacements).get();
                 BlockStateMeta im = (BlockStateMeta) shulkerIt.getItemMeta();
                 ShulkerBox shulker = (ShulkerBox) im.getBlockState();
 

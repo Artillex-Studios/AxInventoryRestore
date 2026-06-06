@@ -23,9 +23,9 @@ public enum View {
             if (uuid == null) return;
 
             String name = Bukkit.getOfflinePlayer(uuid).getName();
-            Scheduler.get().runAt(sender.getLocation(), t -> {
+            Scheduler.get().run(sender, task -> {
                 new MainGui(uuid, sender, Optional.ofNullable(name).orElse(player)).open();
-            });
+            }, () -> {});
         }, Priority.HIGH);
     }
 

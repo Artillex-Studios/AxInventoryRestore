@@ -9,7 +9,6 @@ import com.artillexstudios.axinventoryrestore.backups.BackupData;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.LocationUtils;
-import com.artillexstudios.axinventoryrestore.utils.PermissionUtils;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
@@ -22,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGEUTILS;
 
 public class PreviewGui {
@@ -43,7 +42,7 @@ public class PreviewGui {
         this.pageNum = pageNum;
 
         previewGui = Gui.gui()
-                .title(StringUtils.format(MESSAGES.getString("guis.previewgui.title").replace("%player%", categoryGui.getMainGui().getName())))
+                .title(StringUtils.format(LANG.getString("guis.previewgui.title").replace("%player%", categoryGui.getMainGui().getName())))
                 .rows(6)
                 .create();
     }
@@ -61,7 +60,7 @@ public class PreviewGui {
                 if (it.getType().isAir()) continue;
 
                 previewGui.setItem(n, new GuiItem(it, event -> {
-                    if (!PermissionUtils.hasPermission(viewer, "modify")) {
+                    if (!viewer.hasPermission("axinventoryrestore.modify")) {
                         event.setCancelled(true);
                         return;
                     }
@@ -74,15 +73,15 @@ public class PreviewGui {
             final DiscordAddon discordAddon = AxInventoryRestore.getDiscordAddon();
             if (discordAddon != null) starter = 45;
 
-            previewGui.setItem(starter, new GuiItem(ItemBuilder.create(MESSAGES.getSection("gui-items.back")).get(), event -> {
+            previewGui.setItem(starter, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.back")).get(), event -> {
                 lastGui.open(viewer, pageNum);
                 event.setCancelled(true);
             }));
 
-            previewGui.setItem(starter + 2, new GuiItem(ItemBuilder.create(MESSAGES.getSection("guis.previewgui.teleport"), Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).get(), event -> {
+            previewGui.setItem(starter + 2, new GuiItem(ItemBuilder.create(LANG.getSection("guis.previewgui.teleport"), Map.of("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()))).get(), event -> {
                 event.setCancelled(true);
 
-                if (!PermissionUtils.hasPermission(viewer, "teleport")) {
+                if (!viewer.hasPermission("axinventoryrestore.teleport")) {
                     MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
                     return;
                 }
@@ -92,10 +91,10 @@ public class PreviewGui {
             }));
 
             boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
-            previewGui.setItem(starter + 4, new GuiItem(ItemBuilder.create(MESSAGES.getSection("guis.previewgui.quick-restore" + (isEnder ? "-ender-chest" : ""))).get(), event -> {
+            previewGui.setItem(starter + 4, new GuiItem(ItemBuilder.create(LANG.getSection("guis.previewgui.quick-restore" + (isEnder ? "-ender-chest" : ""))).get(), event -> {
                 event.setCancelled(true);
 
-                if (!PermissionUtils.hasPermission(viewer, "restore")) {
+                if (!viewer.hasPermission("axinventoryrestore.restore")) {
                     MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
                     return;
                 }
@@ -122,10 +121,10 @@ public class PreviewGui {
 
             final int starterFinal = starter;
             backupData.getInShulkers(viewer.getName()).thenAccept(item -> {
-                previewGui.setItem(starterFinal + 6, new GuiItem(ItemBuilder.create(MESSAGES.getSection("guis.previewgui.export-as-shulker"), Map.of("%shulker-amount%", Integer.toString(item.size()))).get(), event -> {
+                previewGui.setItem(starterFinal + 6, new GuiItem(ItemBuilder.create(LANG.getSection("guis.previewgui.export-as-shulker"), Map.of("%shulker-amount%", Integer.toString(item.size()))).get(), event -> {
                     event.setCancelled(true);
 
-                    if (!PermissionUtils.hasPermission(viewer, "export")) {
+                    if (!viewer.hasPermission("axinventoryrestore.export")) {
                         MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
                         return;
                     }
@@ -143,7 +142,7 @@ public class PreviewGui {
                 previewGui.setItem(starter + 8, new GuiItem(discordAddon.getRequestItem(), event -> {
                     event.setCancelled(true);
 
-                    if (!PermissionUtils.hasPermission(viewer, "discord-request")) {
+                    if (!viewer.hasPermission("axinventoryrestore.discord-request")) {
                         MESSAGEUTILS.sendLang(viewer, "errors.no-permission");
                         return;
                     }

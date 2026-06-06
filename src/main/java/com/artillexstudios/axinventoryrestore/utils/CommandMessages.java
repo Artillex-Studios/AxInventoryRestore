@@ -6,7 +6,7 @@ import revxrsal.commands.locales.LocaleReader;
 import java.util.Locale;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 
 public class CommandMessages implements LocaleReader {
     @Override
@@ -19,45 +19,45 @@ public class CommandMessages implements LocaleReader {
         String res;
         switch (s) {
             case "invalid-enum", "invalid-number", "invalid-uuid", "invalid-url", "invalid-boolean": {
-                res = MESSAGES.getString("commands.invalid-value")
+                res = LANG.getString("commands.invalid-value")
                         .replace("%value%", "{0}");
                 break;
             }
             case "missing-argument": {
-                res = MESSAGES.getString("commands.missing-argument")
+                res = LANG.getString("commands.missing-argument")
                         .replace("%value%", "{0}");
                 break;
             }
             case "no-permission": {
-                res = MESSAGES.getString("commands.no-permission");
+                res = LANG.getString("commands.no-permission");
                 break;
             }
             case "number-not-in-range": {
-                res = MESSAGES.getString("commands.out-of-range")
+                res = LANG.getString("commands.out-of-range")
                         .replace("%number%", "{0}")
                         .replace("%min%", "{1}")
                         .replace("%max%", "{2}");
                 break;
             }
             case "must-be-player": {
-                res = MESSAGES.getString("commands.player-only");
+                res = LANG.getString("commands.player-only");
                 break;
             }
             case "must-be-console": {
-                res = MESSAGES.getString("commands.console-only");
+                res = LANG.getString("commands.console-only");
                 break;
             }
             case "invalid-player": {
-                res = MESSAGES.getString("commands.invalid-player")
+                res = LANG.getString("commands.invalid-player")
                         .replace("%player%", "{0}");
                 break;
             }
             case "invalid-selector": {
-                res = MESSAGES.getString("commands.invalid-selector");
+                res = LANG.getString("commands.invalid-selector");
                 break;
             }
             default:  {
-                res = MESSAGES.getString("commands.invalid-command");
+                res = LANG.getString("commands.invalid-command");
                 break;
             }
         }

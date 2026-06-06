@@ -1,11 +1,10 @@
 prefix: "<gradient:#00AAFF:#00CCFF><b>AxInventoryRestore</b></gradient> &7» "
 
 database:
-  # h2, mysql, postgresql
-  # unless you have multiple synchronised servers, you should almost always use h2 as it is the fastest database type by a lot!
+  # h2, mysql
+  # for single servers we suggest using h2 as it requires no setup and it is faster
   type: "h2"
-
-  # you only need to touch these when using mysql/postgresql
+  # you only need to touch these when using mysql
   address: 127.0.0.1
   port: 3306
   database: admin

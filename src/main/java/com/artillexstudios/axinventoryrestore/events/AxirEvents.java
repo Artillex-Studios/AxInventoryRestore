@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 
 public class AxirEvents {
 
@@ -21,7 +21,7 @@ public class AxirEvents {
         Bukkit.getPluginManager().callEvent(inventoryBackupEvent);
         WebHooks.sendBackupWebHook(
                 Map.of("%player%", player.getName(),
-                    "%category%", MESSAGES.getString("categories." + category + ".raw", category),
+                    "%category%", LANG.getString("categories." + category + ".raw", category),
                     "%extrainfo%", extraInfo == null ? "---" : extraInfo,
                     "%location%", LocationUtils.serializeLocationReadable(player.getLocation()),
                     "%date%", DateUtils.formatDate(System.currentTimeMillis())
@@ -36,7 +36,7 @@ public class AxirEvents {
         WebHooks.sendRestoreWebHook(
                 Map.of("%restorer%", restorer.getName(),
                         "%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName(),
-                        "%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
+                        "%category%", LANG.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
                         "%extrainfo%", backupData.getCause() == null ? "---" : backupData.getCause(),
                         "%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()),
                         "%date%", DateUtils.formatDate(backupData.getDate())
@@ -48,7 +48,7 @@ public class AxirEvents {
     public static void callBackupExportEvent(@NotNull Player restorer, @NotNull BackupData backupData) {
         WebHooks.sendExportWebHook(
                         Map.of("%restorer%", restorer.getName(),
-                        "%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
+                        "%category%", LANG.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
                         "%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName(),
                         "%extrainfo%", backupData.getCause() == null ? "---" : backupData.getCause(),
                         "%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()),
