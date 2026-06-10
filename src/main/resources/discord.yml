@@ -131,9 +131,9 @@ bot-activity: "AxInventoryRestore"
 # where should the requests be sent?
 channel-id: ""
 
-# the permission needed to interact with a restore request on discord
-# list of permissions: https://ci.dv8tion.net/job/JDA5/javadoc/net/dv8tion/jda/api/Permission.html
-required-permission: "ADMINISTRATOR"
+# the role needed to interact with a restore request on discord
+# it should look like this: required-role-id: "0000000000000000"
+required-role-id: "0000000000000000"
 
 create-thread: true
 thread-name: "Restore"
