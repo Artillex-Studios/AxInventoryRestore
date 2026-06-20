@@ -1,129 +1,135 @@
-# NOTE: this feature requires 1.18+
-
-# WEBHOOK INFORMATION
-# These are all the options that you can use here: (most of them are optional, you can remove them)
-#    # the message before the embed, you can put a ping here in the <@&1234567890123456789> format
-#    content: "<@&1234567890123456789>"
-#    # color in hex
-#    color: "#FF6600"
-#    description: "Your description"
-#    title:
-#      # required
-#      text: "Title!"
-#      icon: ""
-#    author:
-#      # required
-#      name: "Author name"
-#      icon-url: ""
-#      url: ""
-#    footer:
-#      # required
-#      text: "Footer"
-#      icon: ""
-#    image-url: ""
-#    thumbnail-url: ""
-#    fields:
-#      1:
-#        # required
-#        inline: false
-#        # required
-#        name: "Field1"
-#        # required
-#        value: "Value1"
+# DOCUMENTATION: https://docs.artillex-studios.com/axinventoryrestore.html
 
 # ------- WEBHOOKS -------
 
 # REQUIRED FOR WEBHOOKS
 url: ""
 
-# this may be a bit spammy on big servers
+# for more webhook options check out the docs: https://docs.artillex-studios.com/discord-webhook-builder.html
 backup-create:
+  # disabled by default, as it might be spammy on big servers
   enabled: false
-  color: "#00AAFF"
-  title:
-    text: "New backup created"
-  fields:
-    "1":
-      inline: false
-      name: "Player"
-      value: "%player%"
-    "2":
-      inline: false
-      name: "Category"
-      value: "%category%"
-    "3":
-      inline: false
-      name: "Extra Info"
-      value: "%extrainfo%"
+  content: ""
+  username: ""
+  avatar-url: ""
+  embeds:
+    - title:
+        text: New backup created
+        url: ""
+      description: ""
+      color: "#00AAFF"
+      timestamp: "%timestamp%"
+      image-url: ""
+      thumbnail-url: ""
+      video-url: ""
+      author:
+        name: ""
+        icon-url: ""
+        url: ""
+      footer:
+        icon-url: ""
+        text: ""
+      fields:
+        - inline: false
+          name: Player
+          value: "%player%"
+        - inline: false
+          name: Category
+          value: "%category%"
+        - inline: false
+          name: Extra Info
+          value: "%extrainfo%"
 
 backup-restore:
   enabled: true
-  color: "#00AAFF"
-  title:
-    text: "Backup restored"
-  fields:
-    "1":
-      inline: true
-      name: "Restored by"
-      value: "%restorer%"
-    "2":
-      inline: true
-      name: "Player"
-      value: "%player%"
-    "3":
-      inline: true
-      name: "Backup Date"
-      value: "%date%"
-    "4":
-      inline: true
-      name: "Category"
-      value: "%category%"
-    "5":
-      inline: true
-      name: "Extra Info"
-      value: "%extrainfo%"
-    "6":
-      inline: true
-      name: "Backup Location"
-      value: "%location%"
+  content: ""
+  username: ""
+  avatar-url: ""
+  embeds:
+    - title:
+        text: Backup restored
+        url: ""
+      description: ""
+      color: "#00AAFF"
+      timestamp: "%timestamp%"
+      image-url: ""
+      thumbnail-url: ""
+      video-url: ""
+      author:
+        name: ""
+        icon-url: ""
+        url: ""
+      footer:
+        icon-url: ""
+        text: ""
+      fields:
+        - inline: true
+          name: Restored by
+          value: "%restorer%"
+        - inline: true
+          name: Player
+          value: "%player%"
+        - inline: true
+          name: Backup Date
+          value: "%date%"
+        - inline: true
+          name: Category
+          value: "%category%"
+        - inline: true
+          name: Extra Info
+          value: "%extrainfo%"
+        - inline: true
+          name: Backup Location
+          value: "%location%"
 
 backup-export:
   enabled: true
-  color: "#00AAFF"
-  title:
-    text: "Backup exported as shulker"
-  fields:
-    "1":
-      inline: true
-      name: "Exported by"
-      value: "%restorer%"
-    "2":
-      inline: true
-      name: "Player"
-      value: "%player%"
-    "3":
-      inline: true
-      name: "Backup Date"
-      value: "%date%"
-    "4":
-      inline: true
-      name: "Category"
-      value: "%category%"
-    "5":
-      inline: true
-      name: "Extra Info"
-      value: "%extrainfo%"
-    "6":
-      inline: true
-      name: "Backup Location"
-      value: "%location%"
+  content: ""
+  username: ""
+  avatar-url: ""
+  embeds:
+    - title:
+        text: Backup exported as shulker
+        url: ""
+      description: ""
+      color: "#00AAFF"
+      timestamp: "%timestamp%"
+      image-url: ""
+      thumbnail-url: ""
+      video-url: ""
+      author:
+        name: ""
+        icon-url: ""
+        url: ""
+      footer:
+        icon-url: ""
+        text: ""
+      fields:
+        - inline: true
+          name: Exported by
+          value: "%restorer%"
+        - inline: true
+          name: Player
+          value: "%player%"
+        - inline: true
+          name: Backup Date
+          value: "%date%"
+        - inline: true
+          name: Category
+          value: "%category%"
+        - inline: true
+          name: Extra Info
+          value: "%extrainfo%"
+        - inline: true
+          name: Backup Location
+          value: "%location%"
 
 # ------- DISCORD ADDON -------
 
 # set enable-discord-addon in the config.yml to true if you want to enable this module
 
 # you must create a bot at https://discord.com/developers/applications
-# the bot will run on your minecraft server, you don't need to do anything externally
+# the bot will run on your minecraft server, you don"t need to do anything externally
 token: ""
 
 bot-activity: "AxInventoryRestore"
@@ -147,7 +153,7 @@ messages:
   # the new color of the embed
   accepted-color: "#00ff00"
   declined-color: "#ff0000"
-  no-permission: "You don't have permission to use this!"
+  no-permission: "You don"t have permission to use this!"
 
 request-restore:
   material: BLUE_DYE

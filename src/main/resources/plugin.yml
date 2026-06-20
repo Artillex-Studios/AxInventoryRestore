@@ -34,4 +34,3 @@ permissions:
 
 libraries:
   - net.dv8tion:JDA:5.2.2
-  - club.minnced:discord-webhooks:0.8.4

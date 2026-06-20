@@ -11,13 +11,14 @@ import com.artillexstudios.axapi.libs.boostedyaml.settings.updater.UpdaterSettin
 import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.featureflags.FeatureFlags;
+import com.artillexstudios.axdiscordwebhooks.builder.WebhookMigrator;
 import com.artillexstudios.axinventoryrestore.commands.CommandManager;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
-import com.artillexstudios.axinventoryrestore.events.WebHooks;
+import com.artillexstudios.axinventoryrestore.events.Webhooks;
 import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.ListenerManager;
@@ -93,8 +94,11 @@ public final class AxInventoryRestore extends AxPlugin {
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         LANG = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         DISCORD = new Config(new File(getDataFolder(), "discord.yml"), getResource("discord.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        new WebhookMigrator(DISCORD, "backup-create");
+        new WebhookMigrator(DISCORD, "backup-restore");
+        new WebhookMigrator(DISCORD, "backup-export");
 
-        WebHooks.reload();
+        Webhooks.reload();
         threadedQueue = new PriorityThreadedQueue<>("AxInventoryRestore-Datastore-thread");
         debug = CONFIG.getBoolean("debug", false);
 
@@ -131,6 +135,7 @@ public final class AxInventoryRestore extends AxPlugin {
     public void disable() {
         if (metrics != null) metrics.cancel();
         AutoBackupScheduler.stop();
+        Webhooks.stop();
         threadedQueue.stop();
         database.disable();
     }

@@ -19,7 +19,7 @@ public class AxirEvents {
     public static boolean callInventoryBackupEvent(@NotNull Player player, @NotNull String category, @Nullable String extraInfo) {
         final InventoryBackupEvent inventoryBackupEvent = new InventoryBackupEvent(player, category, extraInfo);
         Bukkit.getPluginManager().callEvent(inventoryBackupEvent);
-        WebHooks.sendBackupWebHook(
+        Webhooks.sendBackupWebhook(
                 Map.of("%player%", player.getName(),
                     "%category%", LANG.getString("categories." + category + ".raw", category),
                     "%extrainfo%", extraInfo == null ? "---" : extraInfo,
@@ -33,7 +33,7 @@ public class AxirEvents {
     public static boolean callInventoryRestoreEvent(@NotNull Player restorer, @NotNull BackupData backupData) {
         final InventoryRestoreEvent inventoryRestoreEvent = new InventoryRestoreEvent(restorer, backupData);
         Bukkit.getPluginManager().callEvent(inventoryRestoreEvent);
-        WebHooks.sendRestoreWebHook(
+        Webhooks.sendRestoreWebhook(
                 Map.of("%restorer%", restorer.getName(),
                         "%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName(),
                         "%category%", LANG.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
@@ -46,7 +46,7 @@ public class AxirEvents {
     }
 
     public static void callBackupExportEvent(@NotNull Player restorer, @NotNull BackupData backupData) {
-        WebHooks.sendExportWebHook(
+        Webhooks.sendExportWebhook(
                         Map.of("%restorer%", restorer.getName(),
                         "%category%", LANG.getString("categories." + backupData.getReason() + ".raw", backupData.getReason()),
                         "%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName(),
