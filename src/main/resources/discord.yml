@@ -153,7 +153,7 @@ messages:
   # the new color of the embed
   accepted-color: "#00ff00"
   declined-color: "#ff0000"
-  no-permission: "You don"t have permission to use this!"
+  no-permission: "You don't have permission to use this!"
 
 request-restore:
   material: BLUE_DYE
