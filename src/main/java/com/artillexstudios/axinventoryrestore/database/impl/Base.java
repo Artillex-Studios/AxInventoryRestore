@@ -32,6 +32,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -271,7 +272,7 @@ public abstract class Base implements Database {
         }
 
         long time = System.currentTimeMillis();
-        if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Creatig backup for {} [reason: {}] [cause: {}]", player.getName(), reason, cause);
+        if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Creating backup for {} [reason: {}] [cause: {}]", player.getName(), reason, cause);
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, worldId, x, y, z, inventoryId, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
         final Location location = player.getLocation();
@@ -318,7 +319,7 @@ public abstract class Base implements Database {
             }
             if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Backup ready for {} in {}ms", player.getName(), System.currentTimeMillis() - time);
 
-            BackupLimiter.tryLimit(player.getUniqueId(), reason.toLowerCase(Locale.ENGLISH), reason);
+            BackupLimiter.tryLimit(player.getUniqueId(), reason.toLowerCase(Locale.ENGLISH).replace("_", "-"), reason);
         });
     }
 
@@ -411,8 +412,8 @@ public abstract class Base implements Database {
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         Integer userId = getUserId(uuid);
         if (userId == null) return null;
-        final ArrayList<BackupData> backups = new ArrayList<>();
-        final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ?;";
+        List<BackupData> backups = new LinkedList<>();
+        String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
 
@@ -434,7 +435,6 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while getting backups of player {}!", uuid, exception);
         }
 
-        Collections.reverse(backups);
         return new Backup(backups);
     }
 

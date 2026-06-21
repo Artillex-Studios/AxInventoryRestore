@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Backup {
-    private final ArrayList<BackupData> backupDataList;
+    private final List<BackupData> backupDataList;
     private final HashMap<String, List<BackupData>> deathsPerTypes = new HashMap<>();
 
-    public Backup(ArrayList<BackupData> backupDataList) {
+    public Backup(List<BackupData> backupDataList) {
         this.backupDataList = backupDataList;
         calculate();
     }
@@ -27,7 +27,7 @@ public class Backup {
         }
     }
 
-    public ArrayList<BackupData> getBackupDataList() {
+    public List<BackupData> getBackupDataList() {
         return backupDataList;
     }
 
