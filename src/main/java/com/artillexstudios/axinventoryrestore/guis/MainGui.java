@@ -59,9 +59,7 @@ public class MainGui {
 
             if ((CONFIG.getBoolean("enable-all-category") && reasons.size() == 1) || reasons.isEmpty()) {
                 MESSAGEUTILS.sendLang(viewer, "errors.unknown-player", Map.of("%number%", "no backups found"));
-                Scheduler.get().run(viewer, task -> {
-                    viewer.closeInventory();
-                }, () -> {});
+                Scheduler.get().runAt(viewer.getLocation(), t -> viewer.closeInventory());
                 return;
             }
 
@@ -74,9 +72,9 @@ public class MainGui {
                     item = ItemBuilder.create(LANG.getSection("categories." + saveReason), Map.of("%amount%", "" + backupDataList.size())).get();
                 }
 
-                mainGui.addItem(new GuiItem(item, event -> {
-                    new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open();
-                }));
+                mainGui.addItem(new GuiItem(item, event ->
+                        Scheduler.get().runAt(viewer.getLocation(), task ->
+                                new CategoryGui(this, backupDataList, mainGui, mainGui.getCurrentPageNum()).open())));
             }
             mainGui.update();
             if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Opened gui for {} in {}ms", viewer.getName(), System.currentTimeMillis() - time);
@@ -89,11 +87,10 @@ public class MainGui {
 
         mainGui.setDefaultClickAction(event -> event.setCancelled(true));
 
-        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.close")).get(), event2 -> {
-            mainGui.close(viewer);
-        }));
+        mainGui.setItem(rows, 5, new GuiItem(ItemBuilder.create(LANG.getSection("gui-items.close")).get(), event2 ->
+                Scheduler.get().runAt(viewer.getLocation(), task -> mainGui.close(viewer))));
 
-        mainGui.open(viewer);
+        Scheduler.get().runAt(viewer.getLocation(), task -> mainGui.open(viewer));
     }
 
     public PaginatedGui getMainGui() {
