@@ -11,13 +11,14 @@ import com.artillexstudios.axapi.libs.boostedyaml.settings.updater.UpdaterSettin
 import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.featureflags.FeatureFlags;
+import com.artillexstudios.axdiscordwebhooks.builder.WebhookMigrator;
 import com.artillexstudios.axinventoryrestore.commands.CommandManager;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.database.impl.H2;
 import com.artillexstudios.axinventoryrestore.database.impl.MySQL;
 import com.artillexstudios.axinventoryrestore.database.impl.PostgreSQL;
 import com.artillexstudios.axinventoryrestore.discord.DiscordAddon;
-import com.artillexstudios.axinventoryrestore.events.WebHooks;
+import com.artillexstudios.axinventoryrestore.events.Webhooks;
 import com.artillexstudios.axinventoryrestore.hooks.HookManager;
 import com.artillexstudios.axinventoryrestore.libraries.Libraries;
 import com.artillexstudios.axinventoryrestore.listeners.ListenerManager;
@@ -34,7 +35,7 @@ import java.io.File;
 
 public final class AxInventoryRestore extends AxPlugin {
     public static Config CONFIG;
-    public static Config MESSAGES;
+    public static Config LANG;
     public static Config DISCORD;
     public static MessageUtils MESSAGEUTILS;
     private static AxPlugin instance;
@@ -91,14 +92,17 @@ public final class AxInventoryRestore extends AxPlugin {
         Metrics bstats = new Metrics(this, 19446);
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
-        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        LANG = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
         DISCORD = new Config(new File(getDataFolder(), "discord.yml"), getResource("discord.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        new WebhookMigrator(DISCORD, "backup-create");
+        new WebhookMigrator(DISCORD, "backup-restore");
+        new WebhookMigrator(DISCORD, "backup-export");
 
-        WebHooks.reload();
+        Webhooks.reload();
         threadedQueue = new PriorityThreadedQueue<>("AxInventoryRestore-Datastore-thread");
         debug = CONFIG.getBoolean("debug", false);
 
-        MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
+        MESSAGEUTILS = new MessageUtils(LANG.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
             case "mysql" -> database = new MySQL();
@@ -123,7 +127,7 @@ public final class AxInventoryRestore extends AxPlugin {
         metrics = new AxMetrics(this, 19);
         metrics.start();
 
-        UpdateNotifier.init(CONFIG, MESSAGES);
+        UpdateNotifier.init(CONFIG, LANG);
         if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 
@@ -131,6 +135,7 @@ public final class AxInventoryRestore extends AxPlugin {
     public void disable() {
         if (metrics != null) metrics.cancel();
         AutoBackupScheduler.stop();
+        Webhooks.stop();
         threadedQueue.stop();
         database.disable();
     }

@@ -25,7 +25,7 @@ public class H2 extends Base {
 
     @Override
     public void setup() {
-        try { // ;TRACE_LEVEL_FILE=2
+        try {
             conn = new H2Connection("jdbc:h2:./" + AxInventoryRestore.getInstance().getDataFolder() + "/data;mode=MySQL", new Properties(), null, null, false);
             conn.setAutoCommit(true);
         } catch (Exception e) {
@@ -37,10 +37,15 @@ public class H2 extends Base {
     @Override
     public void disable() {
         super.disable();
-        final String sql = "SHUTDOWN COMPACT;";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            if (CONFIG.getBoolean("compact-database", true))
+
+        if (CONFIG.getBoolean("compact-database", true)) {
+            String sql = "SHUTDOWN COMPACT;";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.executeUpdate();
+            } catch (Exception ignored) {}
+        }
+
+        try {
             conn.realClose();
         } catch (Exception ignored) {}
     }

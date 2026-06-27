@@ -8,12 +8,9 @@ import com.artillexstudios.axapi.utils.logging.LogUtils;
 import com.artillexstudios.axinventoryrestore.AxInventoryRestore;
 import com.artillexstudios.axinventoryrestore.backups.Backup;
 import com.artillexstudios.axinventoryrestore.backups.BackupData;
-import com.artillexstudios.axinventoryrestore.database.Converter2;
-import com.artillexstudios.axinventoryrestore.database.Converter3;
 import com.artillexstudios.axinventoryrestore.database.Database;
 import com.artillexstudios.axinventoryrestore.events.AxirEvents;
 import com.artillexstudios.axinventoryrestore.utils.BackupLimiter;
-import com.artillexstudios.axinventoryrestore.utils.SQLUtils;
 import com.google.common.collect.HashBiMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,13 +26,13 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -61,7 +58,6 @@ public abstract class Base implements Database {
     @Override
     public void setup() {
         final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS axir_backups (id INT(128) NOT NULL AUTO_INCREMENT, userId INT(128) NOT NULL, reasonId INT(128) NOT NULL, worldId INT NOT NULL, x INT(128) NOT NULL, y INT(128) NOT NULL, z INT(128) NOT NULL, inventoryId INT NOT NULL, time BIGINT(128) NOT NULL, cause VARCHAR(1024), PRIMARY KEY (id));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -69,7 +65,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS axir_reasons ( id INT(128) NOT NULL AUTO_INCREMENT, reason VARCHAR(255) NOT NULL, PRIMARY KEY (id), UNIQUE (reason));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -77,7 +72,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axir_users ( id INT(128) NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL, name VARCHAR(512) NOT NULL, PRIMARY KEY (id), UNIQUE (uuid));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -85,7 +79,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE4 = "CREATE TABLE IF NOT EXISTS axir_restorerequests ( id INT(128) NOT NULL AUTO_INCREMENT, backupId INT(128) NOT NULL, granted BOOLEAN, PRIMARY KEY (id));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE4)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -93,7 +86,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE5 = "CREATE TABLE IF NOT EXISTS axir_storage (id INT NOT NULL AUTO_INCREMENT, inventory MEDIUMBLOB, PRIMARY KEY (id));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE5)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -101,7 +93,6 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_TABLE6 = "CREATE TABLE IF NOT EXISTS axir_worlds (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, PRIMARY KEY (id), UNIQUE (name));";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE6)) {
             stmt.executeUpdate();
         } catch (SQLException exception) {
@@ -109,51 +100,27 @@ public abstract class Base implements Database {
         }
 
         final String CREATE_INDEX1 = "CREATE INDEX idx_user ON axir_backups (userId);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX1)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
         }
 
         final String CREATE_INDEX2 = "CREATE INDEX idx_worldId ON axir_backups(worldId);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX2)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
         }
 
         final String CREATE_INDEX3 = "CREATE INDEX idx_inventoryId ON axir_backups(inventoryId);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX3)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
         }
 
         final String CREATE_INDEX4 = "CREATE INDEX idx_time ON axir_backups(time);";
-
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_INDEX4)) {
             stmt.executeUpdate();
         } catch (SQLException ignored) {
-        }
-
-        try {
-            if (SQLUtils.tableExists(getConnection(), "axinventoryrestore_data")) {
-                new Converter2(this);
-            }
-        } catch (Exception exception) {
-            log.error("An unexpected error occurred while running v2 converter!", exception);
-        }
-
-        try (Statement stmt = getConnection().createStatement()) {
-            String query = "SELECT * FROM axir_backups LIMIT 1";
-            try (ResultSet rs = stmt.executeQuery(query)) {
-                ResultSetMetaData rsmd = rs.getMetaData();
-                if (rsmd.getColumnName(8).equalsIgnoreCase("inventory")) {
-                    new Converter3(this);
-                }
-            }
-        } catch (Exception exception) {
-            log.error("An unexpected error occurred while running v3 converter!", exception);
         }
     }
 
@@ -305,7 +272,7 @@ public abstract class Base implements Database {
         }
 
         long time = System.currentTimeMillis();
-        if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Creatig backup for {} [reason: {}] [cause: {}]", player.getName(), reason, cause);
+        if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Creating backup for {} [reason: {}] [cause: {}]", player.getName(), reason, cause);
 
         final String sql = "INSERT INTO axir_backups(userId, reasonId, worldId, x, y, z, inventoryId, time, cause) VALUES (?,?,?,?,?,?,?,?,?);";
         final Location location = player.getLocation();
@@ -352,7 +319,7 @@ public abstract class Base implements Database {
             }
             if (AxInventoryRestore.isDebugMode()) LogUtils.debug("Backup ready for {} in {}ms", player.getName(), System.currentTimeMillis() - time);
 
-            BackupLimiter.tryLimit(player.getUniqueId(), reason.toLowerCase(Locale.ENGLISH), reason);
+            BackupLimiter.tryLimit(player.getUniqueId(), reason.toLowerCase(Locale.ENGLISH).replace("_", "-"), reason);
         });
     }
 
@@ -445,8 +412,8 @@ public abstract class Base implements Database {
     public Backup getBackupsOfPlayer(@NotNull UUID uuid) {
         Integer userId = getUserId(uuid);
         if (userId == null) return null;
-        final ArrayList<BackupData> backups = new ArrayList<>();
-        final String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ?;";
+        List<BackupData> backups = new LinkedList<>();
+        String sql = "SELECT id, reasonid, worldId, x, y, z, time, cause, inventoryId FROM axir_backups WHERE userId = ? ORDER BY time DESC;";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
 
@@ -468,7 +435,6 @@ public abstract class Base implements Database {
             log.error("An unexpected error occurred while getting backups of player {}!", uuid, exception);
         }
 
-        Collections.reverse(backups);
         return new Backup(backups);
     }
 

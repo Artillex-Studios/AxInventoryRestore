@@ -14,7 +14,9 @@ public class CommandManager {
     public static void load() {
         handler = BukkitCommandHandler.create(AxInventoryRestore.getInstance());
 
-        handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+        handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+        });
 
         handler.getTranslator().add(new CommandMessages());
         handler.setLocale(Locale.of("en", "US"));

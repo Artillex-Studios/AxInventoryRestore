@@ -1,6 +1,7 @@
 package com.artillexstudios.axinventoryrestore.utils;
 
 import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,11 +11,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class JDAEmbedBuilder {
-    private final net.dv8tion.jda.api.EmbedBuilder embed;
+    private final EmbedBuilder embed;
     private final Map<String, String> replacements;
 
     public JDAEmbedBuilder(Section section, Map<String, String> replacements) {
-        this.embed = new net.dv8tion.jda.api.EmbedBuilder();
+        this.embed = new EmbedBuilder();
         this.replacements = replacements;
 
         section.getOptionalString("color").ifPresent(this::setColor);

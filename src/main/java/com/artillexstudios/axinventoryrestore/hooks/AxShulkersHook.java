@@ -8,5 +8,4 @@ public class AxShulkersHook {
     public void clean(ItemStack item) {
         ShulkerUtils.removeShulkerUUID(item);
     }
-
 }

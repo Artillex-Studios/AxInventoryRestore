@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.DISCORD;
-import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.MESSAGES;
+import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
 
 public class DiscordAddon extends ListenerAdapter {
     private JDA jda = null;
@@ -60,7 +60,7 @@ public class DiscordAddon extends ListenerAdapter {
         replacements.put("%player%", Bukkit.getOfflinePlayer(backupData.getPlayerUUID()).getName());
         replacements.put("%requester%", requester.getName());
         replacements.put("%date%", DateUtils.formatDate(backupData.getDate()));
-        replacements.put("%category%", MESSAGES.getString("categories." + backupData.getReason() + ".raw", "---"));
+        replacements.put("%category%", LANG.getString("categories." + backupData.getReason() + ".raw", "---"));
         replacements.put("%cause%", backupData.getCause() == null ? "---" : backupData.getCause());
         replacements.put("%location%", LocationUtils.serializeLocationReadable(backupData.getLocation()));
 

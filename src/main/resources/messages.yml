@@ -1,3 +1,5 @@
+# DOCUMENTATION: https://docs.artillex-studios.com/axinventoryrestore.html
+
 reloaded: "&#33FF33Successfully reloaded plugin!"
 reload-fail: "&#FF3333Failed to reload the plugin! Something is wrong in the &f%file%&#FF3333 file, look in the console or use a yaml validator to fix the errors!"
 

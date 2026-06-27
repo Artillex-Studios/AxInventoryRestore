@@ -11,6 +11,10 @@ public enum Cleanup {
     INSTANCE;
 
     public void execute(CommandSender sender) {
-        CompletableFuture.runAsync(() -> AxInventoryRestore.getDatabase().cleanup()).thenRun(() -> MESSAGEUTILS.sendLang(sender, "cleaned-up"));
+        CompletableFuture.runAsync(() -> {
+            AxInventoryRestore.getDatabase().cleanup();
+        }).thenRun(() -> {
+            MESSAGEUTILS.sendLang(sender, "cleaned-up");
+        });
     }
 }
