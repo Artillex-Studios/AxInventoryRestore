@@ -8,15 +8,12 @@ import com.artillexstudios.axinventoryrestore.utils.DateUtils;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.CONFIG;
 import static com.artillexstudios.axinventoryrestore.AxInventoryRestore.LANG;
