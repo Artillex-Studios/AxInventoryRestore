@@ -1,5 +1,6 @@
 package com.artillexstudios.axinventoryrestore.guis;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -88,8 +89,10 @@ public class PreviewGui {
                     MESSAGEUTILS.sendLang(viewer, "errors.world-not-found");
                     return;
                 }
-                PaperUtils.teleportAsync(viewer, location);
-                viewer.closeInventory();
+                Scheduler.get().execute(viewer, () -> {
+                    PaperUtils.teleportAsync(viewer, location);
+                    viewer.closeInventory();
+                }, () -> {}, 0);
             }));
 
             boolean isEnder = backupData.getReason().equals("ENDER_CHEST");
