@@ -45,7 +45,7 @@ public class Webhooks {
 
     private static void send(Webhook webhook) {
         if (webhook == null) return;
-        client.send(webhook);
+        client.sendAsync(webhook);
     }
 
     public static void stop() {

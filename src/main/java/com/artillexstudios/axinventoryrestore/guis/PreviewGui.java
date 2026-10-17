@@ -90,8 +90,8 @@ public class PreviewGui {
                     return;
                 }
                 Scheduler.get().execute(viewer, () -> {
-                    PaperUtils.teleportAsync(viewer, location);
                     viewer.closeInventory();
+                    PaperUtils.teleportAsync(viewer, location);
                 }, () -> {}, 0);
             }));
 
