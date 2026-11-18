@@ -467,13 +467,21 @@ public abstract class Base implements Database {
                             if (items == null) return null;
                             processed.incrementAndGet();
 
-                            boolean matching = false;
-                            for (ItemStack item : items) {
-                                if (item == null) continue;
-                                boolean match = SearchUtils.matchesFilter(search, item);
-                                if (match) {
-                                    matching = true;
-                                    break;
+                            boolean matching = search.equals("*");
+                            if (SearchUtils.isMatching(search, backupData.getCause())) {
+                                matching = true;
+                            }
+                            if (SearchUtils.isMatching(search, backupData.getReason())) {
+                                matching = true;
+                            }
+                            if (!matching) {
+                                for (ItemStack item : items) {
+                                    if (item == null) continue;
+                                    boolean match = SearchUtils.matchesFilter(search, item);
+                                    if (match) {
+                                        matching = true;
+                                        break;
+                                    }
                                 }
                             }
                             if (!matching) return null;

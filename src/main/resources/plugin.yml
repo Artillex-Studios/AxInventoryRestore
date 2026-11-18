@@ -29,6 +29,8 @@ permissions:
     default: op
   axinventoryrestore.discord-request:
     default: op
+  axinventoryrestore.search:
+    default: op
   axinventoryrestore.dontsave:
     default: false
 

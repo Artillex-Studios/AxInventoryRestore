@@ -65,7 +65,7 @@ public class SearchUtils {
         return false;
     }
 
-    private static boolean isMatching(@NotNull String filter, String original) {
+    public static boolean isMatching(@NotNull String filter, String original) {
         if (original == null) return false;
         original = original.toLowerCase();
         return original.contains(filter);
